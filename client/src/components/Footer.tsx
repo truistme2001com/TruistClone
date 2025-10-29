@@ -54,7 +54,7 @@ export function Footer() {
               <li><a href="https://ir.truist.com/" className="text-white/80 hover:text-white hover:underline transition-colors">Investor relations</a></li>
               <li><a href="https://www.truist.com/money-mindset" className="text-white/80 hover:text-white hover:underline transition-colors">Money and Mindset</a></li>
               <li><a href="https://media.truist.com/" className="text-white/80 hover:text-white hover:underline transition-colors">Newsroom</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Suppliers</a></li>
+              <li><a href="https://www.truist.com/who-we-are/suppliers" className="text-white/80 hover:text-white hover:underline transition-colors">Suppliers</a></li>
             </ul>
           </div>
 
