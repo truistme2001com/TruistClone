@@ -61,8 +61,19 @@ export default function UserDashboard() {
     });
   };
 
+  const formatBusinessName = (name: string | undefined) => {
+    if (!name) return "";
+    return name.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/40 to-indigo-50/30 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-200/20 rounded-full blur-3xl -mr-64 -mt-64"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-3xl -ml-48 -mb-48"></div>
+      <div className="relative z-10">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -107,7 +118,7 @@ export default function UserDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Overview</h1>
-          <p className="text-gray-600">{account?.businessName}</p>
+          <p className="text-gray-600 text-lg">{formatBusinessName(account?.businessName)}</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 mb-8">
@@ -118,7 +129,7 @@ export default function UserDashboard() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardDescription className="text-purple-100 text-xs uppercase tracking-wide mb-1">Business Checking</CardDescription>
-                  <CardTitle className="text-white text-xl mb-1">{account?.businessName}</CardTitle>
+                  <CardTitle className="text-white text-xl mb-1">{formatBusinessName(account?.businessName)}</CardTitle>
                   <p className="text-purple-200 text-sm">Account #{account?.accountNumber}</p>
                 </div>
                 <CreditCard className="h-10 w-10 text-purple-300" />
@@ -293,7 +304,7 @@ export default function UserDashboard() {
                 <CardContent className="pt-6 space-y-5">
                   <div className="flex justify-between py-4 border-b border-gray-100">
                     <span className="text-gray-600 font-medium">Business Name</span>
-                    <span className="font-bold text-gray-900">{account?.businessName}</span>
+                    <span className="font-bold text-gray-900">{formatBusinessName(account?.businessName)}</span>
                   </div>
                   <div className="flex justify-between py-4 border-b border-gray-100">
                     <span className="text-gray-600 font-medium">Account Type</span>
@@ -348,6 +359,7 @@ export default function UserDashboard() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
