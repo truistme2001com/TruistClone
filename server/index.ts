@@ -1,20 +1,96 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { getUserByUsername, getUserById, verifyPassword } from "./storage";
+import connectPgSimple from "connect-pg-simple";
+import { neon } from "@neondatabase/serverless";
 
 const app = express();
 
+// Session store setup
+const PgSession = connectPgSimple(session);
+const pgClient = neon(process.env.DATABASE_URL!);
+
+// Passport configuration
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await getUserByUsername(username);
+      if (!user) {
+        return done(null, false, { message: "Incorrect username or password" });
+      }
+
+      const isValid = await verifyPassword(password, user.password);
+      if (!isValid) {
+        return done(null, false, { message: "Incorrect username or password" });
+      }
+
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  })
+);
+
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id: number, done) => {
+  try {
+    const user = await getUserById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+// Middleware
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
   }
 }
+
+declare module 'express-session' {
+  interface SessionData {
+    passport?: any;
+  }
+}
+
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
   }
 }));
 app.use(express.urlencoded({ extended: false }));
+
+// Session middleware
+app.use(
+  session({
+    store: new PgSession({
+      conObject: {
+        connectionString: process.env.DATABASE_URL,
+      },
+      tableName: "sessions",
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
   const start = Date.now();
