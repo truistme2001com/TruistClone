@@ -3,22 +3,30 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { queryClient } from "@/lib/queryClient";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send } from "lucide-react";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
     queryFn: async () => {
       const response = await fetch("/api/me", { credentials: "include" });
       if (!response.ok) {
-        setLocation("/");
+        if (response.status === 403 || response.status === 401) {
+          setLocation("/");
+        }
         throw new Error("Not authenticated");
       }
       const data = await response.json();
@@ -26,6 +34,13 @@ export default function UserDashboard() {
         setSelectedAccountId(data.user.accounts[0].id);
       }
       return data;
+    },
+    refetchInterval: 3000,
+    retry: (failureCount, error: any) => {
+      if (error.message === "Not authenticated") {
+        return false;
+      }
+      return failureCount < 3;
     },
   });
 
@@ -40,6 +55,7 @@ export default function UserDashboard() {
       return response.json();
     },
     enabled: !!selectedAccountId,
+    refetchInterval: 3000,
   });
 
   const logoutMutation = useMutation({
@@ -50,6 +66,38 @@ export default function UserDashboard() {
       setLocation("/");
     },
   });
+
+  const transferMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions", selectedAccountId] });
+      setIsTransferOpen(false);
+    },
+  });
+
+  const handleTransfer = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    transferMutation.mutate({
+      fromAccountId: selectedAccountId,
+      toAccountNumber: formData.get("toAccountNumber"),
+      amount: formData.get("amount"),
+      description: formData.get("description"),
+    });
+  };
 
   const user = userData?.user;
   const account = user?.accounts?.[0];
@@ -160,11 +208,15 @@ export default function UserDashboard() {
           </Card>
 
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-gradient-to-br from-green-50 to-green-100/50">
+            <Card 
+              className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-gradient-to-br from-green-50 to-green-100/50"
+              onClick={() => setIsTransferOpen(true)}
+              data-testid="card-quick-transfer"
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
                   <div className="bg-green-500 p-3.5 rounded-xl group-hover:scale-110 transition-transform">
-                    <ArrowUpRight className="h-6 w-6 text-white" />
+                    <Send className="h-6 w-6 text-white" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Quick Transfer</p>
@@ -346,6 +398,75 @@ export default function UserDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <Dialog open={isTransferOpen} onOpenChange={setIsTransferOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transfer Money</DialogTitle>
+            <DialogDescription>
+              Send money to another Truist account
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleTransfer} className="space-y-4">
+            <div className="space-y-2">
+              <Label>From Account</Label>
+              <p className="text-lg font-semibold text-purple-600">
+                {formatBusinessName(account?.businessName)}
+              </p>
+              <p className="text-sm text-gray-600">
+                Account #{account?.accountNumber}
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                ${account?.balance ? formatCurrency(account.balance) : "0.00"}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="toAccountNumber">Recipient Account Number</Label>
+              <Input 
+                id="toAccountNumber" 
+                name="toAccountNumber" 
+                placeholder="Enter account number" 
+                required 
+                data-testid="input-recipient-account"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input 
+                id="amount" 
+                name="amount" 
+                type="number" 
+                step="0.01" 
+                placeholder="0.00" 
+                required 
+                data-testid="input-transfer-amount"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (optional)</Label>
+              <Input 
+                id="description" 
+                name="description" 
+                placeholder="What's this for?" 
+                data-testid="input-transfer-description"
+              />
+            </div>
+            {transferMutation.error && (
+              <Alert variant="destructive">
+                <AlertDescription>{transferMutation.error.message}</AlertDescription>
+              </Alert>
+            )}
+            <Button 
+              type="submit" 
+              className="w-full bg-green-600 hover:bg-green-700" 
+              disabled={transferMutation.isPending}
+              data-testid="button-send-transfer"
+            >
+              {transferMutation.isPending ? "Sending..." : "Send Transfer"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

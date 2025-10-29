@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   fullName: text("full_name").notNull(),
   email: varchar("email", { length: 255 }),
   isAdmin: boolean("is_admin").notNull().default(false),
+  isBlocked: boolean("is_blocked").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -75,9 +76,17 @@ export const updateBalanceSchema = z.object({
   description: z.string().optional(),
 });
 
+export const transferSchema = z.object({
+  fromAccountId: z.number(),
+  toAccountNumber: z.string().min(1, "Recipient account number is required"),
+  amount: z.string().min(1, "Amount is required"),
+  description: z.string().optional(),
+});
+
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type CreateUserRequest = z.infer<typeof createUserSchema>;
 export type UpdateBalanceRequest = z.infer<typeof updateBalanceSchema>;
+export type TransferRequest = z.infer<typeof transferSchema>;
 
 export interface LoginResponse {
   success: boolean;
@@ -96,6 +105,7 @@ export interface UserWithAccount {
   fullName: string;
   email: string | null;
   isAdmin: boolean;
+  isBlocked: boolean;
   createdAt: Date;
   account?: {
     id: number;

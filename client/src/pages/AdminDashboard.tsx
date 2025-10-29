@@ -27,10 +27,18 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/me", { credentials: "include" });
       if (!response.ok) {
-        setLocation("/");
+        if (response.status === 403 || response.status === 401) {
+          setLocation("/");
+        }
         throw new Error("Not authenticated");
       }
       return response.json();
+    },
+    retry: (failureCount, error: any) => {
+      if (error.message === "Not authenticated") {
+        return false;
+      }
+      return failureCount < 3;
     },
   });
 
@@ -38,8 +46,20 @@ export default function AdminDashboard() {
     queryKey: ["admin-users"],
     queryFn: async () => {
       const response = await fetch("/api/admin/users", { credentials: "include" });
-      if (!response.ok) throw new Error("Failed to fetch users");
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 401) {
+          setLocation("/");
+        }
+        throw new Error("Failed to fetch users");
+      }
       return response.json();
+    },
+    refetchInterval: 3000,
+    retry: (failureCount, error: any) => {
+      if (error.message === "Failed to fetch users") {
+        return false;
+      }
+      return failureCount < 3;
     },
   });
 
@@ -79,6 +99,34 @@ export default function AdminDashboard() {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to delete user");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+  });
+
+  const blockUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await fetch(`/api/admin/users/${userId}/block`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to block user");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+  });
+
+  const unblockUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await fetch(`/api/admin/users/${userId}/unblock`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to unblock user");
       return response.json();
     },
     onSuccess: () => {
@@ -148,9 +196,20 @@ export default function AdminDashboard() {
     return acc + balance;
   }, 0) || 0;
 
+  const formatBusinessName = (name: string | undefined) => {
+    if (!name) return "";
+    return name.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/40 to-indigo-50/30 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-200/20 rounded-full blur-3xl -mr-64 -mt-64"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-3xl -ml-48 -mb-48"></div>
+      <div className="relative z-10">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-6">
@@ -187,9 +246,9 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </header>
+        </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
@@ -326,6 +385,7 @@ export default function AdminDashboard() {
                         <TableHead className="font-bold">Account Number</TableHead>
                         <TableHead className="font-bold">Balance</TableHead>
                         <TableHead className="font-bold">Role</TableHead>
+                        <TableHead className="font-bold">Status</TableHead>
                         <TableHead className="font-bold">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -335,7 +395,7 @@ export default function AdminDashboard() {
                           <TableCell className="font-semibold text-gray-900">{user.fullName}</TableCell>
                           <TableCell className="text-gray-700">{user.username}</TableCell>
                           <TableCell className="text-gray-700">
-                            {user.accounts?.[0]?.businessName || <span className="text-gray-400 italic">No account</span>}
+                            {user.accounts?.[0]?.businessName ? formatBusinessName(user.accounts[0].businessName) : <span className="text-gray-400 italic">No account</span>}
                           </TableCell>
                           <TableCell className="font-mono text-sm text-gray-700">
                             {user.accounts?.[0]?.accountNumber || <span className="text-gray-400">N/A</span>}
@@ -352,6 +412,14 @@ export default function AdminDashboard() {
                             </Badge>
                           </TableCell>
                           <TableCell>
+                            <Badge 
+                              variant={user.isBlocked ? "destructive" : "default"} 
+                              className={user.isBlocked ? "bg-red-100 text-red-700 font-semibold" : "bg-green-100 text-green-700 font-semibold"}
+                            >
+                              {user.isBlocked ? "Blocked" : "Active"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
                             <div className="flex gap-2">
                               {user.accounts?.[0] && (
                                 <Button
@@ -362,25 +430,54 @@ export default function AdminDashboard() {
                                     setSelectedAccount(user.accounts[0]);
                                     setIsUpdateBalanceOpen(true);
                                   }}
+                                  data-testid={`button-update-balance-${user.id}`}
                                 >
                                   <Edit className="h-3.5 w-3.5" />
                                   Update
                                 </Button>
                               )}
                               {!user.isAdmin && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="gap-1.5 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
-                                  onClick={() => {
-                                    if (confirm("Are you sure you want to delete this user?")) {
-                                      deleteUserMutation.mutate(user.id);
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  Delete
-                                </Button>
+                                <>
+                                  {user.isBlocked ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="gap-1.5 border-green-300 text-green-600 hover:bg-green-50"
+                                      onClick={() => unblockUserMutation.mutate(user.id)}
+                                      data-testid={`button-unblock-${user.id}`}
+                                    >
+                                      Unblock
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="gap-1.5 border-orange-300 text-orange-600 hover:bg-orange-50"
+                                      onClick={() => {
+                                        if (confirm("Are you sure you want to block this user?")) {
+                                          blockUserMutation.mutate(user.id);
+                                        }
+                                      }}
+                                      data-testid={`button-block-${user.id}`}
+                                    >
+                                      Block
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-1.5 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                                    onClick={() => {
+                                      if (confirm("Are you sure you want to delete this user?")) {
+                                        deleteUserMutation.mutate(user.id);
+                                      }
+                                    }}
+                                    data-testid={`button-delete-${user.id}`}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Delete
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </TableCell>
@@ -393,9 +490,9 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
+        </main>
 
-      <Dialog open={isUpdateBalanceOpen} onOpenChange={setIsUpdateBalanceOpen}>
+        <Dialog open={isUpdateBalanceOpen} onOpenChange={setIsUpdateBalanceOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Update Account Balance</DialogTitle>
@@ -440,20 +537,21 @@ export default function AdminDashboard() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
 
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-            <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
+        <footer className="bg-white border-t border-gray-200 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+              <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
+              <div className="flex gap-6">
+                <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
+                <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
+                <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

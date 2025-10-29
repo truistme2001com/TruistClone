@@ -23,6 +23,10 @@ passport.use(
         return done(null, false, { message: "Incorrect username or password" });
       }
 
+      if (user.isBlocked) {
+        return done(null, false, { message: "Account has been blocked. Please contact support." });
+      }
+
       const isValid = await verifyPassword(password, user.password);
       if (!isValid) {
         return done(null, false, { message: "Incorrect username or password" });

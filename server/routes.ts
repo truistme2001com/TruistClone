@@ -11,23 +11,48 @@ import {
   getAccountById,
   deleteUser,
   deleteAccount,
+  blockUser,
+  unblockUser,
+  transferFunds,
 } from "./storage";
-import { loginSchema, createUserSchema, updateBalanceSchema } from "@shared/schema";
+import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema } from "@shared/schema";
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
-  if (req.isAuthenticated()) {
-    return next();
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ success: false, message: "Not authenticated" });
   }
-  res.status(401).json({ success: false, message: "Not authenticated" });
+  
+  const user = req.user as any;
+  if (user?.isBlocked) {
+    req.logout((err) => {
+      if (err) console.error("Logout error:", err);
+    });
+    return res.status(403).json({ success: false, message: "Account has been blocked. Please contact support." });
+  }
+  
+  return next();
 }
 
 // Middleware to check if user is admin
 function isAdmin(req: Request, res: Response, next: Function) {
-  if (req.isAuthenticated() && (req.user as any)?.isAdmin) {
-    return next();
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ success: false, message: "Not authenticated" });
   }
-  res.status(403).json({ success: false, message: "Admin access required" });
+  
+  const user = req.user as any;
+  if (user?.isBlocked) {
+    req.logout((err) => {
+      if (err) console.error("Logout error:", err);
+    });
+    return res.status(403).json({ success: false, message: "Account has been blocked. Please contact support." });
+  }
+  
+  if (!user?.isAdmin) {
+    return res.status(403).json({ success: false, message: "Admin access required" });
+  }
+  
+  return next();
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -231,6 +256,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Account deleted successfully" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/users/:userId/block", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await blockUser(userId);
+      res.json({ success: true, message: "User blocked successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/users/:userId/unblock", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await unblockUser(userId);
+      res.json({ success: true, message: "User unblocked successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/transfer", isAuthenticated, async (req, res) => {
+    try {
+      const currentUser = req.user as any;
+      const data = transferSchema.parse(req.body);
+      
+      const account = await getAccountById(data.fromAccountId);
+      if (!account || account.userId !== currentUser.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Unauthorized" 
+        });
+      }
+      
+      const result = await transferFunds(
+        data.fromAccountId,
+        data.toAccountNumber,
+        data.amount,
+        data.description
+      );
+      
+      res.json({
+        success: true,
+        message: "Transfer successful",
+        newBalance: result.fromBalance,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Transfer failed",
+      });
     }
   });
 

@@ -66,6 +66,20 @@ export async function deleteUser(userId: number) {
   await db.delete(users).where(eq(users.id, userId));
 }
 
+export async function blockUser(userId: number) {
+  await db
+    .update(users)
+    .set({ isBlocked: true, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+export async function unblockUser(userId: number) {
+  await db
+    .update(users)
+    .set({ isBlocked: false, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
 // Account operations
 export async function createAccount(data: {
   userId: number;
@@ -109,6 +123,16 @@ export async function getAccountById(accountId: number) {
     .select()
     .from(accounts)
     .where(eq(accounts.id, accountId))
+    .limit(1);
+  
+  return account;
+}
+
+export async function getAccountByAccountNumber(accountNumber: string) {
+  const [account] = await db
+    .select()
+    .from(accounts)
+    .where(eq(accounts.accountNumber, accountNumber))
     .limit(1);
   
   return account;
@@ -198,6 +222,72 @@ export async function getAllUsersWithAccounts() {
   );
   
   return usersWithAccounts;
+}
+
+export async function transferFunds(
+  fromAccountId: number,
+  toAccountNumber: string,
+  amount: string,
+  description?: string
+) {
+  const fromAccount = await getAccountById(fromAccountId);
+  if (!fromAccount) {
+    throw new Error("Source account not found");
+  }
+  
+  const toAccount = await getAccountByAccountNumber(toAccountNumber);
+  if (!toAccount) {
+    throw new Error("Recipient account not found");
+  }
+  
+  if (fromAccountId === toAccount.id) {
+    throw new Error("Cannot transfer to the same account");
+  }
+  
+  const currentBalance = parseFloat(fromAccount.balance);
+  const transferAmount = parseFloat(amount);
+  
+  if (transferAmount <= 0) {
+    throw new Error("Transfer amount must be greater than zero");
+  }
+  
+  if (currentBalance < transferAmount) {
+    throw new Error("Insufficient funds");
+  }
+  
+  const newFromBalance = currentBalance - transferAmount;
+  const newToBalance = parseFloat(toAccount.balance) + transferAmount;
+  
+  await db
+    .update(accounts)
+    .set({ balance: newFromBalance.toFixed(2), updatedAt: new Date() })
+    .where(eq(accounts.id, fromAccountId));
+  
+  await db
+    .update(accounts)
+    .set({ balance: newToBalance.toFixed(2), updatedAt: new Date() })
+    .where(eq(accounts.id, toAccount.id));
+  
+  await db.insert(transactions).values({
+    accountId: fromAccountId,
+    type: "debit",
+    amount,
+    description: description || `Transfer to ${toAccount.businessName}`,
+    balanceAfter: newFromBalance.toFixed(2),
+  });
+  
+  await db.insert(transactions).values({
+    accountId: toAccount.id,
+    type: "credit",
+    amount,
+    description: description || `Transfer from ${fromAccount.businessName}`,
+    balanceAfter: newToBalance.toFixed(2),
+  });
+  
+  return {
+    fromBalance: newFromBalance.toFixed(2),
+    toBalance: newToBalance.toFixed(2),
+  };
 }
 
 // Helper function to generate account numbers
