@@ -1,4 +1,5 @@
 import appMockup from "@assets/generated_images/Banking_mobile_app_mockup_64163d74.png";
+import qrCode from "@assets/Screenshot 2025-10-29 at 10.19.05 AM_1761747565477.png";
 import { Button } from "@/components/ui/button";
 
 export function MobileAppSection() {
@@ -19,15 +20,11 @@ export function MobileAppSection() {
             
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-lg inline-block shadow-sm">
-                <div className="w-32 h-32 bg-foreground rounded-md flex items-center justify-center">
-                  <svg viewBox="0 0 100 100" className="w-full h-full p-2">
-                    <rect x="0" y="0" width="100" height="100" fill="white"/>
-                    <rect x="20" y="20" width="20" height="20" fill="black"/>
-                    <rect x="60" y="20" width="20" height="20" fill="black"/>
-                    <rect x="20" y="60" width="20" height="20" fill="black"/>
-                    <rect x="60" y="60" width="20" height="20" fill="black"/>
-                  </svg>
-                </div>
+                <img 
+                  src={qrCode} 
+                  alt="Scan to download Truist app"
+                  className="w-32 h-32 rounded-md"
+                />
                 <p className="text-xs text-center mt-2 text-muted-foreground">
                   Scan to download
                 </p>
