@@ -48,7 +48,7 @@ export function Footer() {
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">Careers</a></li>
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">Community Reinvestment Act</a></li>
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">Corporate Responsibility & Sustainability</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Emerging issues</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Belonging</a></li>
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">Facts about banking</a></li>
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">FDIC Insurance</a></li>
               <li><a href="#" className="text-white/80 hover:text-white transition-colors">Investor relations</a></li>
