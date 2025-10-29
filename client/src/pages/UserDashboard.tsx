@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { ArrowUpRight, ArrowDownRight, CreditCard, TrendingUp, Download, FileText } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell } from "lucide-react";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
@@ -18,7 +18,7 @@ export default function UserDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/me", { credentials: "include" });
       if (!response.ok) {
-        setLocation("/login");
+        setLocation("/");
         throw new Error("Not authenticated");
       }
       const data = await response.json();
@@ -47,7 +47,7 @@ export default function UserDashboard() {
       await fetch("/api/logout", { method: "POST", credentials: "include" });
     },
     onSuccess: () => {
-      setLocation("/login");
+      setLocation("/");
     },
   });
 
@@ -62,29 +62,41 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
-              <img src={truistLogo} alt="Truist Bank" className="h-8" />
+              <img src={truistLogo} alt="Truist Bank" className="h-10" />
               <nav className="hidden md:flex gap-6">
-                <a href="#" className="text-purple-600 font-medium border-b-2 border-purple-600 pb-4 pt-4">Accounts</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 pb-4 pt-4">Transfer</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 pb-4 pt-4">Pay Bills</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 pb-4 pt-4">Services</a>
+                <a href="#" className="text-purple-600 font-semibold border-b-2 border-purple-600 pb-4 pt-4">Accounts</a>
+                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Transfer</a>
+                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Pay Bills</a>
+                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Services</a>
               </nav>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700 hidden sm:block">
-                Welcome, <span className="font-semibold">{user?.fullName}</span>
-              </span>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+                <Settings className="h-5 w-5" />
+              </Button>
+              <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
+                <div className="flex items-center gap-2">
+                  <div className="bg-purple-100 p-2 rounded-full">
+                    <User className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{user?.fullName}</span>
+                </div>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm"
-                className="border-gray-300 hover:bg-gray-50"
+                className="border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700 gap-2"
                 onClick={() => logoutMutation.mutate()}
               >
+                <LogOut className="h-4 w-4" />
                 Sign Out
               </Button>
             </div>
@@ -93,67 +105,73 @@ export default function UserDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Account Overview</h1>
-          <p className="text-gray-600 mt-1">{account?.businessName}</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Overview</h1>
+          <p className="text-gray-600">{account?.businessName}</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-purple-600 to-purple-700 text-white col-span-2">
-            <CardHeader className="pb-3">
+        <div className="grid gap-6 lg:grid-cols-12 mb-8">
+          <Card className="lg:col-span-8 border-0 shadow-lg bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+            <CardHeader className="pb-4 relative z-10">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardDescription className="text-purple-100 text-sm">Business Checking</CardDescription>
-                  <CardTitle className="text-white mt-1">{account?.businessName}</CardTitle>
+                  <CardDescription className="text-purple-100 text-xs uppercase tracking-wide mb-1">Business Checking</CardDescription>
+                  <CardTitle className="text-white text-xl mb-1">{account?.businessName}</CardTitle>
+                  <p className="text-purple-200 text-sm">Account #{account?.accountNumber}</p>
                 </div>
-                <CreditCard className="h-8 w-8 text-purple-200" />
+                <CreditCard className="h-10 w-10 text-purple-300" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="mt-4">
+            <CardContent className="relative z-10">
+              <div className="mt-2">
                 <p className="text-purple-100 text-sm mb-2">Available Balance</p>
-                <p className="text-5xl font-bold tracking-tight">
+                <p className="text-5xl font-bold tracking-tight mb-6">
                   ${account?.balance ? formatCurrency(account.balance) : "0.00"}
                 </p>
               </div>
-              <div className="mt-6 flex gap-4 text-sm">
-                <div>
-                  <p className="text-purple-100">Account Number</p>
-                  <p className="font-mono mt-1">****{account?.accountNumber?.slice(-4)}</p>
-                </div>
-                <div className="ml-auto">
-                  <Badge variant="secondary" className="bg-purple-500/30 text-white border-0">
-                    {account?.status || "Active"}
-                  </Badge>
+              <div className="flex items-center justify-between pt-4 border-t border-purple-400/30">
+                <div className="flex gap-6">
+                  <div>
+                    <p className="text-purple-200 text-xs mb-1">Account Type</p>
+                    <p className="font-semibold capitalize">{account?.accountType || "Business"}</p>
+                  </div>
+                  <div>
+                    <p className="text-purple-200 text-xs mb-1">Status</p>
+                    <Badge variant="secondary" className="bg-green-500/90 text-white border-0 hover:bg-green-500">
+                      {account?.status || "Active"}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+          <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-gradient-to-br from-green-50 to-green-100/50">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <ArrowUpRight className="h-6 w-6 text-green-600" />
+                  <div className="bg-green-500 p-3.5 rounded-xl group-hover:scale-110 transition-transform">
+                    <ArrowUpRight className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Transfer Money</p>
-                    <p className="font-semibold text-gray-900">Send or Receive</p>
+                    <p className="text-sm text-gray-600 mb-1">Quick Transfer</p>
+                    <p className="font-bold text-gray-900">Send Money</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-gradient-to-br from-blue-50 to-blue-100/50">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <FileText className="h-6 w-6 text-blue-600" />
+                  <div className="bg-blue-500 p-3.5 rounded-xl group-hover:scale-110 transition-transform">
+                    <FileText className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Statements</p>
-                    <p className="font-semibold text-gray-900">View & Download</p>
+                    <p className="text-sm text-gray-600 mb-1">Documents</p>
+                    <p className="font-bold text-gray-900">View Statements</p>
                   </div>
                 </div>
               </CardContent>
@@ -162,24 +180,30 @@ export default function UserDashboard() {
         </div>
 
         <Tabs defaultValue="transactions" className="space-y-6">
-          <TabsList className="bg-white border border-gray-200">
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
+          <TabsList className="bg-white border border-gray-200 shadow-sm h-12">
+            <TabsTrigger 
+              value="transactions" 
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold"
+            >
               Transaction History
             </TabsTrigger>
-            <TabsTrigger value="details" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
+            <TabsTrigger 
+              value="details" 
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold"
+            >
               Account Details
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions">
-            <Card className="border-0 shadow-md">
-              <CardHeader className="border-b border-gray-100">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="border-b border-gray-100 bg-white">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardTitle className="text-xl">Recent Transactions</CardTitle>
                     <CardDescription className="mt-1">Your latest account activity</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 border-purple-300 text-purple-600 hover:bg-purple-50">
                     <Download className="h-4 w-4" />
                     Export
                   </Button>
@@ -190,17 +214,17 @@ export default function UserDashboard() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-gray-50">
-                          <TableHead className="font-semibold">Date</TableHead>
-                          <TableHead className="font-semibold">Description</TableHead>
-                          <TableHead className="font-semibold">Type</TableHead>
-                          <TableHead className="text-right font-semibold">Amount</TableHead>
-                          <TableHead className="text-right font-semibold">Balance</TableHead>
+                        <TableRow className="bg-gray-50/80">
+                          <TableHead className="font-bold">Date</TableHead>
+                          <TableHead className="font-bold">Description</TableHead>
+                          <TableHead className="font-bold">Type</TableHead>
+                          <TableHead className="text-right font-bold">Amount</TableHead>
+                          <TableHead className="text-right font-bold">Balance</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {transactionsData.transactions.map((transaction: any) => (
-                          <TableRow key={transaction.id} className="hover:bg-gray-50">
+                          <TableRow key={transaction.id} className="hover:bg-purple-50/50 transition-colors">
                             <TableCell className="text-gray-900">
                               {new Date(transaction.createdAt).toLocaleDateString('en-US', {
                                 year: 'numeric',
@@ -215,28 +239,31 @@ export default function UserDashboard() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 {transaction.type === "credit" ? (
-                                  <div className="bg-green-100 p-1.5 rounded">
+                                  <div className="bg-green-100 p-2 rounded-lg">
                                     <ArrowDownRight className="h-4 w-4 text-green-600" />
                                   </div>
                                 ) : (
-                                  <div className="bg-red-100 p-1.5 rounded">
+                                  <div className="bg-red-100 p-2 rounded-lg">
                                     <ArrowUpRight className="h-4 w-4 text-red-600" />
                                   </div>
                                 )}
-                                <span className="font-medium text-gray-900">{transaction.description || "N/A"}</span>
+                                <span className="font-semibold text-gray-900">{transaction.description || "N/A"}</span>
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={transaction.type === "credit" ? "default" : "secondary"} className={transaction.type === "credit" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-gray-100 text-gray-700 hover:bg-gray-100"}>
+                              <Badge 
+                                variant={transaction.type === "credit" ? "default" : "secondary"} 
+                                className={transaction.type === "credit" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-gray-100 text-gray-700 hover:bg-gray-100"}
+                              >
                                 {transaction.type === "credit" ? "Credit" : "Debit"}
                               </Badge>
                             </TableCell>
-                            <TableCell className={`text-right font-semibold ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
+                            <TableCell className={`text-right font-bold text-base ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
                               {transaction.type === "credit" ? "+" : "-"}${formatCurrency(transaction.amount)}
                             </TableCell>
-                            <TableCell className="text-right font-medium text-gray-900">
+                            <TableCell className="text-right font-semibold text-gray-900">
                               ${formatCurrency(transaction.balanceAfter)}
                             </TableCell>
                           </TableRow>
@@ -245,10 +272,12 @@ export default function UserDashboard() {
                     </Table>
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    <FileText className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                    <p className="font-medium">No transactions yet</p>
-                    <p className="text-sm mt-1">Your transaction history will appear here</p>
+                  <div className="text-center py-16 text-gray-500">
+                    <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <p className="font-semibold text-lg text-gray-700">No transactions yet</p>
+                    <p className="text-sm mt-2">Your transaction history will appear here</p>
                   </div>
                 )}
               </CardContent>
@@ -257,48 +286,48 @@ export default function UserDashboard() {
 
           <TabsContent value="details">
             <div className="grid gap-6 md:grid-cols-2">
-              <Card className="border-0 shadow-md">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle>Account Information</CardTitle>
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                  <CardTitle className="text-xl">Account Information</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                  <div className="flex justify-between py-3 border-b border-gray-100">
-                    <span className="text-gray-600">Business Name</span>
-                    <span className="font-semibold text-gray-900">{account?.businessName}</span>
+                <CardContent className="pt-6 space-y-5">
+                  <div className="flex justify-between py-4 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Business Name</span>
+                    <span className="font-bold text-gray-900">{account?.businessName}</span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-gray-100">
-                    <span className="text-gray-600">Account Type</span>
-                    <span className="font-semibold text-gray-900 capitalize">{account?.accountType}</span>
+                  <div className="flex justify-between py-4 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Account Type</span>
+                    <span className="font-bold text-gray-900 capitalize">{account?.accountType}</span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-gray-100">
-                    <span className="text-gray-600">Account Number</span>
-                    <span className="font-mono text-sm font-semibold text-gray-900">{account?.accountNumber}</span>
+                  <div className="flex justify-between py-4 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Account Number</span>
+                    <span className="font-mono font-bold text-gray-900">{account?.accountNumber}</span>
                   </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-gray-600">Status</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">{account?.status || "Active"}</Badge>
+                  <div className="flex justify-between py-4">
+                    <span className="text-gray-600 font-medium">Status</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 font-semibold">{account?.status || "Active"}</Badge>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-md">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle>Account Holder</CardTitle>
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
+                  <CardTitle className="text-xl">Account Holder</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                  <div className="flex justify-between py-3 border-b border-gray-100">
-                    <span className="text-gray-600">Full Name</span>
-                    <span className="font-semibold text-gray-900">{user?.fullName}</span>
+                <CardContent className="pt-6 space-y-5">
+                  <div className="flex justify-between py-4 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Full Name</span>
+                    <span className="font-bold text-gray-900">{user?.fullName}</span>
                   </div>
                   {user?.email && (
-                    <div className="flex justify-between py-3 border-b border-gray-100">
-                      <span className="text-gray-600">Email</span>
-                      <span className="font-semibold text-gray-900">{user.email}</span>
+                    <div className="flex justify-between py-4 border-b border-gray-100">
+                      <span className="text-gray-600 font-medium">Email</span>
+                      <span className="font-bold text-gray-900">{user.email}</span>
                     </div>
                   )}
-                  <div className="flex justify-between py-3">
-                    <span className="text-gray-600">Username</span>
-                    <span className="font-semibold text-gray-900">{user?.username}</span>
+                  <div className="flex justify-between py-4">
+                    <span className="text-gray-600 font-medium">Username</span>
+                    <span className="font-bold text-gray-900">{user?.username}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -307,14 +336,14 @@ export default function UserDashboard() {
         </Tabs>
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <footer className="bg-white border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-purple-600">Privacy Policy</a>
-              <a href="#" className="hover:text-purple-600">Terms of Service</a>
-              <a href="#" className="hover:text-purple-600">Contact Us</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
             </div>
           </div>
         </div>

@@ -6,35 +6,51 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { loginSchema, type LoginRequest, type LoginResponse } from "@shared/schema";
+import { loginSchema } from "@shared/schema";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
+
+type LoginFormData = {
+  username: string;
+  password: string;
+};
 
 export function LoginForm() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   
-  const form = useForm<LoginRequest>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      userId: "",
+      username: "",
       password: "",
-      saveUserId: false,
     },
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: LoginRequest) => {
-      const res = await apiRequest("POST", "/api/login", data);
-      return await res.json() as LoginResponse;
+    mutationFn: async (credentials: { username: string; password: string }) => {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+
+      return response.json();
     },
     onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: data.message,
-      });
-      form.reset({ ...form.getValues(), password: "" });
+      if (data.user.isAdmin) {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -45,59 +61,40 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (data: LoginRequest) => {
+  const onSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data);
   };
 
   return (
-    <div className="w-full bg-[#2E1A47] p-8 rounded-lg shadow-xl" data-testid="card-login">
+    <div className="w-full bg-gradient-to-br from-purple-700 via-purple-600 to-purple-800 p-8 rounded-2xl shadow-2xl backdrop-blur-sm border border-purple-400/20" data-testid="card-login">
+      <div className="mb-6">
+        <img 
+          src="/attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg" 
+          alt="Truist Bank" 
+          className="h-10 bg-white px-4 py-2 rounded mb-4"
+        />
+        <h2 className="text-2xl font-bold text-white mb-2">Sign In</h2>
+        <p className="text-purple-100">Access your account securely</p>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
-            name="userId"
+            name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-normal">User ID</FormLabel>
+                <FormLabel className="text-white text-sm font-medium">Username</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
-                    placeholder=""
-                    className="bg-white border-white text-gray-900 placeholder:text-gray-400"
+                    placeholder="Enter your username"
+                    className="bg-white/95 border-white text-gray-900 placeholder:text-gray-400 h-11 focus:ring-2 focus:ring-purple-300"
                     data-testid="input-user-id"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-red-300" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="saveUserId"
-            render={({ field }) => (
-              <FormItem className="flex items-start space-x-2 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="border-white data-[state=checked]:bg-white data-[state=checked]:text-[#2E1A47] mt-0.5"
-                    data-testid="checkbox-save-user-id"
-                  />
-                </FormControl>
-                <div className="flex items-center justify-between w-full">
-                  <FormLabel className="text-white text-sm font-normal cursor-pointer">
-                    Save user ID
-                  </FormLabel>
-                  <a 
-                    href="#" 
-                    className="text-sm text-[#B8A9D4] hover:text-white hover:underline"
-                    data-testid="link-forgot-user-id"
-                  >
-                    Forgot user ID?
-                  </a>
-                </div>
+                <FormMessage className="text-red-200" />
               </FormItem>
             )}
           />
@@ -107,13 +104,13 @@ export function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white text-sm font-normal">Password</FormLabel>
+                <FormLabel className="text-white text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder=""
-                      className="bg-white border-white text-gray-900 placeholder:text-gray-400 pr-10"
+                      placeholder="Enter your password"
+                      className="bg-white/95 border-white text-gray-900 placeholder:text-gray-400 pr-10 h-11 focus:ring-2 focus:ring-purple-300"
                       data-testid="input-password"
                       {...field}
                     />
@@ -126,48 +123,32 @@ export function LoginForm() {
                     </button>
                   </div>
                 </FormControl>
-                <FormMessage className="text-red-300" />
+                <FormMessage className="text-red-200" />
               </FormItem>
             )}
           />
 
-          <a 
-            href="#" 
-            className="text-sm text-[#B8A9D4] hover:text-white hover:underline block"
-            data-testid="link-reset-password"
-          >
-            Reset password
-          </a>
-
           <Button 
             type="submit" 
-            className="w-full bg-[#A896C8] hover:bg-[#9785B7] text-white border-0 h-12 text-base font-medium"
+            className="w-full bg-white hover:bg-gray-50 text-purple-700 border-0 h-12 text-base font-semibold shadow-lg"
             disabled={loginMutation.isPending}
             data-testid="button-sign-in"
           >
-            {loginMutation.isPending ? "Signing in..." : "Sign in"}
+            {loginMutation.isPending ? "Signing in..." : "Sign In"}
           </Button>
 
-          <div className="pt-2 space-y-3 text-sm">
-            <p className="text-white font-normal">Need a user ID? <a href="#" className="text-[#B8A9D4] hover:text-white hover:underline" data-testid="link-setup-online-banking">Set up online banking</a></p>
+          <div className="pt-4 space-y-3 text-sm text-center">
+            <a 
+              href="#" 
+              className="text-purple-100 hover:text-white hover:underline block font-medium"
+              data-testid="link-reset-password"
+            >
+              Forgot your password? Reset it here
+            </a>
             
-            <a 
-              href="#" 
-              className="text-[#B8A9D4] hover:text-white hover:underline block"
-              data-testid="link-online-security"
-            >
-              Online security measures
-            </a>
-            <a 
-              href="#" 
-              className="text-[#B8A9D4] hover:text-white hover:underline flex items-center gap-1"
-              data-testid="link-sign-in-another"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
-              </svg>
-              Sign in to another account →
-            </a>
+            <div className="pt-2 border-t border-purple-400/30">
+              <p className="text-purple-100 font-normal">New to Truist? <a href="#" className="text-white hover:underline font-medium" data-testid="link-setup-online-banking">Create an account</a></p>
+            </div>
           </div>
         </form>
       </Form>

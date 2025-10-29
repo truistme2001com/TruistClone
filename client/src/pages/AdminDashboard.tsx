@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { Users, DollarSign, Building2, Plus, Trash2, Edit } from "lucide-react";
+import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell } from "lucide-react";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/me", { credentials: "include" });
       if (!response.ok) {
-        setLocation("/login");
+        setLocation("/");
         throw new Error("Not authenticated");
       }
       return response.json();
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
       await fetch("/api/logout", { method: "POST", credentials: "include" });
     },
     onSuccess: () => {
-      setLocation("/login");
+      setLocation("/");
     },
   });
 
@@ -149,26 +149,39 @@ export default function AdminDashboard() {
   }, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-8">
-              <img src={truistLogo} alt="Truist Bank" className="h-8" />
-              <div className="flex items-center gap-2">
-                <Badge variant="default" className="bg-purple-600">Admin Portal</Badge>
+            <div className="flex items-center gap-6">
+              <img src={truistLogo} alt="Truist Bank" className="h-10" />
+              <div className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full">
+                <Shield className="h-4 w-4 text-white" />
+                <span className="text-white font-bold text-sm">Admin Portal</span>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700 hidden sm:block">
-                <span className="font-semibold">{currentUser?.user?.fullName}</span>
-              </span>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+                <Settings className="h-5 w-5" />
+              </Button>
+              <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
+                <div className="flex items-center gap-2">
+                  <div className="bg-purple-100 p-2 rounded-full">
+                    <User className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{currentUser?.user?.fullName}</span>
+                </div>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm"
-                className="border-gray-300 hover:bg-gray-50"
+                className="border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700 gap-2"
                 onClick={() => logoutMutation.mutate()}
               >
+                <LogOut className="h-4 w-4" />
                 Sign Out
               </Button>
             </div>
@@ -177,15 +190,15 @@ export default function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage users, accounts, and system operations</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+            <p className="text-gray-600">Manage users, accounts, and system operations</p>
           </div>
           <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
-                <Plus className="h-4 w-4" />
+              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg gap-2">
+                <Plus className="h-5 w-5" />
                 Create New User
               </Button>
             </DialogTrigger>
@@ -239,29 +252,29 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-white">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Users className="h-6 w-6 text-purple-600" />
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl shadow-lg">
+                  <Users className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Users</p>
-                  <p className="text-3xl font-bold text-gray-900">{usersData?.users?.length || 0}</p>
+                  <p className="text-sm text-gray-600 mb-1">Total Users</p>
+                  <p className="text-4xl font-bold text-gray-900">{usersData?.users?.length || 0}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-white">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-2xl shadow-lg">
+                  <Building2 className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Active Accounts</p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-sm text-gray-600 mb-1">Active Accounts</p>
+                  <p className="text-4xl font-bold text-gray-900">
                     {usersData?.users?.filter((u: any) => u.accounts?.length > 0).length || 0}
                   </p>
                 </div>
@@ -269,14 +282,14 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-white">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl shadow-lg">
+                  <DollarSign className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Balance</p>
+                  <p className="text-sm text-gray-600 mb-1">Total Balance</p>
                   <p className="text-3xl font-bold text-green-600">
                     ${formatCurrency(totalBalance)}
                   </p>
@@ -287,48 +300,54 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="bg-white border border-gray-200">
-            <TabsTrigger value="users" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
+          <TabsList className="bg-white border border-gray-200 shadow-sm h-12">
+            <TabsTrigger 
+              value="users" 
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold"
+            >
               User Management
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
-            <Card className="border-0 shadow-md">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle>All Users & Accounts</CardTitle>
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                <CardTitle className="text-xl">All Users & Accounts</CardTitle>
                 <CardDescription>Manage user accounts and balances</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gray-50">
-                        <TableHead className="font-semibold">User</TableHead>
-                        <TableHead className="font-semibold">Username</TableHead>
-                        <TableHead className="font-semibold">Business Account</TableHead>
-                        <TableHead className="font-semibold">Account Number</TableHead>
-                        <TableHead className="font-semibold">Balance</TableHead>
-                        <TableHead className="font-semibold">Role</TableHead>
-                        <TableHead className="font-semibold">Actions</TableHead>
+                      <TableRow className="bg-gray-50/80">
+                        <TableHead className="font-bold">User</TableHead>
+                        <TableHead className="font-bold">Username</TableHead>
+                        <TableHead className="font-bold">Business Account</TableHead>
+                        <TableHead className="font-bold">Account Number</TableHead>
+                        <TableHead className="font-bold">Balance</TableHead>
+                        <TableHead className="font-bold">Role</TableHead>
+                        <TableHead className="font-bold">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {usersData?.users?.map((user: any) => (
-                        <TableRow key={user.id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium text-gray-900">{user.fullName}</TableCell>
+                        <TableRow key={user.id} className="hover:bg-purple-50/50 transition-colors">
+                          <TableCell className="font-semibold text-gray-900">{user.fullName}</TableCell>
                           <TableCell className="text-gray-700">{user.username}</TableCell>
                           <TableCell className="text-gray-700">
-                            {user.accounts?.[0]?.businessName || <span className="text-gray-400">No account</span>}
+                            {user.accounts?.[0]?.businessName || <span className="text-gray-400 italic">No account</span>}
                           </TableCell>
                           <TableCell className="font-mono text-sm text-gray-700">
                             {user.accounts?.[0]?.accountNumber || <span className="text-gray-400">N/A</span>}
                           </TableCell>
-                          <TableCell className="font-semibold text-green-600">
+                          <TableCell className="font-bold text-green-600">
                             {user.accounts?.[0]?.balance ? `$${formatCurrency(user.accounts[0].balance)}` : <span className="text-gray-400">$0.00</span>}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={user.isAdmin ? "default" : "secondary"} className={user.isAdmin ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700"}>
+                            <Badge 
+                              variant={user.isAdmin ? "default" : "secondary"} 
+                              className={user.isAdmin ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-100 text-gray-700"}
+                            >
                               {user.isAdmin ? "Admin" : "User"}
                             </Badge>
                           </TableCell>
@@ -338,21 +357,21 @@ export default function AdminDashboard() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="gap-1.5"
+                                  className="gap-1.5 border-purple-300 text-purple-600 hover:bg-purple-50"
                                   onClick={() => {
                                     setSelectedAccount(user.accounts[0]);
                                     setIsUpdateBalanceOpen(true);
                                   }}
                                 >
                                   <Edit className="h-3.5 w-3.5" />
-                                  Update Balance
+                                  Update
                                 </Button>
                               )}
                               {!user.isAdmin && (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                  className="gap-1.5 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
                                   onClick={() => {
                                     if (confirm("Are you sure you want to delete this user?")) {
                                       deleteUserMutation.mutate(user.id);
@@ -387,7 +406,7 @@ export default function AdminDashboard() {
           <form onSubmit={handleUpdateBalance} className="space-y-4">
             <div className="space-y-2">
               <Label>Current Balance</Label>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-3xl font-bold text-green-600">
                 ${selectedAccount?.balance ? formatCurrency(selectedAccount.balance) : "0.00"}
               </p>
             </div>
@@ -423,14 +442,14 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <footer className="bg-white border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-purple-600">Privacy Policy</a>
-              <a href="#" className="hover:text-purple-600">Terms of Service</a>
-              <a href="#" className="hover:text-purple-600">Contact Us</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
             </div>
           </div>
         </div>
