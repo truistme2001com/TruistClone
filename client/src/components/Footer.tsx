@@ -38,7 +38,7 @@ export function Footer() {
               <li><a href="https://www.truist.com/content/truist-bank/us/en/purpose/truist-foundation" className="text-white/80 hover:text-white hover:underline transition-colors">Truist Foundation</a></li>
               <li><a href="https://www.truistleadershipinstitute.com/" className="text-white/80 hover:text-white hover:underline transition-colors">Truist Leadership Institute</a></li>
               <li><a href="https://www.truist.com/commercial-corporate-institutional/investment-banking" className="text-white/80 hover:text-white hover:underline transition-colors">Truist Securities</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Truist Ventures</a></li>
+              <li><a href="https://www.truist.com/who-we-are/truist-ventures/about-us" className="text-white/80 hover:text-white hover:underline transition-colors">Truist Ventures</a></li>
             </ul>
           </div>
 
