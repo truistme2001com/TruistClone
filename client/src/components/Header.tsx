@@ -36,8 +36,14 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2" data-testid="link-home">
-              <svg className="w-24 h-8" viewBox="0 0 100 30" fill="none">
-                <text x="0" y="22" className="text-2xl font-bold fill-primary">TRUIST</text>
+              <svg className="h-8" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* T+ Icon */}
+                <rect x="0" y="5" width="20" height="20" rx="2" className="fill-primary"/>
+                <path d="M6 10 L14 10 M10 10 L10 20" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M16 15 L16 15" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+                
+                {/* TRUIST Text */}
+                <text x="26" y="20" className="text-xl font-bold fill-foreground" style={{fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.5px'}}>TRUIST</text>
               </svg>
             </Link>
             
@@ -57,8 +63,8 @@ export function Header() {
               <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md flex items-center gap-1" data-testid="link-investing">
                 Investing & retirement <ChevronDown className="w-4 h-4" />
               </a>
-              <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md" data-testid="link-premier-banking">
-                Premier Banking
+              <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md flex items-center gap-1" data-testid="link-premier-banking">
+                Premier Banking <ChevronDown className="w-4 h-4" />
               </a>
               <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md flex items-center gap-1" data-testid="link-money-mindset">
                 Money and Mindset <ChevronDown className="w-4 h-4" />
