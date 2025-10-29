@@ -45,7 +45,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Careers</a></li>
+              <li><a href="https://careers.truist.com/us/en" className="text-white/80 hover:text-white hover:underline transition-colors">Careers</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Community Reinvestment Act</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Corporate Responsibility & Sustainability</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Belonging</a></li>
