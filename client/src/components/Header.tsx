@@ -61,8 +61,8 @@ export function Header() {
                   Checking & savings <ChevronDown className="w-4 h-4" />
                 </button>
                 {activeDropdown === 'checking' && (
-                  <div className="absolute left-0 top-full mt-2 w-[800px] bg-white shadow-xl rounded-lg p-8 border border-border">
-                    <div className="grid grid-cols-3 gap-8">
+                  <div className="absolute left-0 top-full mt-2 w-[1000px] bg-white shadow-xl rounded-lg p-8 border border-border">
+                    <div className="grid grid-cols-4 gap-8">
                       <div>
                         <h3 className="font-semibold text-foreground mb-4">Checking</h3>
                         <div className="space-y-3">
@@ -97,6 +97,11 @@ export function Header() {
                           <a href="https://www.truist.com/checking/set-up-account" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Setting up your Truist Checking Account</a>
                         </div>
                       </div>
+                      <div className="bg-[#B8D8D8] rounded-lg p-6">
+                        <p className="text-lg font-semibold text-[#2D1B4E] mb-4">Can't get to the bank? No problem.</p>
+                        <p className="text-sm text-[#2D1B4E] mb-4">Truist One Digital Banking makes it easy to take care of everything—online or in the app.</p>
+                        <a href="https://www.truist.com/digital-banking" target="_blank" rel="noopener noreferrer" className="text-sm text-[#2D1B4E] underline hover:no-underline font-medium">See how it works.</a>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -111,12 +116,33 @@ export function Header() {
                   Credit cards <ChevronDown className="w-4 h-4" />
                 </button>
                 {activeDropdown === 'creditcards' && (
-                  <div className="absolute left-0 top-full mt-2 w-[400px] bg-white shadow-xl rounded-lg p-8 border border-border">
-                    <div className="space-y-3">
-                      <a href="https://www.truist.com/credit-cards" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">View all credit cards</a>
-                      <a href="https://www.truist.com/credit-cards/cash-rewards" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Cash Rewards</a>
-                      <a href="https://www.truist.com/credit-cards/enjoy-travel" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Travel Rewards</a>
-                      <a href="https://www.truist.com/credit-cards/balance-transfer" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Balance Transfer</a>
+                  <div className="absolute left-0 top-full mt-2 w-[800px] bg-white shadow-xl rounded-lg p-8 border border-border">
+                    <div className="grid grid-cols-3 gap-8">
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-4">Our products</h3>
+                        <div className="space-y-3">
+                          <a href="https://www.truist.com/credit-cards" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Credit cards</a>
+                          <a href="https://www.truist.com/credit-cards/enjoy-cash" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Truist Enjoy Cash</a>
+                          <a href="https://www.truist.com/credit-cards/enjoy-travel" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Truist Enjoy Travel</a>
+                          <a href="https://www.truist.com/credit-cards/future-card" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Truist Future Card</a>
+                          <a href="https://www.truist.com/credit-cards/enjoy-beyond" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Truist Enjoy Beyond</a>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-4">&nbsp;</h3>
+                        <div className="space-y-3 mt-7">
+                          <a href="https://www.truist.com/credit-cards/enjoy-cash-secured" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Truist Enjoy Cash (secured)</a>
+                        </div>
+                        <h3 className="font-semibold text-foreground mb-4 mt-8">Offers</h3>
+                        <div className="space-y-3">
+                          <a href="https://www.truist.com/credit-cards/check-for-offers" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Check for Offers</a>
+                        </div>
+                      </div>
+                      <div className="bg-[#B8D8D8] rounded-lg p-6">
+                        <p className="text-lg font-semibold text-[#2D1B4E] mb-4">Nights out and weekend getaways, upgraded.</p>
+                        <p className="text-sm text-[#2D1B4E] mb-4">Perks. Rewards. Status. Sometimes you just want a little more.</p>
+                        <a href="https://www.truist.com/credit-cards/enjoy-beyond" target="_blank" rel="noopener noreferrer" className="text-sm text-[#2D1B4E] underline hover:no-underline font-medium">Go Beyond ordinary.</a>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -131,13 +157,20 @@ export function Header() {
                   Loans <ChevronDown className="w-4 h-4" />
                 </button>
                 {activeDropdown === 'loans' && (
-                  <div className="absolute left-0 top-full mt-2 w-[400px] bg-white shadow-xl rounded-lg p-8 border border-border">
-                    <div className="space-y-3">
-                      <a href="https://www.truist.com/loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">View all loans</a>
-                      <a href="https://www.truist.com/loans/home-equity" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Home equity</a>
-                      <a href="https://www.truist.com/loans/personal-loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Personal loans</a>
-                      <a href="https://www.lightstream.com" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">LightStream</a>
-                      <a href="https://www.truist.com/loans/auto-loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Auto loans</a>
+                  <div className="absolute left-0 top-full mt-2 w-[600px] bg-white shadow-xl rounded-lg p-8 border border-border">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <a href="https://www.truist.com/loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">View all loans</a>
+                        <a href="https://www.truist.com/loans/home-equity" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Home equity</a>
+                        <a href="https://www.truist.com/loans/personal-loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Personal loans</a>
+                        <a href="https://www.lightstream.com" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">LightStream</a>
+                        <a href="https://www.truist.com/loans/auto-loans" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Auto loans</a>
+                      </div>
+                      <div className="bg-[#B8D8D8] rounded-lg p-6">
+                        <p className="text-lg font-semibold text-[#2D1B4E] mb-4">Turn possibilities into reality.</p>
+                        <p className="text-sm text-[#2D1B4E] mb-4">From home improvements to debt consolidation, find the right loan for your needs.</p>
+                        <a href="https://www.truist.com/loans" target="_blank" rel="noopener noreferrer" className="text-sm text-[#2D1B4E] underline hover:no-underline font-medium">Explore loan options.</a>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -152,13 +185,20 @@ export function Header() {
                   Mortgage <ChevronDown className="w-4 h-4" />
                 </button>
                 {activeDropdown === 'mortgage' && (
-                  <div className="absolute left-0 top-full mt-2 w-[400px] bg-white shadow-xl rounded-lg p-8 border border-border">
-                    <div className="space-y-3">
-                      <a href="https://www.truist.com/mortgage" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage overview</a>
-                      <a href="https://www.truist.com/mortgage/home-purchase" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Buy a home</a>
-                      <a href="https://www.truist.com/mortgage/refinance" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Refinance</a>
-                      <a href="https://www.truist.com/mortgage/rates" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage rates</a>
-                      <a href="https://www.truist.com/mortgage/calculator" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage calculator</a>
+                  <div className="absolute left-0 top-full mt-2 w-[600px] bg-white shadow-xl rounded-lg p-8 border border-border">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <a href="https://www.truist.com/mortgage" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage overview</a>
+                        <a href="https://www.truist.com/mortgage/home-purchase" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Buy a home</a>
+                        <a href="https://www.truist.com/mortgage/refinance" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Refinance</a>
+                        <a href="https://www.truist.com/mortgage/rates" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage rates</a>
+                        <a href="https://www.truist.com/mortgage/calculator" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Mortgage calculator</a>
+                      </div>
+                      <div className="bg-[#B8D8D8] rounded-lg p-6">
+                        <p className="text-lg font-semibold text-[#2D1B4E] mb-4">Your dream home awaits.</p>
+                        <p className="text-sm text-[#2D1B4E] mb-4">Whether you're buying or refinancing, we're here to help every step of the way.</p>
+                        <a href="https://www.truist.com/mortgage" target="_blank" rel="noopener noreferrer" className="text-sm text-[#2D1B4E] underline hover:no-underline font-medium">Start your journey.</a>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -173,12 +213,19 @@ export function Header() {
                   Investing & retirement <ChevronDown className="w-4 h-4" />
                 </button>
                 {activeDropdown === 'investing' && (
-                  <div className="absolute left-0 top-full mt-2 w-[400px] bg-white shadow-xl rounded-lg p-8 border border-border">
-                    <div className="space-y-3">
-                      <a href="https://www.truist.com/investing-and-retirement" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Investment services overview</a>
-                      <a href="https://www.truist.com/wealth/investment-management" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Investment management</a>
-                      <a href="https://www.truist.com/retirement-planning" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Retirement planning</a>
-                      <a href="https://www.truist.com/wealth/wealth-planning" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Wealth planning</a>
+                  <div className="absolute left-0 top-full mt-2 w-[600px] bg-white shadow-xl rounded-lg p-8 border border-border">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <a href="https://www.truist.com/investing-and-retirement" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Investment services overview</a>
+                        <a href="https://www.truist.com/wealth/investment-management" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Investment management</a>
+                        <a href="https://www.truist.com/retirement-planning" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Retirement planning</a>
+                        <a href="https://www.truist.com/wealth/wealth-planning" target="_blank" rel="noopener noreferrer" className="block text-sm text-foreground hover:text-primary">Wealth planning</a>
+                      </div>
+                      <div className="bg-[#B8D8D8] rounded-lg p-6">
+                        <p className="text-lg font-semibold text-[#2D1B4E] mb-4">Plan for tomorrow, today.</p>
+                        <p className="text-sm text-[#2D1B4E] mb-4">Build a strategy for a confident financial future with our investment and retirement services.</p>
+                        <a href="https://www.truist.com/investing-and-retirement" target="_blank" rel="noopener noreferrer" className="text-sm text-[#2D1B4E] underline hover:no-underline font-medium">Learn more.</a>
+                      </div>
                     </div>
                   </div>
                 )}
