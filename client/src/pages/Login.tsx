@@ -84,15 +84,16 @@ export default function Login() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-gray-700 font-medium">Username</Label>
+                  <Label htmlFor="username" className="text-gray-700 font-medium">Username or Email</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Enter your username"
+                    placeholder="Enter your username or email"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="h-11 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                     required
+                    data-testid="input-username"
                   />
                 </div>
                 <div className="space-y-2">
@@ -105,6 +106,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-11 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                     required
+                    data-testid="input-password"
                   />
                 </div>
                 {loginMutation.error && (
@@ -118,6 +120,7 @@ export default function Login() {
                   type="submit"
                   className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-medium"
                   disabled={loginMutation.isPending}
+                  data-testid="button-signin"
                 >
                   {loginMutation.isPending ? "Signing in..." : "Sign In"}
                 </Button>

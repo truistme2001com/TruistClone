@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { getUserByUsername, getUserById, verifyPassword } from "./storage";
+import { getUserByUsernameOrEmail, getUserById, verifyPassword } from "./storage";
 import connectPgSimple from "connect-pg-simple";
 import { neon } from "@neondatabase/serverless";
 
@@ -18,9 +18,9 @@ const pgClient = neon(process.env.DATABASE_URL!);
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const user = await getUserByUsername(username);
+      const user = await getUserByUsernameOrEmail(username);
       if (!user) {
-        return done(null, false, { message: "Incorrect username or password" });
+        return done(null, false, { message: "Incorrect username/email or password" });
       }
 
       if (user.isBlocked) {
@@ -29,7 +29,7 @@ passport.use(
 
       const isValid = await verifyPassword(password, user.password);
       if (!isValid) {
-        return done(null, false, { message: "Incorrect username or password" });
+        return done(null, false, { message: "Incorrect username/email or password" });
       }
 
       return done(null, user);

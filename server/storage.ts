@@ -44,6 +44,28 @@ export async function getUserByUsername(username: string) {
   return user;
 }
 
+export async function getUserByEmail(email: string) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  
+  return user;
+}
+
+export async function getUserByUsernameOrEmail(usernameOrEmail: string) {
+  // First try to find by username
+  let user = await getUserByUsername(usernameOrEmail);
+  
+  // If not found and input looks like an email, try email
+  if (!user && usernameOrEmail.includes('@')) {
+    user = await getUserByEmail(usernameOrEmail);
+  }
+  
+  return user;
+}
+
 export async function getUserById(id: number) {
   const [user] = await db
     .select()
