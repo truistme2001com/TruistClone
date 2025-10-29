@@ -50,7 +50,7 @@ export function Header() {
               </svg>
             </Link>
             
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1">
               <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md flex items-center gap-1" data-testid="link-checking-savings">
                 Checking and savings <ChevronDown className="w-4 h-4" />
               </a>
@@ -86,7 +86,7 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="lg:hidden"
+              className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
@@ -96,7 +96,7 @@ export function Header() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border" data-testid="mobile-menu">
+          <div className="md:hidden py-4 border-t border-border" data-testid="mobile-menu">
             <nav className="flex flex-col gap-2">
               <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md" data-testid="link-mobile-checking">Checking and savings</a>
               <a href="#" className="text-sm font-medium text-foreground hover-elevate px-3 py-2 rounded-md" data-testid="link-mobile-credit-cards">Credit cards</a>
