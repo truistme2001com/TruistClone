@@ -4,7 +4,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Top Navigation Links */}
         <div className="flex flex-wrap justify-center gap-6 mb-12 text-sm border-b border-white/20 pb-8">
-          <a href="#" className="text-white/90 hover:text-white hover:underline transition-colors">Privacy</a>
+          <a href="https://www.truist.com/privacy" className="text-white/90 hover:text-white hover:underline transition-colors">Privacy</a>
           <a href="#" className="text-white/90 hover:text-white hover:underline transition-colors">Limit the use of my sensitive personal information</a>
           <a href="#" className="text-white/90 hover:text-white hover:underline transition-colors">Fraud & security</a>
           <a href="#" className="text-white/90 hover:text-white hover:underline transition-colors">Terms and conditions</a>
