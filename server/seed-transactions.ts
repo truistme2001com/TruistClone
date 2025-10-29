@@ -10,7 +10,7 @@ async function seedTransactions() {
     const [account] = await db
       .select()
       .from(accounts)
-      .where(eq(accounts.accountNumber, "17699652287693"))
+      .where(eq(accounts.businessName, "M Lowry Vocal Band"))
       .limit(1);
 
     if (!account) {
