@@ -53,6 +53,8 @@ export default function Home() {
               subtitle=""
               description="With a Truist One Money Market account, keep your savings growing while having easy access."
               actionText="Open now"
+              actionHref="https://www.truist.com/savings/money-market-account"
+              learnMoreHref="https://www.truist.com/savings/money-market-account"
               testId="money-market"
             />
             <PromoCard
@@ -61,6 +63,8 @@ export default function Home() {
               subtitle=""
               description="Consolidate debt, improve your home, or manage big expenses with a low fixed-rate loan—and no fees. Good-to-excellent credit required."
               actionText="Apply now"
+              actionHref="https://www.lightstream.com/"
+              learnMoreHref="https://www.lightstream.com/"
               testId="lightstream"
             />
           </div>
@@ -73,6 +77,8 @@ export default function Home() {
               variant="image"
               image={trickortreatImage}
               actionText="Open now"
+              actionHref="https://www.truist.com/checking/truist-one-checking"
+              learnMoreHref="https://www.truist.com/checking/truist-one-checking"
               testId="checking"
             />
             <PromoCard
@@ -82,6 +88,8 @@ export default function Home() {
               variant="image"
               image={homeImage}
               actionText="Apply now"
+              actionHref="https://www.truist.com/loans/home-equity"
+              learnMoreHref="https://www.truist.com/loans/home-equity"
               testId="home-equity"
             />
           </div>
@@ -93,6 +101,8 @@ export default function Home() {
               subtitle=""
               description="Cash back, travel rewards, or our lowest APR. You could find the credit card that fits just right—in minutes."
               actionText="Check for offers"
+              actionHref="https://www.truist.com/credit-cards"
+              learnMoreHref="https://www.truist.com/credit-cards"
               testId="credit-offers"
             />
             <PromoCard
@@ -101,6 +111,8 @@ export default function Home() {
               subtitle=""
               description="Make sure links are legitimate before you click. Sometimes it's hard to tell. Find out what to look for."
               actionText="Learn to spot scams"
+              actionHref="https://www.truist.com/security-and-fraud"
+              learnMoreHref="https://www.truist.com/security-and-fraud"
               testId="fraud-security"
             />
           </div>
@@ -112,6 +124,8 @@ export default function Home() {
               subtitle=""
               description="Eligible clients can earn a 3.50% annual percentage yield (APY) with a new Truist Business Money Market account."
               actionText="Learn more"
+              actionHref="https://www.truist.com/small-business/business-banking/business-savings/business-money-market-account"
+              learnMoreHref="https://www.truist.com/small-business/business-banking/business-savings/business-money-market-account"
               showLearnMore={false}
               testId="small-business-mm"
             />

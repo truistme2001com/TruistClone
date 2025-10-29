@@ -46,15 +46,21 @@ export function PromoCard({
               variant="outline" 
               className="bg-white/90 backdrop-blur-sm border-white text-primary"
               data-testid={`button-${testId}-action`}
+              asChild
             >
-              {actionText}
+              <a href={actionHref} target="_blank" rel="noopener noreferrer">
+                {actionText}
+              </a>
             </Button>
             <Button 
               variant="outline"
               className="bg-transparent backdrop-blur-sm border-white text-white"
               data-testid={`button-${testId}-learn-more`}
+              asChild
             >
-              Learn more
+              <a href={learnMoreHref} target="_blank" rel="noopener noreferrer">
+                Learn more
+              </a>
             </Button>
           </div>
         </div>
@@ -82,8 +88,18 @@ export function PromoCard({
           {description}
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button data-testid={`button-${testId}-action`}>{actionText}</Button>
-          {showLearnMore && <Button variant="outline" data-testid={`button-${testId}-learn-more`}>Learn more</Button>}
+          <Button data-testid={`button-${testId}-action`} asChild>
+            <a href={actionHref} target="_blank" rel="noopener noreferrer">
+              {actionText}
+            </a>
+          </Button>
+          {showLearnMore && (
+            <Button variant="outline" data-testid={`button-${testId}-learn-more`} asChild>
+              <a href={learnMoreHref} target="_blank" rel="noopener noreferrer">
+                Learn more
+              </a>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
