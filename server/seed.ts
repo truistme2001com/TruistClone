@@ -33,13 +33,13 @@ async function seed() {
       });
       console.log("✓ Mark Lowry user created (username: marklowry, password: lowry123)");
 
-      // Create business account with $16 billion
+      // Create business account with $16 million
       await createAccount({
         userId: markLowry.id,
         businessName: "M. LOWRY VOCAL BAND",
-        initialBalance: "16000000000.00",
+        initialBalance: "16000000.00",
       });
-      console.log("✓ Business account created with $16,000,000,000.00 balance");
+      console.log("✓ Business account created with $16,000,000.00 balance");
     } else {
       console.log("✓ Mark Lowry user already exists");
     }
@@ -55,7 +55,7 @@ async function seed() {
     console.log("  Username: marklowry");
     console.log("  Password: lowry123");
     console.log("  Business: M. LOWRY VOCAL BAND");
-    console.log("  Balance: $16,000,000,000.00");
+    console.log("  Balance: $16,000,000.00");
     console.log("─────────────────────────────────\n");
   } catch (error) {
     console.error("Error seeding database:", error);
