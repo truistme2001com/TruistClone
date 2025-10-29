@@ -1,38 +1,208 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { users, accounts, transactions, sessions } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
-// modify the interface with any CRUD methods
-// you might need
-
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL must be set");
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+const sql = neon(process.env.DATABASE_URL);
+export const db = drizzle(sql, {
+  schema: { users, accounts, transactions, sessions },
+});
 
-  constructor() {
-    this.users = new Map();
-  }
-
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
+// User operations
+export async function createUser(data: {
+  username: string;
+  password: string;
+  fullName: string;
+  email?: string;
+  isAdmin?: boolean;
+}) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  
+  const [user] = await db.insert(users).values({
+    username: data.username,
+    password: hashedPassword,
+    fullName: data.fullName,
+    email: data.email,
+    isAdmin: data.isAdmin || false,
+  }).returning();
+  
+  return user;
 }
 
-export const storage = new MemStorage();
+export async function getUserByUsername(username: string) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+  
+  return user;
+}
+
+export async function getUserById(id: number) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+  
+  return user;
+}
+
+export async function getAllUsers() {
+  return await db.select().from(users);
+}
+
+export async function verifyPassword(plainPassword: string, hashedPassword: string) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+}
+
+export async function deleteUser(userId: number) {
+  await db.delete(users).where(eq(users.id, userId));
+}
+
+// Account operations
+export async function createAccount(data: {
+  userId: number;
+  businessName: string;
+  initialBalance?: string;
+}) {
+  const accountNumber = generateAccountNumber();
+  
+  const [account] = await db.insert(accounts).values({
+    userId: data.userId,
+    businessName: data.businessName,
+    accountNumber,
+    balance: data.initialBalance || "0",
+    accountType: "business",
+    status: "active",
+  }).returning();
+  
+  // Create initial transaction if there's a balance
+  if (data.initialBalance && parseFloat(data.initialBalance) > 0) {
+    await db.insert(transactions).values({
+      accountId: account.id,
+      type: "credit",
+      amount: data.initialBalance,
+      description: "Initial deposit",
+      balanceAfter: data.initialBalance,
+    });
+  }
+  
+  return account;
+}
+
+export async function getAccountsByUserId(userId: number) {
+  return await db
+    .select()
+    .from(accounts)
+    .where(eq(accounts.userId, userId));
+}
+
+export async function getAccountById(accountId: number) {
+  const [account] = await db
+    .select()
+    .from(accounts)
+    .where(eq(accounts.id, accountId))
+    .limit(1);
+  
+  return account;
+}
+
+export async function getAllAccounts() {
+  return await db.select().from(accounts);
+}
+
+export async function updateAccountBalance(
+  accountId: number,
+  amount: string,
+  type: "credit" | "debit",
+  description?: string
+) {
+  const account = await getAccountById(accountId);
+  if (!account) {
+    throw new Error("Account not found");
+  }
+  
+  const currentBalance = parseFloat(account.balance);
+  const changeAmount = parseFloat(amount);
+  
+  const newBalance = type === "credit" 
+    ? currentBalance + changeAmount 
+    : currentBalance - changeAmount;
+  
+  if (newBalance < 0) {
+    throw new Error("Insufficient funds");
+  }
+  
+  // Update account balance
+  await db
+    .update(accounts)
+    .set({ balance: newBalance.toFixed(2), updatedAt: new Date() })
+    .where(eq(accounts.id, accountId));
+  
+  // Create transaction record
+  await db.insert(transactions).values({
+    accountId,
+    type,
+    amount,
+    description: description || `${type === "credit" ? "Deposit" : "Withdrawal"}`,
+    balanceAfter: newBalance.toFixed(2),
+  });
+  
+  return newBalance.toFixed(2);
+}
+
+export async function deleteAccount(accountId: number) {
+  await db.delete(transactions).where(eq(transactions.accountId, accountId));
+  await db.delete(accounts).where(eq(accounts.id, accountId));
+}
+
+export async function getTransactionsByAccountId(accountId: number, limit: number = 50) {
+  return await db
+    .select()
+    .from(transactions)
+    .where(eq(transactions.accountId, accountId))
+    .orderBy(desc(transactions.createdAt))
+    .limit(limit);
+}
+
+export async function getUserWithAccounts(userId: number) {
+  const user = await getUserById(userId);
+  if (!user) return null;
+  
+  const userAccounts = await getAccountsByUserId(userId);
+  
+  return {
+    ...user,
+    accounts: userAccounts,
+  };
+}
+
+export async function getAllUsersWithAccounts() {
+  const allUsers = await getAllUsers();
+  
+  const usersWithAccounts = await Promise.all(
+    allUsers.map(async (user) => {
+      const userAccounts = await getAccountsByUserId(user.id);
+      return {
+        ...user,
+        accounts: userAccounts,
+      };
+    })
+  );
+  
+  return usersWithAccounts;
+}
+
+// Helper function to generate account numbers
+function generateAccountNumber(): string {
+  const timestamp = Date.now().toString();
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  return `${timestamp.slice(-10)}${random}`;
+}
