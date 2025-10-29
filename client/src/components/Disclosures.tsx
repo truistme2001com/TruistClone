@@ -5,25 +5,27 @@ export function Disclosures() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="bg-gray-50 border-t border-border">
+    <section className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
         {/* Disclosure Toggle Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full py-6 flex items-center justify-between text-left hover:bg-gray-100 transition-colors"
-          aria-expanded={isOpen}
-        >
-          <span className="text-base font-medium text-foreground">Disclosures</span>
-          {isOpen ? (
-            <ChevronUp className="w-5 h-5 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-muted-foreground" />
-          )}
-        </button>
+        <div className="flex justify-center py-6">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="inline-flex items-center gap-3 px-8 py-3 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors text-foreground font-medium"
+            aria-expanded={isOpen}
+          >
+            <span className="text-lg">Disclosures</span>
+            {isOpen ? (
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+        </div>
 
         {/* Disclosure Content */}
         {isOpen && (
-          <div className="pb-8 text-sm text-muted-foreground space-y-6">
+          <div className="pb-12 max-w-5xl mx-auto text-sm text-muted-foreground space-y-6">
             <div className="space-y-4">
               <p>
                 <sup>1</sup> Rates may vary based on branch location and whether you open an account in a branch, by phone or online. Interest rates and APYs are accurate as of 9/23/2025 and are subject to change without notice at any time, including after the account is opened.
@@ -89,7 +91,7 @@ export function Disclosures() {
                 Truist Bank, Member FDIC. ©2025, Truist Financial Corporation. Truist, Truist Purple and the Truist Logo are service marks of Truist Financial Corporation.
               </p>
 
-              <div className="mt-8 pt-6 border-t border-border">
+              <div className="mt-8 pt-6 border-t border-gray-200">
                 <h4 className="font-semibold text-foreground mb-4">Disclosures</h4>
                 
                 <p className="mb-4">

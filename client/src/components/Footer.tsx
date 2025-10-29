@@ -4,10 +4,10 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Top Navigation Links */}
         <div className="flex flex-wrap justify-center gap-6 mb-12 text-sm border-b border-white/20 pb-8">
-          <a href="#" className="text-white/90 hover:text-white transition-colors">Privacy</a>
-          <a href="#" className="text-white/90 hover:text-white transition-colors">Limit the use of my sensitive personal information</a>
-          <a href="#" className="text-white/90 hover:text-white transition-colors">Fraud & security</a>
-          <a href="#" className="text-white/90 hover:text-white transition-colors">Terms and conditions</a>
+          <a href="#" className="text-white/90 hover:text-white transition-colors underline">Privacy</a>
+          <a href="#" className="text-white/90 hover:text-white transition-colors underline">Limit the use of my sensitive personal information</a>
+          <a href="#" className="text-white/90 hover:text-white transition-colors underline">Fraud & security</a>
+          <a href="#" className="text-white/90 hover:text-white transition-colors underline">Terms and conditions</a>
         </div>
 
         {/* Main Footer Content */}
@@ -15,62 +15,62 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Banking products</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Checking</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Commercial</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Credit cards</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Loans</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Mortgage</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Online & mobile</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Open an account</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Savings</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Small business</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Wealth</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Checking</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Commercial</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Credit cards</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Loans</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Mortgage</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Online & mobile</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Open an account</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Savings</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Small business</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Wealth</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold text-white mb-4">About Truist</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">About us</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Knowledge and Care</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Community</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Purpose</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Truist Foundation</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Truist Leadership Institute</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Truist Securities</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Truist Ventures</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">About us</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Knowledge and Care</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Community</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Purpose</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Truist Foundation</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Truist Leadership Institute</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Truist Securities</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Truist Ventures</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold text-white mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Community Reinvestment Act</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Corporate Responsibility & Sustainability</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Belonging</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Facts about banking</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">FDIC Insurance</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Investor relations</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Money and Mindset</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Newsroom</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Suppliers</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Careers</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Community Reinvestment Act</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Corporate Responsibility & Sustainability</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Belonging</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Facts about banking</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">FDIC Insurance</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Investor relations</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Money and Mindset</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Newsroom</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Suppliers</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold text-white mb-4">Support</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Accessibility</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Client emergency resources</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Consumer payment relief hub</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Find a banker or advisor</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Find a branch or ATM</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Schedule a branch appointment</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">844-4TRUIST (844-487-8478)</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">AdChoices</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Do not sell or share my personal information</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Accessibility</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Client emergency resources</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Consumer payment relief hub</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Find a banker or advisor</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Find a branch or ATM</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Help Center</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Schedule a branch appointment</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">844-4TRUIST (844-487-8478)</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">AdChoices</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors underline">Do not sell or share my personal information</a></li>
             </ul>
           </div>
         </div>
