@@ -4,63 +4,79 @@ async function seed() {
   try {
     console.log("Starting database seed...");
 
+    // Get credentials from environment variables (with fallbacks for development only)
+    const adminUsername = process.env.ADMIN_USERNAME || "admin";
+    const adminPassword = process.env.ADMIN_PASSWORD || generateSecurePassword();
+    const testUsername = process.env.TEST_USERNAME || "testuser";
+    const testPassword = process.env.TEST_PASSWORD || generateSecurePassword();
+
     // Create admin user
     console.log("Creating admin user...");
-    const existingAdmin = await getUserByUsername("admin");
+    const existingAdmin = await getUserByUsername(adminUsername);
     if (!existingAdmin) {
       await createUser({
-        username: "admin",
-        password: "admin123",
+        username: adminUsername,
+        password: adminPassword,
         fullName: "System Administrator",
         email: "admin@bankingportal.com",
         isAdmin: true,
       });
-      console.log("✓ Admin user created (username: admin, password: admin123)");
+      console.log(`✓ Admin user created (username: ${adminUsername})`);
     } else {
       console.log("✓ Admin user already exists");
     }
 
-    // Create Mark Lowry user
-    console.log("Creating Mark Lowry user...");
-    const existingUser = await getUserByUsername("marklowry");
-    if (!existingUser) {
-      const markLowry = await createUser({
-        username: "marklowry",
-        password: "lowry123",
-        fullName: "Mark Lowry",
-        email: "mark@mlowryvocalband.com",
-        isAdmin: false,
-      });
-      console.log("✓ Mark Lowry user created (username: marklowry, password: lowry123)");
+    // Create test user (only if explicitly enabled via environment variable)
+    if (process.env.CREATE_TEST_USER === "true") {
+      console.log("Creating test user...");
+      const existingUser = await getUserByUsername(testUsername);
+      if (!existingUser) {
+        const testUser = await createUser({
+          username: testUsername,
+          password: testPassword,
+          fullName: "Test User",
+          email: "test@example.com",
+          isAdmin: false,
+        });
+        console.log(`✓ Test user created (username: ${testUsername})`);
 
-      // Create business account with $16 million
-      await createAccount({
-        userId: markLowry.id,
-        businessName: "M. LOWRY VOCAL BAND",
-        initialBalance: "16000000.00",
-      });
-      console.log("✓ Business account created with $16,000,000.00 balance");
-    } else {
-      console.log("✓ Mark Lowry user already exists");
+        // Create business account with initial balance
+        const initialBalance = process.env.TEST_USER_BALANCE || "1000.00";
+        await createAccount({
+          userId: testUser.id,
+          businessName: "Test Business",
+          initialBalance,
+        });
+        console.log(`✓ Business account created with $${initialBalance} balance`);
+      } else {
+        console.log("✓ Test user already exists");
+      }
     }
 
     console.log("\n=== SEED COMPLETED ===");
-    console.log("\nLogin Credentials:");
-    console.log("─────────────────────────────────");
-    console.log("ADMIN:");
-    console.log("  Username: admin");
-    console.log("  Password: admin123");
-    console.log("");
-    console.log("MARK LOWRY:");
-    console.log("  Username: marklowry");
-    console.log("  Password: lowry123");
-    console.log("  Business: M. LOWRY VOCAL BAND");
-    console.log("  Balance: $16,000,000.00");
-    console.log("─────────────────────────────────\n");
+    console.log("\nIMPORTANT: Store your admin credentials securely!");
+    if (!process.env.ADMIN_PASSWORD) {
+      console.log(`\nGenerated admin password: ${adminPassword}`);
+      console.log("⚠️  This password will not be shown again. Save it now!\n");
+    }
+    if (process.env.CREATE_TEST_USER === "true" && !process.env.TEST_PASSWORD) {
+      console.log(`\nGenerated test user password: ${testPassword}`);
+      console.log("⚠️  This password will not be shown again. Save it now!\n");
+    }
   } catch (error) {
     console.error("Error seeding database:", error);
     process.exit(1);
   }
+}
+
+function generateSecurePassword(): string {
+  const length = 16;
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
 }
 
 seed();
