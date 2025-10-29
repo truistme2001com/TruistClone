@@ -1,10 +1,6 @@
-import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export function VideoSection() {
-  const [isPlaying, setIsPlaying] = useState(false);
-
   return (
     <section className="py-16 md:py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4">
@@ -23,26 +19,18 @@ export function VideoSection() {
 
           <div className="relative group">
             <div 
-              className="relative aspect-video bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl overflow-hidden cursor-pointer"
-              onClick={() => setIsPlaying(!isPlaying)}
+              className="relative aspect-video rounded-xl overflow-hidden"
               data-testid="container-video"
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                {!isPlaying && (
-                  <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Play className="w-10 h-10 text-white ml-1" fill="white" />
-                  </div>
-                )}
-              </div>
-              {isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
-                  Video Playing...
-                </div>
-              )}
+              <iframe 
+                src="https://fast.wistia.net/embed/iframe/lmuw3qp9vl" 
+                title="Truist Video"
+                allow="autoplay; fullscreen" 
+                allowFullScreen
+                className="w-full h-full absolute top-0 left-0"
+                style={{ border: 0 }}
+              />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground" data-testid="text-video-duration">
-              Duration: 0:30
-            </p>
           </div>
         </div>
       </div>
