@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import savingsImage from "@assets/generated_images/Woman_savings_goals_jars_86c92ee3.png";
-import sideHustleImage from "@assets/generated_images/Side_hustle_workspace_6deb6720.png";
+import sideHustleImage from "@assets/2025-10-29 10.06.56_1761746841099.jpg";
 
 export function MoneyMindsetSection() {
   return (
