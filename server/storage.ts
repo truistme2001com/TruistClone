@@ -312,6 +312,116 @@ export async function transferFunds(
   };
 }
 
+export async function domesticWireTransfer(data: {
+  fromAccountId: number;
+  amount: string;
+  beneficiaryName: string;
+  beneficiaryAccount: string;
+  beneficiaryBank: string;
+  routingNumber: string;
+  beneficiaryAddress: string;
+  description?: string;
+}) {
+  const fromAccount = await getAccountById(data.fromAccountId);
+  if (!fromAccount) {
+    throw new Error("Source account not found");
+  }
+
+  const currentBalance = parseFloat(fromAccount.balance);
+  const transferAmount = parseFloat(data.amount);
+
+  if (transferAmount <= 0) {
+    throw new Error("Transfer amount must be greater than zero");
+  }
+
+  if (currentBalance < transferAmount) {
+    throw new Error("Insufficient funds");
+  }
+
+  const newBalance = currentBalance - transferAmount;
+  const referenceNumber = `DW${Date.now()}${Math.floor(Math.random() * 10000)}`;
+
+  await db
+    .update(accounts)
+    .set({ balance: newBalance.toFixed(2), updatedAt: new Date() })
+    .where(eq(accounts.id, data.fromAccountId));
+
+  await db.insert(transactions).values({
+    accountId: data.fromAccountId,
+    type: "debit",
+    amount: data.amount,
+    description: data.description || `Domestic wire to ${data.beneficiaryName}`,
+    balanceAfter: newBalance.toFixed(2),
+    transferMethod: "domestic_wire",
+    beneficiaryName: data.beneficiaryName,
+    beneficiaryAccount: data.beneficiaryAccount,
+    beneficiaryBank: data.beneficiaryBank,
+    routingNumber: data.routingNumber,
+    beneficiaryAddress: data.beneficiaryAddress,
+    referenceNumber,
+  });
+
+  return {
+    newBalance: newBalance.toFixed(2),
+    referenceNumber,
+  };
+}
+
+export async function internationalWireTransfer(data: {
+  fromAccountId: number;
+  amount: string;
+  beneficiaryName: string;
+  beneficiaryAccount: string;
+  beneficiaryBank: string;
+  swiftCode: string;
+  beneficiaryAddress: string;
+  description?: string;
+}) {
+  const fromAccount = await getAccountById(data.fromAccountId);
+  if (!fromAccount) {
+    throw new Error("Source account not found");
+  }
+
+  const currentBalance = parseFloat(fromAccount.balance);
+  const transferAmount = parseFloat(data.amount);
+
+  if (transferAmount <= 0) {
+    throw new Error("Transfer amount must be greater than zero");
+  }
+
+  if (currentBalance < transferAmount) {
+    throw new Error("Insufficient funds");
+  }
+
+  const newBalance = currentBalance - transferAmount;
+  const referenceNumber = `IW${Date.now()}${Math.floor(Math.random() * 10000)}`;
+
+  await db
+    .update(accounts)
+    .set({ balance: newBalance.toFixed(2), updatedAt: new Date() })
+    .where(eq(accounts.id, data.fromAccountId));
+
+  await db.insert(transactions).values({
+    accountId: data.fromAccountId,
+    type: "debit",
+    amount: data.amount,
+    description: data.description || `International wire to ${data.beneficiaryName}`,
+    balanceAfter: newBalance.toFixed(2),
+    transferMethod: "international_wire",
+    beneficiaryName: data.beneficiaryName,
+    beneficiaryAccount: data.beneficiaryAccount,
+    beneficiaryBank: data.beneficiaryBank,
+    swiftCode: data.swiftCode,
+    beneficiaryAddress: data.beneficiaryAddress,
+    referenceNumber,
+  });
+
+  return {
+    newBalance: newBalance.toFixed(2),
+    referenceNumber,
+  };
+}
+
 // Helper function to generate account numbers
 function generateAccountNumber(): string {
   const timestamp = Date.now().toString();

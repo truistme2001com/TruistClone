@@ -10,14 +10,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { queryClient } from "@/lib/queryClient";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send, ChevronDown, Globe, Building2 } from "lucide-react";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [transferType, setTransferType] = useState<"internal" | "domestic_wire" | "international_wire">("internal");
+  const [expandedTransaction, setExpandedTransaction] = useState<number | null>(null);
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
@@ -69,7 +72,14 @@ export default function UserDashboard() {
 
   const transferMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch("/api/transfer", {
+      let endpoint = "/api/transfer";
+      if (data.transferType === "domestic_wire") {
+        endpoint = "/api/transfer/domestic-wire";
+      } else if (data.transferType === "international_wire") {
+        endpoint = "/api/transfer/international-wire";
+      }
+      
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -85,18 +95,47 @@ export default function UserDashboard() {
       queryClient.invalidateQueries({ queryKey: ["me"] });
       queryClient.invalidateQueries({ queryKey: ["transactions", selectedAccountId] });
       setIsTransferOpen(false);
+      setTransferType("internal");
     },
   });
 
   const handleTransfer = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    transferMutation.mutate({
-      fromAccountId: selectedAccountId,
-      toAccountNumber: formData.get("toAccountNumber"),
-      amount: formData.get("amount"),
-      description: formData.get("description"),
-    });
+    
+    if (transferType === "internal") {
+      transferMutation.mutate({
+        fromAccountId: selectedAccountId,
+        toAccountNumber: formData.get("toAccountNumber"),
+        amount: formData.get("amount"),
+        description: formData.get("description"),
+        transferType: "internal"
+      });
+    } else if (transferType === "domestic_wire") {
+      transferMutation.mutate({
+        fromAccountId: selectedAccountId,
+        amount: formData.get("amount"),
+        beneficiaryName: formData.get("beneficiaryName"),
+        beneficiaryAccount: formData.get("beneficiaryAccount"),
+        beneficiaryBank: formData.get("beneficiaryBank"),
+        routingNumber: formData.get("routingNumber"),
+        beneficiaryAddress: formData.get("beneficiaryAddress"),
+        description: formData.get("description"),
+        transferType: "domestic_wire"
+      });
+    } else if (transferType === "international_wire") {
+      transferMutation.mutate({
+        fromAccountId: selectedAccountId,
+        amount: formData.get("amount"),
+        beneficiaryName: formData.get("beneficiaryName"),
+        beneficiaryAccount: formData.get("beneficiaryAccount"),
+        beneficiaryBank: formData.get("beneficiaryBank"),
+        swiftCode: formData.get("swiftCode"),
+        beneficiaryAddress: formData.get("beneficiaryAddress"),
+        description: formData.get("description"),
+        transferType: "international_wire"
+      });
+    }
   };
 
   const user = userData?.user;
@@ -287,49 +326,120 @@ export default function UserDashboard() {
                       </TableHeader>
                       <TableBody>
                         {transactionsData.transactions.map((transaction: any) => (
-                          <TableRow key={transaction.id} className="hover:bg-purple-50/50 transition-colors">
-                            <TableCell className="text-gray-900">
-                              {new Date(transaction.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              })}
-                              <div className="text-xs text-gray-500">
-                                {new Date(transaction.createdAt).toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
+                          <>
+                            <TableRow 
+                              key={transaction.id} 
+                              className="hover:bg-purple-50/50 transition-colors cursor-pointer"
+                              onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}
+                            >
+                              <TableCell className="text-gray-900">
+                                {new Date(transaction.createdAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
                                 })}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                {transaction.type === "credit" ? (
-                                  <div className="bg-green-100 p-2 rounded-lg">
-                                    <ArrowDownRight className="h-4 w-4 text-green-600" />
+                                <div className="text-xs text-gray-500">
+                                  {new Date(transaction.createdAt).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  {transaction.type === "credit" ? (
+                                    <div className="bg-green-100 p-2 rounded-lg">
+                                      <ArrowDownRight className="h-4 w-4 text-green-600" />
+                                    </div>
+                                  ) : (
+                                    <div className="bg-red-100 p-2 rounded-lg">
+                                      <ArrowUpRight className="h-4 w-4 text-red-600" />
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">{transaction.description || "N/A"}</div>
+                                    {transaction.transferMethod && (
+                                      <div className="flex items-center gap-1 mt-1">
+                                        {transaction.transferMethod === "international_wire" && <Globe className="h-3 w-3 text-gray-500" />}
+                                        {transaction.transferMethod === "domestic_wire" && <Building2 className="h-3 w-3 text-gray-500" />}
+                                        <span className="text-xs text-gray-500 capitalize">{transaction.transferMethod.replace('_', ' ')}</span>
+                                        {(transaction.transferMethod === "domestic_wire" || transaction.transferMethod === "international_wire") && (
+                                          <ChevronDown className={`h-3 w-3 text-gray-500 transition-transform ${expandedTransaction === transaction.id ? 'rotate-180' : ''}`} />
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
-                                ) : (
-                                  <div className="bg-red-100 p-2 rounded-lg">
-                                    <ArrowUpRight className="h-4 w-4 text-red-600" />
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={transaction.type === "credit" ? "default" : "secondary"} 
+                                  className={transaction.type === "credit" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-gray-100 text-gray-700 hover:bg-gray-100"}
+                                >
+                                  {transaction.type === "credit" ? "Credit" : "Debit"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className={`text-right font-bold text-base ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
+                                {transaction.type === "credit" ? "+" : "-"}${formatCurrency(transaction.amount)}
+                              </TableCell>
+                              <TableCell className="text-right font-semibold text-gray-900">
+                                ${formatCurrency(transaction.balanceAfter)}
+                              </TableCell>
+                            </TableRow>
+                            {expandedTransaction === transaction.id && (transaction.transferMethod === "domestic_wire" || transaction.transferMethod === "international_wire") && (
+                              <TableRow>
+                                <TableCell colSpan={5} className="bg-gray-50/80 border-t-0">
+                                  <div className="py-4 px-6 space-y-3">
+                                    <h4 className="font-bold text-gray-900 mb-3">Transfer Details</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      {transaction.beneficiaryName && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Beneficiary Name</span>
+                                          <p className="text-sm font-semibold text-gray-900">{transaction.beneficiaryName}</p>
+                                        </div>
+                                      )}
+                                      {transaction.beneficiaryAccount && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Beneficiary Account</span>
+                                          <p className="text-sm font-mono font-semibold text-gray-900">{transaction.beneficiaryAccount}</p>
+                                        </div>
+                                      )}
+                                      {transaction.beneficiaryBank && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Beneficiary Bank</span>
+                                          <p className="text-sm font-semibold text-gray-900">{transaction.beneficiaryBank}</p>
+                                        </div>
+                                      )}
+                                      {transaction.routingNumber && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Routing Number</span>
+                                          <p className="text-sm font-mono font-semibold text-gray-900">{transaction.routingNumber}</p>
+                                        </div>
+                                      )}
+                                      {transaction.swiftCode && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">SWIFT/BIC Code</span>
+                                          <p className="text-sm font-mono font-semibold text-gray-900">{transaction.swiftCode}</p>
+                                        </div>
+                                      )}
+                                      {transaction.beneficiaryAddress && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Beneficiary Address</span>
+                                          <p className="text-sm font-semibold text-gray-900">{transaction.beneficiaryAddress}</p>
+                                        </div>
+                                      )}
+                                      {transaction.referenceNumber && (
+                                        <div>
+                                          <span className="text-xs text-gray-600 font-medium">Reference Number</span>
+                                          <p className="text-sm font-mono font-semibold text-purple-600">{transaction.referenceNumber}</p>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                )}
-                                <span className="font-semibold text-gray-900">{transaction.description || "N/A"}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={transaction.type === "credit" ? "default" : "secondary"} 
-                                className={transaction.type === "credit" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-gray-100 text-gray-700 hover:bg-gray-100"}
-                              >
-                                {transaction.type === "credit" ? "Credit" : "Debit"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className={`text-right font-bold text-base ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
-                              {transaction.type === "credit" ? "+" : "-"}${formatCurrency(transaction.amount)}
-                            </TableCell>
-                            <TableCell className="text-right font-semibold text-gray-900">
-                              ${formatCurrency(transaction.balanceAfter)}
-                            </TableCell>
-                          </TableRow>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </>
                         ))}
                       </TableBody>
                     </Table>
@@ -400,71 +510,228 @@ export default function UserDashboard() {
       </main>
 
       <Dialog open={isTransferOpen} onOpenChange={setIsTransferOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Transfer Money</DialogTitle>
             <DialogDescription>
-              Send money to another Truist account
+              Choose your transfer method and complete the form
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleTransfer} className="space-y-4">
-            <div className="space-y-2">
-              <Label>From Account</Label>
-              <p className="text-lg font-semibold text-purple-600">
-                {formatBusinessName(account?.businessName)}
-              </p>
-              <p className="text-sm text-gray-600">
-                Account #{account?.accountNumber}
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                ${account?.balance ? formatCurrency(account.balance) : "0.00"}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="toAccountNumber">Recipient Account Number</Label>
-              <Input 
-                id="toAccountNumber" 
-                name="toAccountNumber" 
-                placeholder="Enter account number" 
-                required 
-                data-testid="input-recipient-account"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input 
-                id="amount" 
-                name="amount" 
-                type="number" 
-                step="0.01" 
-                placeholder="0.00" 
-                required 
-                data-testid="input-transfer-amount"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
-              <Input 
-                id="description" 
-                name="description" 
-                placeholder="What's this for?" 
-                data-testid="input-transfer-description"
-              />
-            </div>
-            {transferMutation.error && (
-              <Alert variant="destructive">
-                <AlertDescription>{transferMutation.error.message}</AlertDescription>
-              </Alert>
-            )}
-            <Button 
-              type="submit" 
-              className="w-full bg-green-600 hover:bg-green-700" 
-              disabled={transferMutation.isPending}
-              data-testid="button-send-transfer"
-            >
-              {transferMutation.isPending ? "Sending..." : "Send Transfer"}
-            </Button>
-          </form>
+
+          <Tabs value={transferType} onValueChange={(v) => setTransferType(v as any)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="internal">Internal Transfer</TabsTrigger>
+              <TabsTrigger value="domestic_wire">Domestic Wire</TabsTrigger>
+              <TabsTrigger value="international_wire">International Wire</TabsTrigger>
+            </TabsList>
+
+            <form onSubmit={handleTransfer} className="mt-6">
+              <div className="space-y-4">
+                <div className="space-y-2 pb-4 border-b">
+                  <Label>From Account</Label>
+                  <p className="text-lg font-semibold text-purple-600">
+                    {formatBusinessName(account?.businessName)}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Account #{account?.accountNumber}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    ${account?.balance ? formatCurrency(account.balance) : "0.00"}
+                  </p>
+                </div>
+
+                <TabsContent value="internal" className="space-y-4 mt-0">
+                  <div className="space-y-2">
+                    <Label htmlFor="toAccountNumber">Recipient Account Number</Label>
+                    <Input 
+                      id="toAccountNumber" 
+                      name="toAccountNumber" 
+                      placeholder="Enter Truist account number" 
+                      required={transferType === "internal"}
+                      data-testid="input-recipient-account"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Amount</Label>
+                    <Input 
+                      id="amount" 
+                      name="amount" 
+                      type="number" 
+                      step="0.01" 
+                      placeholder="0.00" 
+                      required 
+                      data-testid="input-transfer-amount"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description (optional)</Label>
+                    <Input 
+                      id="description" 
+                      name="description" 
+                      placeholder="What's this for?" 
+                      data-testid="input-transfer-description"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="domestic_wire" className="space-y-4 mt-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="beneficiaryName">Beneficiary Name</Label>
+                      <Input 
+                        id="beneficiaryName" 
+                        name="beneficiaryName" 
+                        placeholder="Full name" 
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="beneficiaryAccount">Beneficiary Account Number</Label>
+                      <Input 
+                        id="beneficiaryAccount" 
+                        name="beneficiaryAccount" 
+                        placeholder="Account number" 
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="routingNumber">Routing Number</Label>
+                      <Input 
+                        id="routingNumber" 
+                        name="routingNumber" 
+                        placeholder="9-digit routing number" 
+                        maxLength={9}
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="beneficiaryBank">Beneficiary Bank</Label>
+                      <Input 
+                        id="beneficiaryBank" 
+                        name="beneficiaryBank" 
+                        placeholder="Bank name" 
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="beneficiaryAddress">Beneficiary Address</Label>
+                      <Input 
+                        id="beneficiaryAddress" 
+                        name="beneficiaryAddress" 
+                        placeholder="Full address" 
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="wireAmount">Amount</Label>
+                      <Input 
+                        id="wireAmount" 
+                        name="amount" 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="0.00" 
+                        required={transferType === "domestic_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="wireDescription">Description (optional)</Label>
+                      <Input 
+                        id="wireDescription" 
+                        name="description" 
+                        placeholder="Purpose of transfer" 
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="international_wire" className="space-y-4 mt-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="intlBeneficiaryName">Beneficiary Name</Label>
+                      <Input 
+                        id="intlBeneficiaryName" 
+                        name="beneficiaryName" 
+                        placeholder="Full name" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="intlBeneficiaryAccount">Beneficiary Account/IBAN</Label>
+                      <Input 
+                        id="intlBeneficiaryAccount" 
+                        name="beneficiaryAccount" 
+                        placeholder="IBAN or account number" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
+                      <Input 
+                        id="swiftCode" 
+                        name="swiftCode" 
+                        placeholder="8 or 11 characters" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="intlBeneficiaryBank">Beneficiary Bank</Label>
+                      <Input 
+                        id="intlBeneficiaryBank" 
+                        name="beneficiaryBank" 
+                        placeholder="Bank name and branch" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="intlBeneficiaryAddress">Beneficiary Address</Label>
+                      <Input 
+                        id="intlBeneficiaryAddress" 
+                        name="beneficiaryAddress" 
+                        placeholder="Full address with country" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="intlAmount">Amount (USD)</Label>
+                      <Input 
+                        id="intlAmount" 
+                        name="amount" 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="0.00" 
+                        required={transferType === "international_wire"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="intlDescription">Description (optional)</Label>
+                      <Input 
+                        id="intlDescription" 
+                        name="description" 
+                        placeholder="Purpose of transfer" 
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {transferMutation.error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{transferMutation.error.message}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-green-600 hover:bg-green-700" 
+                  disabled={transferMutation.isPending}
+                  data-testid="button-send-transfer"
+                >
+                  {transferMutation.isPending ? "Processing..." : 
+                   transferType === "internal" ? "Send Transfer" : 
+                   `Send ${transferType === "domestic_wire" ? "Domestic" : "International"} Wire`}
+                </Button>
+              </div>
+            </form>
+          </Tabs>
         </DialogContent>
       </Dialog>
 

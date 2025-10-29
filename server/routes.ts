@@ -14,8 +14,10 @@ import {
   blockUser,
   unblockUser,
   transferFunds,
+  domesticWireTransfer,
+  internationalWireTransfer,
 } from "./storage";
-import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema } from "@shared/schema";
+import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
@@ -308,6 +310,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({
         success: false,
         message: error.message || "Transfer failed",
+      });
+    }
+  });
+
+  app.post("/api/transfer/domestic-wire", isAuthenticated, async (req, res) => {
+    try {
+      const currentUser = req.user as any;
+      const data = domesticWireSchema.parse(req.body);
+      
+      const account = await getAccountById(data.fromAccountId);
+      if (!account || account.userId !== currentUser.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Unauthorized" 
+        });
+      }
+      
+      const result = await domesticWireTransfer(data);
+      
+      res.json({
+        success: true,
+        message: "Domestic wire transfer successful",
+        newBalance: result.newBalance,
+        referenceNumber: result.referenceNumber,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Wire transfer failed",
+      });
+    }
+  });
+
+  app.post("/api/transfer/international-wire", isAuthenticated, async (req, res) => {
+    try {
+      const currentUser = req.user as any;
+      const data = internationalWireSchema.parse(req.body);
+      
+      const account = await getAccountById(data.fromAccountId);
+      if (!account || account.userId !== currentUser.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Unauthorized" 
+        });
+      }
+      
+      const result = await internationalWireTransfer(data);
+      
+      res.json({
+        success: true,
+        message: "International wire transfer successful",
+        newBalance: result.newBalance,
+        referenceNumber: result.referenceNumber,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Wire transfer failed",
       });
     }
   });
