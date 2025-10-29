@@ -105,42 +105,8 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="text-center text-sm text-white/70 border-t border-white/20 pt-8">
+        <div className="text-center text-sm text-white/70">
           <p>© 2025 Truist Financial Corporation. All Rights Reserved.</p>
-        </div>
-
-        {/* Comprehensive Disclosure Section */}
-        <div className="mt-8 pt-8 border-t border-white/20 text-xs text-white/60 space-y-4">
-          <p>
-            <sup>1</sup> Eligible clients include new Truist Business Money Market accounts opened between April 1, 2025 and June 30, 2025, with initial deposits of $10,000 or more. The promotional Annual Percentage Yield (APY) of 3.50% is available for 90 days from account opening. After the promotional period, standard variable APY applies. Fees may reduce earnings.
-          </p>
-          <p>
-            <sup>2</sup> Annual Percentage Yield (APY) and Annual Percentage Rate (APR) are accurate as of October 29, 2025, and are subject to change at any time without notice. Minimum opening deposit requirements may apply. For current rates and terms, please visit your local Truist branch or contact us at 1-844-4TRUIST.
-          </p>
-          <p>
-            <sup>3</sup> Prime Rate is the rate published in The Wall Street Journal's "Money Rates" table. Special introductory rate applies only to new accounts opened during the promotional period. After the 9-month introductory period, the rate will convert to the standard approved variable rate based on creditworthiness, which currently ranges from 7.50% to 14.85% APR. Your actual rate may be higher or lower depending on your credit profile. Excellent credit is required to qualify for the lowest rates. All credit applications are subject to credit approval.
-          </p>
-          <p>
-            Investment and Insurance Products: <strong>Are not FDIC or any other Government Agency Insured • Are not Bank Guaranteed • May Lose Value</strong>
-          </p>
-          <p>
-            Truist Bank, Member FDIC. Truist, the Truist logo, and Truist Purple are service marks of Truist Financial Corporation. All other trademarks are the property of their respective owners.
-          </p>
-          <p>
-            Securities, Insurance, and Advisory services offered through Truist Investment Services, Inc., a SEC registered broker-dealer, member FINRA, SIPC, and a licensed insurance agency. Truist Wealth, the Truist Wealth logo, and Truist Purple are service marks of Truist Financial Corporation.
-          </p>
-          <p>
-            Lending, deposit, and other banking products and services are provided by Truist Bank, Member FDIC. Credit and collateral are subject to approval. Terms and conditions apply. This is not a commitment to lend. Programs, rates, terms and conditions are subject to change without notice.
-          </p>
-          <p>
-            LightStream loans are issued by Truist Bank. LightStream® is a registered trademark of Truist Bank. LightStream is a division of Truist Bank. NMLS# 399798. LightStream personal loans are available exclusively online through LightStream.
-          </p>
-          <p>
-            Equal Housing Lender. Truist Bank is an Equal Opportunity Employer. We do not discriminate based on race, religion, color, national origin, gender (including pregnancy, childbirth, or related medical conditions), sexual orientation, gender identity, gender expression, age, status as a protected veteran, status as an individual with a disability, or other applicable legally protected characteristics.
-          </p>
-          <p className="text-white/50">
-            CNS-7472 | Effective Date: October 29, 2025
-          </p>
         </div>
       </div>
     </footer>
