@@ -66,7 +66,7 @@ export function Footer() {
               <li><a href="https://www.truist.com/payment-relief/personal-loans" className="text-white/80 hover:text-white hover:underline transition-colors">Consumer payment relief hub</a></li>
               <li><a href="https://www.truist.com/finder" className="text-white/80 hover:text-white hover:underline transition-colors">Find a banker or advisor</a></li>
               <li><a href="https://www.truist.com/locations" className="text-white/80 hover:text-white hover:underline transition-colors">Find a branch or ATM</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Help Center</a></li>
+              <li><a href="https://www.truist.com/contact" className="text-white/80 hover:text-white hover:underline transition-colors">Help Center</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Schedule a branch appointment</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">844-4TRUIST (844-487-8478)</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">AdChoices</a></li>
