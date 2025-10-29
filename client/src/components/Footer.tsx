@@ -22,8 +22,8 @@ export function Footer() {
               <li><a href="https://www.truist.com/mortgage" className="text-white/80 hover:text-white hover:underline transition-colors">Mortgage</a></li>
               <li><a href="https://www.truist.com/digital-banking" className="text-white/80 hover:text-white hover:underline transition-colors">Online & mobile</a></li>
               <li><a href="https://www.truist.com/open-account" className="text-white/80 hover:text-white hover:underline transition-colors">Open an account</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Savings</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Small business</a></li>
+              <li><a href="https://www.truist.com/savings" className="text-white/80 hover:text-white hover:underline transition-colors">Savings</a></li>
+              <li><a href="https://www.truist.com/small-business" className="text-white/80 hover:text-white hover:underline transition-colors">Small business</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Wealth</a></li>
             </ul>
           </div>
