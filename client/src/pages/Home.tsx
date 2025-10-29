@@ -7,6 +7,7 @@ import { MobileAppSection } from "@/components/MobileAppSection";
 import { VideoSection } from "@/components/VideoSection";
 import { NFLSection } from "@/components/NFLSection";
 import { MoneyMindsetSection } from "@/components/MoneyMindsetSection";
+import { Disclosures } from "@/components/Disclosures";
 import { Footer } from "@/components/Footer";
 import trickortreatImage from "@assets/generated_images/Kids_trick-or-treating_Halloween_33a4af10.png";
 import homeImage from "@assets/generated_images/Modern_family_home_exterior_c68486de.png";
@@ -122,6 +123,7 @@ export default function Home() {
       <VideoSection />
       <NFLSection />
       <MoneyMindsetSection />
+      <Disclosures />
       <Footer />
     </div>
   );
