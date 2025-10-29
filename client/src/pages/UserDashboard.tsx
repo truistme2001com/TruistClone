@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -165,12 +165,14 @@ export default function UserDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
-              <img src={truistLogo} alt="Truist Bank" className="h-10" />
+              <Link href="/dashboard">
+                <img src={truistLogo} alt="Truist Bank" className="h-10 cursor-pointer" />
+              </Link>
               <nav className="hidden md:flex gap-6">
-                <a href="#" className="text-purple-600 font-semibold border-b-2 border-purple-600 pb-4 pt-4">Accounts</a>
-                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Transfer</a>
-                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Pay Bills</a>
-                <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Services</a>
+                <Link href="/dashboard" className="text-purple-600 font-semibold border-b-2 border-purple-600 pb-4 pt-4">Accounts</Link>
+                <Link href="/transfer" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Transfer</Link>
+                <Link href="/pay-bills" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Pay Bills</Link>
+                <Link href="/services" className="text-gray-600 hover:text-purple-600 transition-colors pb-4 pt-4">Services</Link>
               </nav>
             </div>
             <div className="flex items-center gap-3">
