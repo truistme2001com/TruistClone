@@ -103,6 +103,18 @@ export default function Home() {
               testId="fraud-security"
             />
           </div>
+
+          <div className="mt-8">
+            <PromoCard
+              badge="Small Business Money Market Account"
+              title="Kickstart cash reserves"
+              subtitle=""
+              description="Eligible clients can earn a 3.50% annual percentage yield (APY) with a new Truist Business Money Market account."
+              actionText="Learn more"
+              showLearnMore={false}
+              testId="small-business-mm"
+            />
+          </div>
         </div>
       </section>
 

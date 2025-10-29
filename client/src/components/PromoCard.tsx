@@ -12,6 +12,7 @@ interface PromoCardProps {
   image?: string;
   variant?: "default" | "image";
   testId?: string;
+  showLearnMore?: boolean;
 }
 
 export function PromoCard({
@@ -25,6 +26,7 @@ export function PromoCard({
   image,
   variant = "default",
   testId = "promo-card",
+  showLearnMore = true,
 }: PromoCardProps) {
   if (variant === "image" && image) {
     return (
@@ -81,7 +83,7 @@ export function PromoCard({
         </p>
         <div className="flex flex-wrap gap-3">
           <Button data-testid={`button-${testId}-action`}>{actionText}</Button>
-          <Button variant="outline" data-testid={`button-${testId}-learn-more`}>Learn more</Button>
+          {showLearnMore && <Button variant="outline" data-testid={`button-${testId}-learn-more`}>Learn more</Button>}
         </div>
       </CardContent>
     </Card>
