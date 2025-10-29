@@ -2,14 +2,14 @@ import { Wallet, PiggyBank, CreditCard, Store, HandCoins, Home, Handshake, Sprou
 import { Button } from "@/components/ui/button";
 
 const products = [
-  { icon: Wallet, label: "Checking", href: "#" },
-  { icon: PiggyBank, label: "Savings", href: "#" },
-  { icon: CreditCard, label: "Credit Card", href: "#" },
-  { icon: Store, label: "Small Business", href: "#" },
-  { icon: HandCoins, label: "Loans", href: "#" },
-  { icon: Home, label: "Mortgage", href: "#" },
-  { icon: Handshake, label: "Premier Banking", href: "#" },
-  { icon: Sprout, label: "Investments", href: "#" },
+  { icon: Wallet, label: "Checking", href: "https://www.truist.com/checking" },
+  { icon: PiggyBank, label: "Savings", href: "https://www.truist.com/savings" },
+  { icon: CreditCard, label: "Credit Card", href: "https://www.truist.com/credit-cards" },
+  { icon: Store, label: "Small Business", href: "https://www.truist.com/small-business" },
+  { icon: HandCoins, label: "Loans", href: "https://www.truist.com/loans" },
+  { icon: Home, label: "Mortgage", href: "https://www.truist.com/mortgage" },
+  { icon: Handshake, label: "Premier Banking", href: "https://www.truist.com/premier-banking" },
+  { icon: Sprout, label: "Investments", href: "https://www.truist.com/investing-and-retirement" },
 ];
 
 export function ProductCarousel() {
@@ -27,6 +27,8 @@ export function ProductCarousel() {
               <a
                 key={index}
                 href={product.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex flex-col items-center gap-3 p-4 rounded-lg hover-elevate active-elevate-2 group"
                 data-testid={`link-product-${product.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
@@ -42,8 +44,10 @@ export function ProductCarousel() {
         </div>
 
         <div className="text-center">
-          <Button variant="outline" data-testid="button-view-all-products">
-            View all products
+          <Button variant="outline" data-testid="button-view-all-products" asChild>
+            <a href="https://www.truist.com/personal-banking" target="_blank" rel="noopener noreferrer">
+              View all products
+            </a>
           </Button>
         </div>
       </div>
