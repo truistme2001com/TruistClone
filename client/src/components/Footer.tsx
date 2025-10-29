@@ -70,7 +70,7 @@ export function Footer() {
               <li><a href="https://truistconsumerbank.my.site.com/s/" className="text-white/80 hover:text-white hover:underline transition-colors">Schedule a branch appointment</a></li>
               <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">844-4TRUIST (844-487-8478)</a></li>
               <li><a href="https://www.truist.com/privacy#" className="text-white/80 hover:text-white hover:underline transition-colors">AdChoices</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white hover:underline transition-colors">Do not sell or share my personal information</a></li>
+              <li><a href="https://privacyportal.onetrust.com/webform/cccaa63d-8471-45fc-9ef6-ffa187576844/727cbfbd-56ce-406e-905e-69b9693e04f9" className="text-white/80 hover:text-white hover:underline transition-colors">Do not sell or share my personal information</a></li>
             </ul>
           </div>
         </div>
