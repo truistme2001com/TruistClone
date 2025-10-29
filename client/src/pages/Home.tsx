@@ -20,8 +20,8 @@ export default function Home() {
       <div className="relative">
         <HeroSection />
         
-        {/* Login Form - Desktop Only, Fixed Position */}
-        <div className="hidden lg:block fixed top-20 right-8 w-80 z-40">
+        {/* Login Form - Desktop Only, Absolute Position within Hero */}
+        <div className="hidden lg:block absolute top-24 right-8 w-80 z-40">
           <LoginForm />
         </div>
       </div>
