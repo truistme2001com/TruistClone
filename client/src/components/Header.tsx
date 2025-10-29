@@ -242,15 +242,60 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button 
-              className="hidden md:flex bg-primary text-white hover:bg-primary/90"
-              data-testid="button-open-account"
-              asChild
+            <div 
+              className="relative"
+              onMouseEnter={() => setActiveDropdown('openaccount')}
+              onMouseLeave={() => setActiveDropdown(null)}
             >
-              <a href="https://www.truist.com/open-account" target="_blank" rel="noopener noreferrer">
+              <Button 
+                className="hidden md:flex bg-primary text-white hover:bg-primary/90"
+                data-testid="button-open-account"
+              >
                 Open Account <ChevronDown className="w-4 h-4 ml-1" />
-              </a>
-            </Button>
+              </Button>
+              {activeDropdown === 'openaccount' && (
+                <div className="absolute right-0 top-full mt-2 w-[280px] bg-white shadow-xl rounded-lg border border-border overflow-hidden">
+                  <div className="py-2">
+                    <a href="https://www.truist.com/open-account/featured" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Featured accounts</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/checking" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Banking accounts</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/savings" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Savings accounts</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/credit-cards" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Credit cards</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/loans" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Loans</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/mortgage" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Mortgages</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/small-business" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Small Business</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/investing-and-retirement" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Investments</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                    <a href="https://www.truist.com/wealth" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
+                      <span className="font-medium">Wealth</span>
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
             
             <Button 
               variant="ghost" 
