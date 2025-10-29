@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import heroImage from "@assets/generated_images/Kids_jumping_in_lake_a684c46f.png";
+import heroImage from "@assets/hero-truist-person.jpg";
 
 export function HeroSection() {
   return (
@@ -8,31 +8,27 @@ export function HeroSection() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-primary/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent"></div>
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 w-full">
         <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" data-testid="text-hero-title">
-            Truist One Checking
+          <p className="text-lg md:text-xl text-foreground mb-2 font-medium" data-testid="text-hero-badge">
+            New checking customer offer
+          </p>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4" data-testid="text-hero-title">
+            Earn $400 with Truist One Checking.
           </h1>
-          <p className="text-xl md:text-2xl text-white mb-8" data-testid="text-hero-subtitle">
-            No overdraft fees. Practical perks. Automatic upgrades.
+          <p className="text-base md:text-lg text-foreground mb-8" data-testid="text-hero-subtitle">
+            Must open online and complete qualifying activities.<sup>1</sup>
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
-              variant="outline" 
-              size="lg" 
-              className="bg-white/90 backdrop-blur-sm border-white text-primary"
-              data-testid="button-learn-more"
-            >
-              Learn more
-            </Button>
-            <Button 
               size="lg"
-              data-testid="button-open-now"
+              className="bg-primary text-white hover:bg-primary/90"
+              data-testid="button-get-offer"
             >
-              Open now
+              Get offer
             </Button>
           </div>
         </div>
