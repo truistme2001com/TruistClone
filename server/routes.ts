@@ -8,6 +8,7 @@ import {
   getAllUsersWithAccounts,
   updateAccountBalance,
   getTransactionsByAccountId,
+  getAccountById,
   deleteUser,
   deleteAccount,
 } from "./storage";
@@ -167,6 +168,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const accountId = parseInt(req.params.accountId);
       const limit = parseInt(req.query.limit as string) || 50;
+      const currentUser = req.user as any;
+      
+      // Fetch the account first
+      const account = await getAccountById(accountId);
+      
+      // Return 404 if account doesn't exist or user doesn't own it (prevents account enumeration)
+      if (!account) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Account not found" 
+        });
+      }
+      
+      // Allow access if user owns the account OR is admin
+      if (account.userId !== currentUser.id && !currentUser.isAdmin) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Account not found" 
+        });
+      }
       
       const transactions = await getTransactionsByAccountId(accountId, limit);
       res.json({ success: true, transactions });
