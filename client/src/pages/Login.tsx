@@ -92,6 +92,7 @@ export default function Login() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="h-11 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                    autoComplete="username"
                     required
                     data-testid="input-username"
                   />
@@ -105,6 +106,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-11 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                    autoComplete="current-password"
                     required
                     data-testid="input-password"
                   />
