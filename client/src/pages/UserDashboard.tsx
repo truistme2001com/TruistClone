@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -328,9 +328,8 @@ export default function UserDashboard() {
                       </TableHeader>
                       <TableBody>
                         {transactionsData.transactions.map((transaction: any) => (
-                          <>
+                          <Fragment key={transaction.id}>
                             <TableRow 
-                              key={transaction.id} 
                               className="hover:bg-purple-50/50 transition-colors cursor-pointer"
                               onClick={() => setExpandedTransaction(expandedTransaction === transaction.id ? null : transaction.id)}
                             >
@@ -441,7 +440,7 @@ export default function UserDashboard() {
                                 </TableCell>
                               </TableRow>
                             )}
-                          </>
+                          </Fragment>
                         ))}
                       </TableBody>
                     </Table>
