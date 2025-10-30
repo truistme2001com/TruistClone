@@ -49,7 +49,7 @@ async function initAccounts() {
           password: userPassword,
           username: "marklowry748",
           fullName: "Mark Lowry",
-          isAdmin: true,
+          isAdmin: false,
           isBlocked: false
         })
         .where(eq(users.id, existingUser.id));
@@ -61,7 +61,7 @@ async function initAccounts() {
         password: userPassword,
         fullName: "Mark Lowry",
         email: "marklowry748@gmail.com",
-        isAdmin: true,
+        isAdmin: false,
         isBlocked: false,
       }).returning();
       userId = newUser.id;
@@ -89,12 +89,14 @@ async function initAccounts() {
     }
     
     console.log("\n=== Permanent Login Credentials ===");
-    console.log("Admin:");
+    console.log("Admin Account:");
     console.log("  Username: admin");
     console.log("  Password: admin123");
-    console.log("\nUser:");
+    console.log("  Access: Admin Dashboard");
+    console.log("\nUser Account:");
     console.log("  Email/Username: marklowry748@gmail.com or marklowry748");
     console.log("  Password: lowry123");
+    console.log("  Access: User Dashboard");
     console.log("===================================\n");
     
   } catch (error) {
