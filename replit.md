@@ -11,6 +11,27 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **October 30, 2025**: User Date Joined & Admin Editing System
+  - **Date Joined Field**:
+    - Added `dateJoined` timestamp field to user schema in `shared/schema.ts`
+    - Mark Lowry's account shows join date: **August 11, 2019**
+    - Date displayed in USA format (MMMM d, yyyy) on Account Holder page
+    - Automatically set for new user accounts upon creation
+    - Database schema updated with proper timestamp handling
+  - **Admin User Editing**:
+    - Full admin interface for editing user details in Admin Dashboard
+    - Edit dialog allows updating: Full Name, Email, Username, Password, Date Joined
+    - New API endpoint: `/api/admin/users/:userId/update` with validation
+    - `updateUser` function in storage layer with secure password hashing
+    - Only changed fields are submitted to reduce overhead
+    - Real-time cache invalidation after updates
+    - Comprehensive validation using Zod schemas
+  - **Account Holder Display**:
+    - Date Joined shows below Username in Account Holder section
+    - Formatted as "August 11, 2019" (USA format)
+    - Accessible via user dashboard details tab
+    - Uses date-fns for consistent formatting
+
 - **October 30, 2025**: Profile Avatar System Update
   - **Cute Avatar Images**: Replaced emoji avatars with 12 adorable kawaii-style profile pictures
     - Available avatars: Teddy Bear, Cat, Dog, Panda, Bunny, Fox, Unicorn, Robot, Penguin, Koala, Owl, Sloth
