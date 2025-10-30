@@ -38,13 +38,13 @@ function generateCVV(): string {
   return String(Math.floor(Math.random() * 900) + 100);
 }
 
-function getRandomTime(daysAgo: number): Date {
+function getRandomTime(daysAgo: number, hour?: number): Date {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
-  const hour = Math.floor(Math.random() * 14) + 6;
+  const txnHour = hour !== undefined ? hour : Math.floor(Math.random() * 14) + 6;
   const minute = Math.floor(Math.random() * 60);
   const second = Math.floor(Math.random() * 60);
-  date.setHours(hour, minute, second, 0);
+  date.setHours(txnHour, minute, second, 0);
   return date;
 }
 
@@ -193,23 +193,51 @@ async function initAccounts() {
       console.log("Creating realistic transaction history...");
       
       const transactionData = [
-        { type: "credit", amount: "50000.00", description: "Wire transfer received from ABC Corp", days: 28 },
-        { type: "debit", amount: "12500.00", description: "Payment to vendors", days: 27 },
-        { type: "credit", amount: "75000.00", description: "Investment return", days: 25 },
-        { type: "debit", amount: "8000.00", description: "Office supplies purchase", days: 23 },
-        { type: "credit", amount: "100000.00", description: "Contract payment received", days: 21 },
-        { type: "debit", amount: "25000.00", description: "Payroll processing", days: 20 },
-        { type: "credit", amount: "60000.00", description: "Consulting fees received", days: 18 },
-        { type: "debit", amount: "15000.00", description: "Equipment lease payment", days: 16 },
-        { type: "credit", amount: "80000.00", description: "Sales revenue deposit", days: 14 },
-        { type: "debit", amount: "20000.00", description: "Marketing campaign expenses", days: 12 },
-        { type: "credit", amount: "45000.00", description: "Partnership distribution", days: 10 },
-        { type: "debit", amount: "18000.00", description: "Professional services", days: 9 },
-        { type: "credit", amount: "90000.00", description: "Quarterly bonus received", days: 7 },
-        { type: "debit", amount: "30000.00", description: "Tax payment", days: 5 },
-        { type: "credit", amount: "55000.00", description: "Rental income", days: 3 },
-        { type: "debit", amount: "10000.00", description: "Insurance premium", days: 2 },
-        { type: "credit", amount: "70000.00", description: "Investment dividend", days: 1 },
+        { type: "credit", amount: "50000.00", description: "Wire transfer received from ABC Corp", days: 28, hour: 9 },
+        
+        { type: "debit", amount: "12500.00", description: "Payment to vendors", days: 27, hour: 10 },
+        { type: "debit", amount: "3200.00", description: "Amazon Business - Office supplies", days: 27, hour: 14 },
+        
+        { type: "credit", amount: "75000.00", description: "Investment return", days: 25, hour: 11 },
+        
+        { type: "debit", amount: "8000.00", description: "Office Depot - Furniture", days: 23, hour: 15 },
+        { type: "debit", amount: "1450.00", description: "AT&T - Business Internet", days: 23, hour: 16 },
+        { type: "debit", amount: "890.00", description: "Starbucks - Team meeting", days: 23, hour: 8 },
+        
+        { type: "credit", amount: "100000.00", description: "Contract payment received", days: 21, hour: 13 },
+        { type: "credit", amount: "45000.00", description: "Client retainer fee", days: 21, hour: 15 },
+        
+        { type: "debit", amount: "25000.00", description: "Payroll processing", days: 20, hour: 9 },
+        
+        { type: "credit", amount: "60000.00", description: "Consulting fees received", days: 18, hour: 10 },
+        
+        { type: "debit", amount: "15000.00", description: "Equipment lease payment", days: 16, hour: 12 },
+        { type: "debit", amount: "5600.00", description: "Adobe Creative Cloud - Annual", days: 16, hour: 14 },
+        
+        { type: "credit", amount: "80000.00", description: "Sales revenue deposit", days: 14, hour: 11 },
+        { type: "credit", amount: "22000.00", description: "Commission payment", days: 14, hour: 13 },
+        
+        { type: "debit", amount: "20000.00", description: "Marketing campaign expenses", days: 12, hour: 10 },
+        { type: "debit", amount: "7500.00", description: "Google Ads - Monthly budget", days: 12, hour: 11 },
+        { type: "debit", amount: "4200.00", description: "Facebook Ads - Campaign", days: 12, hour: 15 },
+        
+        { type: "credit", amount: "90000.00", description: "Quarterly bonus received", days: 10, hour: 9 },
+        
+        { type: "debit", amount: "18000.00", description: "Professional services", days: 9, hour: 14 },
+        { type: "debit", amount: "2100.00", description: "FedEx - Shipping charges", days: 9, hour: 16 },
+        
+        { type: "debit", amount: "30000.00", description: "Tax payment", days: 7, hour: 10 },
+        
+        { type: "debit", amount: "8900.00", description: "Best Buy - New laptops", days: 5, hour: 13 },
+        { type: "debit", amount: "1200.00", description: "Costco - Office snacks", days: 5, hour: 15 },
+        { type: "debit", amount: "750.00", description: "Uber for Business", days: 5, hour: 17 },
+        
+        { type: "credit", amount: "55000.00", description: "Rental income", days: 3, hour: 11 },
+        
+        { type: "debit", amount: "10000.00", description: "Insurance premium", days: 2, hour: 9 },
+        { type: "debit", amount: "3400.00", description: "Microsoft 365 - Annual renewal", days: 2, hour: 12 },
+        
+        { type: "credit", amount: "70000.00", description: "Investment dividend", days: 1, hour: 10 },
       ];
       
       const finalBalance = 16000000.00;
@@ -226,7 +254,7 @@ async function initAccounts() {
       let runningBalance = finalBalance - netChange;
       
       for (const txn of transactionData) {
-        const txnDate = getRandomTime(txn.days);
+        const txnDate = getRandomTime(txn.days, txn.hour);
         
         if (txn.type === "credit") {
           runningBalance += parseFloat(txn.amount);
