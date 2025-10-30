@@ -11,6 +11,7 @@ if (!process.env.DATABASE_URL) {
 const sql = postgres(process.env.DATABASE_URL);
 export const db = drizzle(sql, {
   schema: { users, accounts, transactions, sessions },
+  casing: 'snake_case',
 });
 
 // User operations
