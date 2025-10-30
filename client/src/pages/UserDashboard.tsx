@@ -123,6 +123,21 @@ export default function UserDashboard() {
     },
   });
 
+  const updateLimitMutation = useMutation({
+    mutationFn: async (data: { accountId: number; cardType: "debit" | "credit"; newLimit: string }) => {
+      return await apiRequest("POST", "/api/cards/update-limit", data);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      const cardName = variables.cardType === "debit" ? "Debit Card" : "Credit Card";
+      toast({
+        title: "✅ Limit Updated",
+        description: `${cardName} limit has been updated to $${parseFloat(variables.newLimit).toLocaleString()}`,
+        duration: 3000,
+      });
+    },
+  });
+
   const handleTransfer = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -552,7 +567,9 @@ export default function UserDashboard() {
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                           <p className="text-xs text-gray-600 mb-1">Daily Limit</p>
-                          <p className="text-lg font-bold text-gray-900">$50,000</p>
+                          <p className="text-lg font-bold text-gray-900" data-testid="text-debit-daily-limit">
+                            ${formatCurrency(account?.debitCardLimit || "50000")}
+                          </p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                           <p className="text-xs text-gray-600 mb-1">Card Status</p>
@@ -586,11 +603,15 @@ export default function UserDashboard() {
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                           <p className="text-xs text-gray-600 mb-1">Credit Limit</p>
-                          <p className="text-lg font-bold text-gray-900">$250,000</p>
+                          <p className="text-lg font-bold text-gray-900" data-testid="text-credit-limit">
+                            ${formatCurrency(account?.creditCardLimit || "250000")}
+                          </p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                           <p className="text-xs text-gray-600 mb-1">Available Credit</p>
-                          <p className="text-lg font-bold text-green-600">$250,000</p>
+                          <p className="text-lg font-bold text-green-600">
+                            ${formatCurrency(account?.creditCardLimit || "250000")}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1085,13 +1106,63 @@ export default function UserDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="text-sm text-gray-600 mb-2">{enlargedCard === "debit" ? "Daily Limit" : "Credit Limit"}</p>
-                <p className="text-2xl font-bold text-gray-900">{enlargedCard === "debit" ? "$50,000" : "$250,000"}</p>
+                <p className="text-2xl font-bold text-gray-900" data-testid={`text-${enlargedCard}-limit`}>
+                  ${enlargedCard === "debit" 
+                    ? formatCurrency(account?.debitCardLimit || "50000") 
+                    : formatCurrency(account?.creditCardLimit || "250000")}
+                </p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="text-sm text-gray-600 mb-2">{enlargedCard === "debit" ? "Card Status" : "Available Credit"}</p>
-                <p className="text-2xl font-bold text-green-600">{enlargedCard === "debit" ? "Active" : "$250,000"}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {enlargedCard === "debit" 
+                    ? (account?.debitCardLocked ? "Locked" : "Active") 
+                    : `$${formatCurrency(account?.creditCardLimit || "250000")}`}
+                </p>
               </div>
             </div>
+            
+            <div className="p-4 bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-200">
+              <Label className="font-semibold text-gray-900 mb-2 block">
+                Increase {enlargedCard === "debit" ? "Daily" : "Credit"} Limit
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Enter new limit"
+                  step="1000"
+                  min={enlargedCard === "debit" ? "50000" : "250000"}
+                  className="flex-1"
+                  data-testid={`input-${enlargedCard}-limit`}
+                  id={`new-${enlargedCard}-limit`}
+                />
+                <Button
+                  onClick={() => {
+                    const input = document.getElementById(`new-${enlargedCard}-limit`) as HTMLInputElement;
+                    const newLimit = input?.value;
+                    if (newLimit && account?.id && enlargedCard) {
+                      updateLimitMutation.mutate({
+                        accountId: account.id,
+                        cardType: enlargedCard,
+                        newLimit,
+                      });
+                      input.value = "";
+                    }
+                  }}
+                  disabled={updateLimitMutation.isPending}
+                  data-testid={`button-update-${enlargedCard}-limit`}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {updateLimitMutation.isPending ? "Updating..." : "Update"}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">
+                Current limit: ${enlargedCard === "debit" 
+                  ? formatCurrency(account?.debitCardLimit || "50000") 
+                  : formatCurrency(account?.creditCardLimit || "250000")}
+              </p>
+            </div>
+
             <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center gap-3">
                 {(enlargedCard === "debit" ? account?.debitCardLocked : account?.creditCardLocked) ? (
@@ -1115,10 +1186,11 @@ export default function UserDashboard() {
                     cardLockMutation.mutate({ accountId: account.id, cardType: enlargedCard, locked: checked });
                   }
                 }}
+                data-testid={`switch-lock-${enlargedCard}-enlarged`}
               />
             </div>
           </div>
-          <Button onClick={() => setEnlargedCard(null)} className="mt-4">Close</Button>
+          <Button onClick={() => setEnlargedCard(null)} className="mt-4" data-testid="button-close-card-dialog">Close</Button>
         </DialogContent>
       </Dialog>
 
