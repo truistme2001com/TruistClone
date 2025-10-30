@@ -388,8 +388,36 @@ export default function UserDashboard() {
 
         <div className="grid gap-6 lg:grid-cols-12 mb-8">
           <Card className="lg:col-span-8 border-0 shadow-lg bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 text-white overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+            {/* Dot pattern overlay */}
+            <div className="absolute inset-0 opacity-10" style={{
+              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+              backgroundSize: '20px 20px'
+            }}></div>
+            
+            {/* Diagonal stripe pattern */}
+            <div className="absolute inset-0 opacity-5" style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 11px)'
+            }}></div>
+            
+            {/* Large decorative circles */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -mr-40 -mt-40"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mb-32"></div>
+            
+            {/* Medium decorative elements */}
+            <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-indigo-400/10 rounded-full"></div>
+            <div className="absolute bottom-1/3 right-1/3 w-24 h-24 bg-purple-400/10 rounded-full"></div>
+            
+            {/* Geometric shapes */}
+            <div className="absolute top-8 right-8 w-16 h-16 border-2 border-white/10 rounded-lg rotate-12"></div>
+            <div className="absolute bottom-12 left-12 w-20 h-20 border-2 border-white/10 rounded-full"></div>
+            
+            {/* Wave pattern at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 opacity-10">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full">
+                <path d="M0,0 C150,100 350,0 600,50 C850,100 1050,0 1200,50 L1200,120 L0,120 Z" fill="white"/>
+              </svg>
+            </div>
+            
             <CardHeader className="pb-4 relative z-10">
               <div className="flex justify-between items-start">
                 <div>
