@@ -25,7 +25,7 @@ export function BankCard({
   return (
     <Card 
       className={`
-        relative overflow-hidden w-full max-w-md h-56 p-6 
+        relative overflow-hidden w-full max-w-md h-60 p-6 
         ${type === "debit" 
           ? "bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800" 
           : "bg-gradient-to-br from-slate-800 via-slate-900 to-black"
@@ -66,7 +66,7 @@ export function BankCard({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex justify-between items-end">
             <div>
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Card Number</p>
@@ -86,23 +86,23 @@ export function BankCard({
             </div>
           </div>
 
-          <div className="flex justify-between items-end">
-            <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <div className="flex-1 pr-4">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Cardholder</p>
-              <p className="text-sm font-semibold uppercase tracking-wide truncate pr-4" data-testid={`cardholder-${type}`}>
+              <p className="text-sm font-semibold uppercase tracking-wide" data-testid={`cardholder-${type}`}>
                 {cardholderName}
               </p>
-              <p className="text-xs text-white/70 uppercase tracking-wide truncate pr-4 mt-0.5">
+              <p className="text-xs text-white/70 uppercase tracking-wide mt-0.5">
                 {businessName}
               </p>
             </div>
-            <div className="flex items-end gap-6">
+            <div className="flex gap-8 shrink-0">
               <div className="text-right">
-                <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Expires</p>
+                <p className="text-xs text-white/60 uppercase tracking-wider mb-1.5">Expires</p>
                 <p className="text-base font-mono font-bold" data-testid={`expiry-${type}`}>{expiryDate}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-white/60 uppercase tracking-wider mb-1">CVV</p>
+                <p className="text-xs text-white/60 uppercase tracking-wider mb-1.5">CVV</p>
                 <p className="text-base font-mono font-bold" data-testid={`cvv-${type}`}>{cvv}</p>
               </div>
             </div>
