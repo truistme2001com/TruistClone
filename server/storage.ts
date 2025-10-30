@@ -437,6 +437,21 @@ export async function toggleCardLock(
   return { success: true, locked };
 }
 
+export async function updateCardLimit(
+  accountId: number,
+  cardType: "debit" | "credit",
+  newLimit: string
+) {
+  const fieldName = cardType === "debit" ? "debitCardLimit" : "creditCardLimit";
+  
+  await db
+    .update(accounts)
+    .set({ [fieldName]: newLimit, updatedAt: new Date() })
+    .where(eq(accounts.id, accountId));
+  
+  return { success: true, newLimit };
+}
+
 // Helper function to generate account numbers (Truist format: 10 digits)
 function generateAccountNumber(): string {
   const random1 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");

@@ -17,6 +17,7 @@ import {
   domesticWireTransfer,
   internationalWireTransfer,
   toggleCardLock,
+  updateCardLimit,
 } from "./storage";
 import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
 
@@ -404,6 +405,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({
         success: false,
         message: error.message || "Failed to toggle card lock",
+      });
+    }
+  });
+
+  app.post("/api/cards/update-limit", isAuthenticated, async (req, res) => {
+    try {
+      const currentUser = req.user as any;
+      const { accountId, cardType, newLimit } = req.body;
+      
+      if (!accountId || !cardType || !newLimit) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields" 
+        });
+      }
+      
+      const account = await getAccountById(accountId);
+      if (!account || account.userId !== currentUser.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Unauthorized" 
+        });
+      }
+      
+      const result = await updateCardLimit(accountId, cardType, newLimit);
+      
+      res.json({
+        success: true,
+        message: "Card limit updated successfully",
+        newLimit: result.newLimit,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to update card limit",
       });
     }
   });
