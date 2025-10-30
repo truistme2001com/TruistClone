@@ -21,6 +21,8 @@ export default function UserDashboard() {
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transferType, setTransferType] = useState<"internal" | "domestic_wire" | "international_wire">("internal");
   const [expandedTransaction, setExpandedTransaction] = useState<number | null>(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
@@ -176,10 +178,22 @@ export default function UserDashboard() {
               </nav>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600 hover:text-purple-600"
+                onClick={() => setIsNotificationOpen(true)}
+                data-testid="button-notifications"
+              >
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600 hover:text-purple-600"
+                onClick={() => setIsSettingsOpen(true)}
+                data-testid="button-settings"
+              >
                 <Settings className="h-5 w-5" />
               </Button>
               <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
@@ -733,6 +747,96 @@ export default function UserDashboard() {
               </div>
             </form>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-purple-600" />
+              Notifications
+            </DialogTitle>
+            <DialogDescription>
+              Stay updated with your account activity
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 border border-purple-100">
+              <div className="bg-purple-600 p-2 rounded-full">
+                <ArrowUpRight className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Wire Transfer Received</p>
+                <p className="text-xs text-gray-600 mt-1">$50,000 deposited to your account</p>
+                <p className="text-xs text-gray-400 mt-1">Oct 2, 2025</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="bg-gray-400 p-2 rounded-full">
+                <ArrowDownRight className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Payment Processed</p>
+                <p className="text-xs text-gray-600 mt-1">$12,500 payment to vendors completed</p>
+                <p className="text-xs text-gray-400 mt-1">Oct 3, 2025</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="bg-green-500 p-2 rounded-full">
+                <FileText className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Statement Available</p>
+                <p className="text-xs text-gray-600 mt-1">Your monthly statement is ready to view</p>
+                <p className="text-xs text-gray-400 mt-1">Oct 1, 2025</p>
+              </div>
+            </div>
+          </div>
+          <Button onClick={() => setIsNotificationOpen(false)} className="mt-4">Close</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-600" />
+              Account Settings
+            </DialogTitle>
+            <DialogDescription>
+              Manage your account preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Profile Information</Label>
+              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
+                <p className="text-xs text-gray-600 mt-1">{user?.email}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Security</Label>
+              <Button variant="outline" className="w-full justify-start">
+                Change Password
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Label>Preferences</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <span className="text-sm">Email Notifications</span>
+                  <Badge variant="secondary" className="bg-green-500 text-white">On</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <span className="text-sm">Two-Factor Authentication</span>
+                  <Badge variant="secondary" className="bg-green-500 text-white">Enabled</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+          <Button onClick={() => setIsSettingsOpen(false)} className="mt-4">Close</Button>
         </DialogContent>
       </Dialog>
 
