@@ -28,6 +28,8 @@ export default function UserDashboard() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [enlargedCard, setEnlargedCard] = useState<"debit" | "credit" | null>(null);
+  const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
+  const [pin, setPin] = useState("");
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
@@ -118,6 +120,21 @@ export default function UserDashboard() {
         description: variables.locked 
           ? `${cardName} has been locked for purchases` 
           : `${cardName} has been unlocked for purchases`,
+        duration: 3000,
+      });
+    },
+  });
+
+  const setPinMutation = useMutation({
+    mutationFn: async (pinValue: string) => {
+      return new Promise((resolve) => setTimeout(resolve, 500));
+    },
+    onSuccess: () => {
+      setIsPinDialogOpen(false);
+      setPin("");
+      toast({
+        title: "✅ PIN Set Successfully",
+        description: "Your new PIN has been set and is ready to use.",
         duration: 3000,
       });
     },
@@ -677,13 +694,7 @@ export default function UserDashboard() {
                           variant="outline" 
                           className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
                           data-testid="button-set-pin"
-                          onClick={() => {
-                            toast({
-                              title: "🔢 Set PIN",
-                              description: "Visit any Truist ATM or call 1-800-TRUIST to set or change your PIN.",
-                              duration: 4000,
-                            });
-                          }}
+                          onClick={() => setIsPinDialogOpen(true)}
                         >
                           Set PIN
                         </Button>
@@ -1191,6 +1202,63 @@ export default function UserDashboard() {
             </div>
           </div>
           <Button onClick={() => setEnlargedCard(null)} className="mt-4" data-testid="button-close-card-dialog">Close</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPinDialogOpen} onOpenChange={setIsPinDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              🔢 Set Card PIN
+            </DialogTitle>
+            <DialogDescription>
+              Create a 4-digit PIN for your card
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pin-input">Enter 4-Digit PIN</Label>
+              <Input
+                id="pin-input"
+                type="password"
+                maxLength={4}
+                placeholder="Enter PIN"
+                value={pin}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setPin(value);
+                }}
+                className="text-center text-2xl tracking-widest"
+                data-testid="input-pin"
+              />
+              <p className="text-xs text-gray-500">Enter a 4-digit PIN to secure your card</p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsPinDialogOpen(false);
+                setPin("");
+              }}
+              className="flex-1"
+              data-testid="button-cancel-pin"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (pin.length === 4) {
+                  setPinMutation.mutate(pin);
+                }
+              }}
+              disabled={pin.length !== 4 || setPinMutation.isPending}
+              className="flex-1 bg-purple-600 hover:bg-purple-700"
+              data-testid="button-submit-pin"
+            >
+              {setPinMutation.isPending ? "Setting..." : "Set PIN"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
