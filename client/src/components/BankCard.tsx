@@ -5,22 +5,21 @@ interface BankCardProps {
   type: "debit" | "credit";
   cardholderName: string;
   businessName: string;
-  accountNumber: string;
-  expiryDate?: string;
-  cvv?: string;
+  cardNumber: string;
+  cardType: string;
+  expiryDate: string;
+  cvv: string;
 }
 
 export function BankCard({ 
   type, 
   cardholderName, 
   businessName,
-  accountNumber, 
-  expiryDate = "12/28",
-  cvv = "***"
+  cardNumber,
+  cardType,
+  expiryDate,
+  cvv
 }: BankCardProps) {
-  const cardNumber = accountNumber.padStart(16, "4");
-  const formattedCardNumber = cardNumber.match(/.{1,4}/g)?.join(" ") || cardNumber;
-  
   return (
     <Card className={`
       relative overflow-hidden w-full max-w-md h-56 p-6 
@@ -29,7 +28,7 @@ export function BankCard({
         : "bg-gradient-to-br from-slate-800 via-slate-900 to-black"
       }
       text-white shadow-2xl border-0
-    `}>
+    `} data-testid={`card-${type}`}>
       <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20"></div>
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
       
@@ -64,13 +63,13 @@ export function BankCard({
         <div className="space-y-3">
           <div>
             <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Card Number</p>
-            <p className="text-lg font-mono font-semibold tracking-wider">{formattedCardNumber}</p>
+            <p className="text-lg font-mono font-semibold tracking-wider" data-testid={`card-number-${type}`}>{cardNumber}</p>
           </div>
 
           <div className="flex justify-between items-end">
             <div className="flex-1">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Cardholder</p>
-              <p className="text-sm font-semibold uppercase tracking-wide truncate pr-4">
+              <p className="text-sm font-semibold uppercase tracking-wide truncate pr-4" data-testid={`cardholder-${type}`}>
                 {cardholderName}
               </p>
               <p className="text-xs text-white/70 uppercase tracking-wide truncate pr-4 mt-0.5">
@@ -79,15 +78,27 @@ export function BankCard({
             </div>
             <div className="text-right">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Expires</p>
-              <p className="text-sm font-mono font-semibold">{expiryDate}</p>
+              <p className="text-sm font-mono font-semibold" data-testid={`expiry-${type}`}>{expiryDate}</p>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-4 right-6">
+        <div className="absolute bottom-6 right-6 flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-xs text-white/60 uppercase tracking-wider">CVV</p>
+            <p className="text-sm font-mono font-semibold" data-testid={`cvv-${type}`}>{cvv}</p>
+          </div>
           <div className="flex items-center gap-1">
-            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30"></div>
-            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 -ml-4"></div>
+            {cardType === "Visa" ? (
+              <div className="flex items-center justify-center w-16 h-10 rounded bg-white/90">
+                <span className="text-blue-900 font-bold italic text-lg">VISA</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-0">
+                <div className="w-7 h-7 rounded-full bg-red-500/90 backdrop-blur-sm"></div>
+                <div className="w-7 h-7 rounded-full bg-yellow-500/90 backdrop-blur-sm -ml-3"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>

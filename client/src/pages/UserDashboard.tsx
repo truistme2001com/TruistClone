@@ -506,8 +506,10 @@ export default function UserDashboard() {
                         type="debit"
                         cardholderName={user?.fullName || ""}
                         businessName={formatBusinessName(account?.businessName)}
-                        accountNumber={account?.accountNumber || ""}
-                        expiryDate="12/28"
+                        cardNumber={account?.debitCardNumber || ""}
+                        cardType={account?.debitCardType || "Visa"}
+                        expiryDate={account?.debitCardExpiry || "12/28"}
+                        cvv={account?.debitCardCvv || "***"}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -535,8 +537,10 @@ export default function UserDashboard() {
                         type="credit"
                         cardholderName={user?.fullName || ""}
                         businessName={formatBusinessName(account?.businessName)}
-                        accountNumber={account?.accountNumber || ""}
-                        expiryDate="09/27"
+                        cardNumber={account?.creditCardNumber || ""}
+                        cardType={account?.creditCardType || "Mastercard"}
+                        expiryDate={account?.creditCardExpiry || "09/27"}
+                        cvv={account?.creditCardCvv || "***"}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">

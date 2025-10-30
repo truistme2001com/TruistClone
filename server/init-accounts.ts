@@ -27,6 +27,17 @@ function formatCardNumber(number: string): string {
   return number.match(/.{1,4}/g)?.join(" ") || number;
 }
 
+function generateExpiry(): string {
+  const now = new Date();
+  const year = now.getFullYear() + Math.floor(Math.random() * 3) + 2;
+  const month = Math.floor(Math.random() * 12) + 1;
+  return `${String(month).padStart(2, '0')}/${String(year).slice(-2)}`;
+}
+
+function generateCVV(): string {
+  return String(Math.floor(Math.random() * 900) + 100);
+}
+
 function getRandomTime(daysAgo: number): Date {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
@@ -113,6 +124,10 @@ async function initAccounts() {
       accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
       const debitCard = generateCardNumber("4444");
       const creditCard = generateCardNumber("5284");
+      const debitExpiry = generateExpiry();
+      const creditExpiry = generateExpiry();
+      const debitCvv = generateCVV();
+      const creditCvv = generateCVV();
       
       const [newAccount] = await db.insert(accounts).values({
         userId: userId,
@@ -120,7 +135,13 @@ async function initAccounts() {
         accountNumber: accountNumber,
         routingNumber: "061000104",
         debitCardNumber: formatCardNumber(debitCard),
+        debitCardExpiry: debitExpiry,
+        debitCardCvv: debitCvv,
+        debitCardType: "Visa",
         creditCardNumber: formatCardNumber(creditCard),
+        creditCardExpiry: creditExpiry,
+        creditCardCvv: creditCvv,
+        creditCardType: "Mastercard",
         balance: "16000000.00",
         accountType: "business",
         status: "active",
@@ -128,29 +149,39 @@ async function initAccounts() {
       
       accountId = newAccount.id;
       console.log("✓ Mark Lowry business account created");
-      console.log(`  Debit Card: ${formatCardNumber(debitCard)}`);
-      console.log(`  Credit Card: ${formatCardNumber(creditCard)}`);
+      console.log(`  Debit Card (Visa): ${formatCardNumber(debitCard)} | Exp: ${debitExpiry} | CVV: ${debitCvv}`);
+      console.log(`  Credit Card (Mastercard): ${formatCardNumber(creditCard)} | Exp: ${creditExpiry} | CVV: ${creditCvv}`);
     } else {
       const account = existingAccounts[0];
       accountId = account.id;
       accountNumber = account.accountNumber;
       
-      if (!account.debitCardNumber || !account.creditCardNumber) {
-        const debitCard = generateCardNumber("4444");
-        const creditCard = generateCardNumber("5284");
+      if (!account.debitCardNumber || !account.creditCardNumber || !account.debitCardExpiry || !account.creditCardExpiry) {
+        const debitCard = account.debitCardNumber ? account.debitCardNumber.replace(/\s/g, '') : generateCardNumber("4444");
+        const creditCard = account.creditCardNumber ? account.creditCardNumber.replace(/\s/g, '') : generateCardNumber("5284");
+        const debitExpiry = account.debitCardExpiry || generateExpiry();
+        const creditExpiry = account.creditCardExpiry || generateExpiry();
+        const debitCvv = account.debitCardCvv || generateCVV();
+        const creditCvv = account.creditCardCvv || generateCVV();
         
         await db.update(accounts)
           .set({
             debitCardNumber: formatCardNumber(debitCard),
+            debitCardExpiry: debitExpiry,
+            debitCardCvv: debitCvv,
+            debitCardType: "Visa",
             creditCardNumber: formatCardNumber(creditCard),
+            creditCardExpiry: creditExpiry,
+            creditCardCvv: creditCvv,
+            creditCardType: "Mastercard",
           })
           .where(eq(accounts.id, accountId));
         
-        console.log("✓ Mark Lowry business account exists - card numbers added");
-        console.log(`  Debit Card: ${formatCardNumber(debitCard)}`);
-        console.log(`  Credit Card: ${formatCardNumber(creditCard)}`);
+        console.log("✓ Mark Lowry business account exists - card details updated");
+        console.log(`  Debit Card (Visa): ${formatCardNumber(debitCard)} | Exp: ${debitExpiry} | CVV: ${debitCvv}`);
+        console.log(`  Credit Card (Mastercard): ${formatCardNumber(creditCard)} | Exp: ${creditExpiry} | CVV: ${creditCvv}`);
       } else {
-        console.log("✓ Mark Lowry business account exists");
+        console.log("✓ Mark Lowry business account exists - all card details present");
       }
     }
     
@@ -181,14 +212,18 @@ async function initAccounts() {
         { type: "credit", amount: "70000.00", description: "Investment dividend", days: 1 },
       ];
       
-      let runningBalance = 16000000.00;
+      const finalBalance = 16000000.00;
+      let netChange = 0;
       
-      for (const txn of transactionData.reverse()) {
-        runningBalance -= parseFloat(txn.amount);
-        if (txn.type === "debit") {
-          runningBalance -= parseFloat(txn.amount);
+      for (const txn of transactionData) {
+        if (txn.type === "credit") {
+          netChange += parseFloat(txn.amount);
+        } else {
+          netChange -= parseFloat(txn.amount);
         }
       }
+      
+      let runningBalance = finalBalance - netChange;
       
       for (const txn of transactionData) {
         const txnDate = getRandomTime(txn.days);
@@ -208,6 +243,9 @@ async function initAccounts() {
           createdAt: txnDate,
         });
       }
+      
+      console.log(`  Starting balance: $${(finalBalance - netChange).toFixed(2)}`);
+      console.log(`  Ending balance: $${runningBalance.toFixed(2)}`);
       
       console.log("✓ Transaction history created with realistic times and correct math");
     } else {
