@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateBalanceOpen, setIsUpdateBalanceOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<any>(null);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { data: currentUser } = useQuery({
     queryKey: ["me"],
@@ -134,6 +136,27 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(`/api/admin/users/${data.userId}/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setIsEditUserOpen(false);
+      setSelectedUser(null);
+    },
+  });
+
   const updateBalanceMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch(`/api/admin/accounts/${data.accountId}/balance`, {
@@ -182,6 +205,26 @@ export default function AdminDashboard() {
       type: transactionType,
       description: formData.get("description"),
     });
+  };
+
+  const handleEditUser = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const updateData: any = { userId: selectedUser.id };
+    
+    const fullName = formData.get("fullName") as string;
+    const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
+    const password = formData.get("password") as string;
+    const dateJoined = formData.get("dateJoined") as string;
+    
+    if (fullName && fullName !== selectedUser.fullName) updateData.fullName = fullName;
+    if (email && email !== selectedUser.email) updateData.email = email;
+    if (username && username !== selectedUser.username) updateData.username = username;
+    if (password) updateData.password = password;
+    if (dateJoined) updateData.dateJoined = dateJoined;
+    
+    updateUserMutation.mutate(updateData);
   };
 
   const formatCurrency = (amount: string | number) => {
@@ -421,6 +464,19 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1.5 border-blue-300 text-blue-600 hover:bg-blue-50"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setIsEditUserOpen(true);
+                                }}
+                                data-testid={`button-edit-user-${user.id}`}
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                                Edit
+                              </Button>
                               {user.accounts?.[0] && (
                                 <Button
                                   size="sm"
@@ -537,6 +593,75 @@ export default function AdminDashboard() {
             </Button>
           </form>
         </DialogContent>
+        </Dialog>
+
+        <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User Details</DialogTitle>
+              <DialogDescription>
+                Update information for {selectedUser?.fullName}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditUser} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-fullName">Full Name</Label>
+                <Input 
+                  id="edit-fullName" 
+                  name="fullName" 
+                  defaultValue={selectedUser?.fullName}
+                  data-testid="input-edit-fullname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input 
+                  id="edit-email" 
+                  name="email" 
+                  type="email"
+                  defaultValue={selectedUser?.email || ""}
+                  data-testid="input-edit-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-username">Username</Label>
+                <Input 
+                  id="edit-username" 
+                  name="username" 
+                  defaultValue={selectedUser?.username}
+                  data-testid="input-edit-username"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-password">Password (leave blank to keep current)</Label>
+                <Input 
+                  id="edit-password" 
+                  name="password" 
+                  type="password"
+                  placeholder="Enter new password"
+                  data-testid="input-edit-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-dateJoined">Date Joined</Label>
+                <Input 
+                  id="edit-dateJoined" 
+                  name="dateJoined" 
+                  type="date"
+                  defaultValue={selectedUser?.dateJoined ? new Date(selectedUser.dateJoined).toISOString().split('T')[0] : ""}
+                  data-testid="input-edit-datejoined"
+                />
+              </div>
+              {updateUserMutation.error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{updateUserMutation.error.message}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={updateUserMutation.isPending} data-testid="button-submit-edit-user">
+                {updateUserMutation.isPending ? "Updating..." : "Update User"}
+              </Button>
+            </form>
+          </DialogContent>
         </Dialog>
 
         <footer className="bg-white border-t border-gray-200 mt-16">

@@ -95,7 +95,8 @@ async function initAccounts() {
           username: "marklowry748",
           fullName: "Mark Lowry",
           isAdmin: false,
-          isBlocked: false
+          isBlocked: false,
+          dateJoined: new Date("2019-08-11")
         })
         .where(eq(users.id, existingUser.id));
       userId = existingUser.id;
@@ -108,6 +109,7 @@ async function initAccounts() {
         email: "marklowry748@gmail.com",
         isAdmin: false,
         isBlocked: false,
+        dateJoined: new Date("2019-08-11"),
       }).returning();
       userId = newUser.id;
       console.log("✓ Mark Lowry account created");

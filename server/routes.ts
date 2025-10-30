@@ -13,6 +13,7 @@ import {
   deleteAccount,
   blockUser,
   unblockUser,
+  updateUser,
   transferFunds,
   domesticWireTransfer,
   internationalWireTransfer,
@@ -22,7 +23,7 @@ import {
   updateUserNickname,
   changeUserPassword,
 } from "./storage";
-import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
+import { loginSchema, createUserSchema, updateUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
@@ -332,6 +333,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "User unblocked successfully" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/users/:userId/update", isAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const data = updateUserSchema.parse({ ...req.body, userId });
+      
+      const updateData: any = {};
+      if (data.fullName) updateData.fullName = data.fullName;
+      if (data.email) updateData.email = data.email;
+      if (data.username) updateData.username = data.username;
+      if (data.password) updateData.password = data.password;
+      if (data.dateJoined) updateData.dateJoined = new Date(data.dateJoined);
+      
+      const updatedUser = await updateUser(userId, updateData);
+      
+      const { password, ...userInfo } = updatedUser;
+      res.json({ 
+        success: true, 
+        message: "User updated successfully",
+        user: userInfo
+      });
+    } catch (error: any) {
+      res.status(400).json({ 
+        success: false, 
+        message: error.message || "Failed to update user" 
+      });
     }
   });
 

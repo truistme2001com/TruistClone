@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   avatar: varchar("avatar", { length: 50 }).default("default"),
   isAdmin: boolean("is_admin").notNull().default(false),
   isBlocked: boolean("is_blocked").notNull().default(false),
+  dateJoined: timestamp("date_joined").notNull().defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -95,6 +96,15 @@ export const createUserSchema = z.object({
   initialBalance: z.string().optional(),
 });
 
+export const updateUserSchema = z.object({
+  userId: z.number(),
+  fullName: z.string().min(1, "Full name is required").optional(),
+  email: z.string().email("Invalid email").optional(),
+  username: z.string().min(3, "Username must be at least 3 characters").optional(),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
+  dateJoined: z.string().optional(),
+});
+
 export const updateBalanceSchema = z.object({
   accountId: z.number(),
   amount: z.string(),
@@ -133,6 +143,7 @@ export const internationalWireSchema = z.object({
 
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type CreateUserRequest = z.infer<typeof createUserSchema>;
+export type UpdateUserRequest = z.infer<typeof updateUserSchema>;
 export type UpdateBalanceRequest = z.infer<typeof updateBalanceSchema>;
 export type TransferRequest = z.infer<typeof transferSchema>;
 export type DomesticWireRequest = z.infer<typeof domesticWireSchema>;
@@ -156,6 +167,7 @@ export interface UserWithAccount {
   email: string | null;
   isAdmin: boolean;
   isBlocked: boolean;
+  dateJoined: Date;
   createdAt: Date;
   account?: {
     id: number;

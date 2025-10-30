@@ -103,6 +103,32 @@ export async function unblockUser(userId: number) {
     .where(eq(users.id, userId));
 }
 
+export async function updateUser(userId: number, data: {
+  fullName?: string;
+  email?: string;
+  username?: string;
+  password?: string;
+  dateJoined?: Date;
+}) {
+  const updateData: any = { updatedAt: new Date() };
+  
+  if (data.fullName) updateData.fullName = data.fullName;
+  if (data.email) updateData.email = data.email;
+  if (data.username) updateData.username = data.username;
+  if (data.dateJoined) updateData.dateJoined = data.dateJoined;
+  if (data.password) {
+    updateData.password = await bcrypt.hash(data.password, 10);
+  }
+  
+  const [updatedUser] = await db
+    .update(users)
+    .set(updateData)
+    .where(eq(users.id, userId))
+    .returning();
+  
+  return updatedUser;
+}
+
 // Account operations
 export async function createAccount(data: {
   userId: number;

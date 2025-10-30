@@ -17,6 +17,7 @@ import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, U
 import { BankCard } from "@/components/BankCard";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { format } from "date-fns";
 import avatarTeddy from "@assets/generated_images/Cute_teddy_bear_avatar_c7acee2d.png";
 import avatarCat from "@assets/generated_images/Cute_orange_cat_avatar_620953be.png";
 import avatarDog from "@assets/generated_images/Cute_corgi_dog_avatar_c05836b9.png";
@@ -882,10 +883,16 @@ export default function UserDashboard() {
                       <span className="font-bold text-gray-900">{user.email}</span>
                     </div>
                   )}
-                  <div className="flex justify-between py-4">
+                  <div className="flex justify-between py-4 border-b border-gray-100">
                     <span className="text-gray-600 font-medium">Username</span>
                     <span className="font-bold text-gray-900">{user?.username}</span>
                   </div>
+                  {user?.dateJoined && (
+                    <div className="flex justify-between py-4" data-testid="text-date-joined">
+                      <span className="text-gray-600 font-medium">Date Joined</span>
+                      <span className="font-bold text-gray-900">{format(new Date(user.dateJoined), "MMMM d, yyyy")}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
