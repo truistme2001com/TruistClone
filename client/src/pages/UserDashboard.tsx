@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { queryClient } from "@/lib/queryClient";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
 import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send, ChevronDown, Globe, Building2 } from "lucide-react";
+import { BankCard } from "@/components/BankCard";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
@@ -306,6 +307,12 @@ export default function UserDashboard() {
               Transaction History
             </TabsTrigger>
             <TabsTrigger 
+              value="cards" 
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold"
+            >
+              My Cards
+            </TabsTrigger>
+            <TabsTrigger 
               value="details" 
               className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold"
             >
@@ -472,6 +479,100 @@ export default function UserDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="cards">
+            <div className="space-y-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="text-xl">My Bank Cards</CardTitle>
+                      <CardDescription className="mt-1">Debit and Credit Cards linked to your account</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-8 pb-8">
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="bg-purple-100 p-2 rounded-lg">
+                          <CreditCard className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">Business Debit Card</h3>
+                          <p className="text-sm text-gray-600">Direct access to your checking account</p>
+                        </div>
+                      </div>
+                      <BankCard
+                        type="debit"
+                        cardholderName={user?.fullName || ""}
+                        businessName={formatBusinessName(account?.businessName)}
+                        accountNumber={account?.accountNumber || ""}
+                        expiryDate="12/28"
+                      />
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Daily Limit</p>
+                          <p className="text-lg font-bold text-gray-900">$50,000</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Card Status</p>
+                          <Badge className="bg-green-500 text-white hover:bg-green-600">Active</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="bg-slate-100 p-2 rounded-lg">
+                          <CreditCard className="h-5 w-5 text-slate-700" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">Business Credit Card</h3>
+                          <p className="text-sm text-gray-600">Platinum rewards card</p>
+                        </div>
+                      </div>
+                      <BankCard
+                        type="credit"
+                        cardholderName={user?.fullName || ""}
+                        businessName={formatBusinessName(account?.businessName)}
+                        accountNumber={account?.accountNumber || ""}
+                        expiryDate="09/27"
+                      />
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Credit Limit</p>
+                          <p className="text-lg font-bold text-gray-900">$250,000</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">Available Credit</p>
+                          <p className="text-lg font-bold text-green-600">$250,000</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <h4 className="font-bold text-gray-900 mb-4">Card Management</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Button variant="outline" className="w-full">
+                        Lock Card
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        Report Lost
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        Set PIN
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        View Transactions
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="details">
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="border-0 shadow-lg">
@@ -490,6 +591,10 @@ export default function UserDashboard() {
                   <div className="flex justify-between py-4 border-b border-gray-100">
                     <span className="text-gray-600 font-medium">Account Number</span>
                     <span className="font-mono font-bold text-gray-900">{account?.accountNumber}</span>
+                  </div>
+                  <div className="flex justify-between py-4 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Routing Number</span>
+                    <span className="font-mono font-bold text-gray-900">{account?.routingNumber || "061000104"}</span>
                   </div>
                   <div className="flex justify-between py-4">
                     <span className="text-gray-600 font-medium">Status</span>

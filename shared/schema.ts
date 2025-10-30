@@ -20,6 +20,7 @@ export const accounts = pgTable("accounts", {
   userId: integer("user_id").notNull().references(() => users.id),
   businessName: text("business_name").notNull(),
   accountNumber: varchar("account_number", { length: 20 }).notNull().unique(),
+  routingNumber: varchar("routing_number", { length: 9 }).notNull().default("061000104"),
   balance: decimal("balance", { precision: 20, scale: 2 }).notNull().default("0"),
   accountType: varchar("account_type", { length: 50 }).notNull().default("business"),
   status: varchar("status", { length: 20 }).notNull().default("active"),

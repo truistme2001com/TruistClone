@@ -422,9 +422,9 @@ export async function internationalWireTransfer(data: {
   };
 }
 
-// Helper function to generate account numbers
+// Helper function to generate account numbers (Truist format: 10 digits)
 function generateAccountNumber(): string {
-  const timestamp = Date.now().toString();
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
-  return `${timestamp.slice(-10)}${random}`;
+  const random1 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
+  const random2 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
+  return `${random1}${random2}`;
 }
