@@ -21,6 +21,8 @@ export const accounts = pgTable("accounts", {
   businessName: text("business_name").notNull(),
   accountNumber: varchar("account_number", { length: 20 }).notNull().unique(),
   routingNumber: varchar("routing_number", { length: 9 }).notNull().default("061000104"),
+  debitCardNumber: varchar("debit_card_number", { length: 19 }),
+  creditCardNumber: varchar("credit_card_number", { length: 19 }),
   balance: decimal("balance", { precision: 20, scale: 2 }).notNull().default("0"),
   accountType: varchar("account_type", { length: 50 }).notNull().default("business"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
