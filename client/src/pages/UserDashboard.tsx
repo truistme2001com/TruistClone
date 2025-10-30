@@ -30,6 +30,27 @@ export default function UserDashboard() {
   const [enlargedCard, setEnlargedCard] = useState<"debit" | "credit" | null>(null);
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
   const [pin, setPin] = useState("");
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const avatarOptions = [
+    { id: "default", emoji: "👤", label: "Default" },
+    { id: "professional", emoji: "👨‍💼", label: "Professional" },
+    { id: "woman", emoji: "👩", label: "Woman" },
+    { id: "man", emoji: "👨", label: "Man" },
+    { id: "artist", emoji: "👨‍🎨", label: "Artist" },
+    { id: "musician", emoji: "🎵", label: "Musician" },
+    { id: "business", emoji: "💼", label: "Business" },
+    { id: "star", emoji: "⭐", label: "Star" },
+    { id: "crown", emoji: "👑", label: "Crown" },
+    { id: "rocket", emoji: "🚀", label: "Rocket" },
+    { id: "trophy", emoji: "🏆", label: "Trophy" },
+    { id: "heart", emoji: "❤️", label: "Heart" },
+  ];
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
@@ -155,6 +176,58 @@ export default function UserDashboard() {
     },
   });
 
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (avatar: string) => {
+      return await apiRequest("POST", "/api/profile/update-avatar", { avatar });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      setIsAvatarDialogOpen(false);
+      toast({
+        title: "✅ Avatar Updated",
+        description: "Your profile avatar has been updated successfully.",
+        duration: 3000,
+      });
+    },
+  });
+
+  const updateNicknameMutation = useMutation({
+    mutationFn: async (nickname: string) => {
+      return await apiRequest("POST", "/api/profile/update-nickname", { nickname });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast({
+        title: "✅ Nickname Updated",
+        description: "Your nickname has been updated successfully.",
+        duration: 3000,
+      });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      return await apiRequest("POST", "/api/profile/change-password", data);
+    },
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast({
+        title: "✅ Password Changed",
+        description: "Your password has been changed successfully. Use your new password next time you sign in.",
+        duration: 4000,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Password Change Failed",
+        description: error.message || "Failed to change password. Please try again.",
+        duration: 4000,
+      });
+    },
+  });
+
   const handleTransfer = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -265,11 +338,14 @@ export default function UserDashboard() {
                 <Settings className="h-5 w-5" />
               </Button>
               <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
-                <div className="flex items-center gap-2">
-                  <div className="bg-purple-100 p-2 rounded-full">
-                    <User className="h-4 w-4 text-purple-600" />
+                <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setIsAvatarDialogOpen(true)} data-testid="profile-avatar">
+                  <div className="bg-purple-100 p-2 rounded-full text-2xl flex items-center justify-center w-10 h-10">
+                    {avatarOptions.find(a => a.id === (user?.avatar || "default"))?.emoji || "👤"}
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{user?.fullName}</span>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-900 block">{user?.nickname || user?.fullName}</span>
+                    {user?.nickname && <span className="text-xs text-gray-500">{user?.fullName}</span>}
+                  </div>
                 </div>
               </div>
               <Button 
@@ -1047,45 +1123,187 @@ export default function UserDashboard() {
       </Dialog>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-purple-600" />
               Account Settings
             </DialogTitle>
             <DialogDescription>
-              Manage your account preferences
+              Manage your profile and security preferences
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Profile Information</Label>
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
-                <p className="text-xs text-gray-600 mt-1">{user?.email}</p>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Profile Information</Label>
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-purple-100 p-3 rounded-full text-3xl flex items-center justify-center w-14 h-14">
+                    {avatarOptions.find(a => a.id === (user?.avatar || "default"))?.emoji || "👤"}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">{user?.email}</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setIsAvatarDialogOpen(true)} data-testid="button-change-avatar">
+                    Change Avatar
+                  </Button>
+                </div>
+                <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <Label htmlFor="nickname-input" className="text-sm">Display Name / Nickname (Optional)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="nickname-input"
+                      placeholder={user?.fullName || "Enter nickname"}
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="flex-1"
+                      data-testid="input-nickname"
+                    />
+                    <Button
+                      onClick={() => {
+                        updateNicknameMutation.mutate(nickname);
+                      }}
+                      disabled={updateNicknameMutation.isPending}
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700"
+                      data-testid="button-save-nickname"
+                    >
+                      {updateNicknameMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">This will be displayed instead of your full name</p>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Security</Label>
-              <Button variant="outline" className="w-full justify-start">
-                Change Password
-              </Button>
+
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Security & Password</Label>
+              <div className="p-4 rounded-lg bg-purple-50 border border-purple-200 space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="current-password" className="text-sm">Current Password</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    placeholder="Enter current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    data-testid="input-current-password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password" className="text-sm">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    data-testid="input-new-password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-sm">Confirm New Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    data-testid="input-confirm-password"
+                  />
+                </div>
+                <Button
+                  onClick={() => {
+                    if (newPassword !== confirmPassword) {
+                      toast({
+                        title: "❌ Passwords Don't Match",
+                        description: "Please make sure your new passwords match.",
+                        duration: 3000,
+                      });
+                      return;
+                    }
+                    changePasswordMutation.mutate({ currentPassword, newPassword });
+                  }}
+                  disabled={!currentPassword || !newPassword || !confirmPassword || changePasswordMutation.isPending}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  data-testid="button-change-password"
+                >
+                  {changePasswordMutation.isPending ? "Changing Password..." : "Change Password"}
+                </Button>
+                <p className="text-xs text-gray-600">Password must be at least 6 characters</p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Preferences</Label>
+
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Notifications & Alerts</Label>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
-                  <span className="text-sm">Email Notifications</span>
-                  <Badge variant="secondary" className="bg-green-500 text-white">On</Badge>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Email Notifications</p>
+                    <p className="text-xs text-gray-600">Receive transaction alerts via email</p>
+                  </div>
+                  <Switch checked={true} />
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
-                  <span className="text-sm">Two-Factor Authentication</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">SMS Alerts</p>
+                    <p className="text-xs text-gray-600">Get text alerts for large transactions</p>
+                  </div>
+                  <Switch checked={true} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Push Notifications</p>
+                    <p className="text-xs text-gray-600">Mobile app notifications</p>
+                  </div>
+                  <Switch checked={false} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Security Preferences</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Two-Factor Authentication</p>
+                    <p className="text-xs text-gray-600">Extra security for your account</p>
+                  </div>
                   <Badge variant="secondary" className="bg-green-500 text-white">Enabled</Badge>
                 </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Biometric Login</p>
+                    <p className="text-xs text-gray-600">Use fingerprint or Face ID</p>
+                  </div>
+                  <Switch checked={true} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Session Timeout</p>
+                    <p className="text-xs text-gray-600">Auto logout after 30 minutes</p>
+                  </div>
+                  <Switch checked={true} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Privacy & Data</Label>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-between" data-testid="button-download-data">
+                  <span>Download Account Data</span>
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" className="w-full justify-between text-left">
+                  <span>Manage Linked Accounts</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-          <Button onClick={() => setIsSettingsOpen(false)} className="mt-4">Close</Button>
+          <Button onClick={() => setIsSettingsOpen(false)} className="mt-4" data-testid="button-close-settings">Close</Button>
         </DialogContent>
       </Dialog>
 
@@ -1202,6 +1420,41 @@ export default function UserDashboard() {
             </div>
           </div>
           <Button onClick={() => setEnlargedCard(null)} className="mt-4" data-testid="button-close-card-dialog">Close</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              👤 Choose Your Avatar
+            </DialogTitle>
+            <DialogDescription>
+              Select an avatar to personalize your profile
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-4 gap-3 py-4">
+            {avatarOptions.map((avatar) => (
+              <button
+                key={avatar.id}
+                onClick={() => {
+                  setSelectedAvatar(avatar.id);
+                  updateAvatarMutation.mutate(avatar.id);
+                }}
+                className={`
+                  flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all hover:scale-105
+                  ${(user?.avatar || "default") === avatar.id 
+                    ? "border-purple-600 bg-purple-50" 
+                    : "border-gray-200 hover:border-purple-300 bg-white"}
+                `}
+                data-testid={`avatar-option-${avatar.id}`}
+              >
+                <span className="text-4xl mb-2">{avatar.emoji}</span>
+                <span className="text-xs text-gray-600 font-medium">{avatar.label}</span>
+              </button>
+            ))}
+          </div>
+          <Button onClick={() => setIsAvatarDialogOpen(false)} className="mt-2" data-testid="button-close-avatar">Close</Button>
         </DialogContent>
       </Dialog>
 
