@@ -17,6 +17,18 @@ import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, U
 import { BankCard } from "@/components/BankCard";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import avatarTeddy from "@assets/generated_images/Cute_teddy_bear_avatar_c7acee2d.png";
+import avatarCat from "@assets/generated_images/Cute_orange_cat_avatar_620953be.png";
+import avatarDog from "@assets/generated_images/Cute_corgi_dog_avatar_c05836b9.png";
+import avatarPanda from "@assets/generated_images/Cute_panda_avatar_446d56e7.png";
+import avatarBunny from "@assets/generated_images/Cute_bunny_rabbit_avatar_1fad4cd8.png";
+import avatarFox from "@assets/generated_images/Cute_fox_avatar_15511073.png";
+import avatarUnicorn from "@assets/generated_images/Cute_unicorn_avatar_a716b055.png";
+import avatarRobot from "@assets/generated_images/Cute_robot_avatar_945782ec.png";
+import avatarPenguin from "@assets/generated_images/Cute_penguin_avatar_8452d04c.png";
+import avatarKoala from "@assets/generated_images/Cute_koala_avatar_90299146.png";
+import avatarOwl from "@assets/generated_images/Cute_owl_avatar_b6ecc7fc.png";
+import avatarSloth from "@assets/generated_images/Cute_sloth_avatar_6f1e1b80.png";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
@@ -38,18 +50,18 @@ export default function UserDashboard() {
   const [confirmPassword, setConfirmPassword] = useState("");
   
   const avatarOptions = [
-    { id: "default", emoji: "👤", label: "Default" },
-    { id: "professional", emoji: "👨‍💼", label: "Professional" },
-    { id: "woman", emoji: "👩", label: "Woman" },
-    { id: "man", emoji: "👨", label: "Man" },
-    { id: "artist", emoji: "👨‍🎨", label: "Artist" },
-    { id: "musician", emoji: "🎵", label: "Musician" },
-    { id: "business", emoji: "💼", label: "Business" },
-    { id: "star", emoji: "⭐", label: "Star" },
-    { id: "crown", emoji: "👑", label: "Crown" },
-    { id: "rocket", emoji: "🚀", label: "Rocket" },
-    { id: "trophy", emoji: "🏆", label: "Trophy" },
-    { id: "heart", emoji: "❤️", label: "Heart" },
+    { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
+    { id: "cat", image: avatarCat, label: "Cat" },
+    { id: "dog", image: avatarDog, label: "Dog" },
+    { id: "panda", image: avatarPanda, label: "Panda" },
+    { id: "bunny", image: avatarBunny, label: "Bunny" },
+    { id: "fox", image: avatarFox, label: "Fox" },
+    { id: "unicorn", image: avatarUnicorn, label: "Unicorn" },
+    { id: "robot", image: avatarRobot, label: "Robot" },
+    { id: "penguin", image: avatarPenguin, label: "Penguin" },
+    { id: "koala", image: avatarKoala, label: "Koala" },
+    { id: "owl", image: avatarOwl, label: "Owl" },
+    { id: "sloth", image: avatarSloth, label: "Sloth" },
   ];
 
   const { data: userData } = useQuery({
@@ -339,8 +351,12 @@ export default function UserDashboard() {
               </Button>
               <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
                 <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setIsAvatarDialogOpen(true)} data-testid="profile-avatar">
-                  <div className="bg-purple-100 p-2 rounded-full text-2xl flex items-center justify-center w-10 h-10">
-                    {avatarOptions.find(a => a.id === (user?.avatar || "default"))?.emoji || "👤"}
+                  <div className="bg-purple-100 p-1 rounded-full flex items-center justify-center w-10 h-10 overflow-hidden">
+                    <img 
+                      src={avatarOptions.find(a => a.id === (user?.avatar || "teddy"))?.image || avatarTeddy} 
+                      alt="User avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   </div>
                   <div>
                     <span className="text-sm font-semibold text-gray-900 block">{user?.nickname || user?.fullName}</span>
@@ -1138,8 +1154,12 @@ export default function UserDashboard() {
               <Label className="text-base font-semibold">Profile Information</Label>
               <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-purple-100 p-3 rounded-full text-3xl flex items-center justify-center w-14 h-14">
-                    {avatarOptions.find(a => a.id === (user?.avatar || "default"))?.emoji || "👤"}
+                  <div className="bg-purple-100 p-1 rounded-full flex items-center justify-center w-14 h-14 overflow-hidden">
+                    <img 
+                      src={avatarOptions.find(a => a.id === (user?.avatar || "teddy"))?.image || avatarTeddy} 
+                      alt="User avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
@@ -1442,14 +1462,20 @@ export default function UserDashboard() {
                   updateAvatarMutation.mutate(avatar.id);
                 }}
                 className={`
-                  flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all hover:scale-105
-                  ${(user?.avatar || "default") === avatar.id 
+                  flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all hover:scale-105
+                  ${(user?.avatar || "teddy") === avatar.id 
                     ? "border-purple-600 bg-purple-50" 
                     : "border-gray-200 hover:border-purple-300 bg-white"}
                 `}
                 data-testid={`avatar-option-${avatar.id}`}
               >
-                <span className="text-4xl mb-2">{avatar.emoji}</span>
+                <div className="w-16 h-16 mb-2 rounded-full overflow-hidden bg-purple-50">
+                  <img 
+                    src={avatar.image} 
+                    alt={avatar.label}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <span className="text-xs text-gray-600 font-medium">{avatar.label}</span>
               </button>
             ))}
