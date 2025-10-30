@@ -158,6 +158,20 @@ export default function UserDashboard() {
       .join(' ');
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const getShortBusinessName = (name: string | undefined) => {
+    if (!name) return "";
+    if (name.includes("M. Lowry")) return "M. Lowry";
+    const words = name.split(' ');
+    return words.length > 2 ? words.slice(0, 2).join(' ') : name;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/40 to-indigo-50/30 relative overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
@@ -221,8 +235,10 @@ export default function UserDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Overview</h1>
-          <p className="text-gray-600 text-lg">{formatBusinessName(account?.businessName)}</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {getGreeting()}, {getShortBusinessName(account?.businessName)}
+          </h1>
+          <p className="text-gray-600 text-lg">Account Overview</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 mb-8">
@@ -558,16 +574,45 @@ export default function UserDashboard() {
                   <div className="mt-8 pt-6 border-t border-gray-200">
                     <h4 className="font-bold text-gray-900 mb-4">Card Management</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                        data-testid="button-lock-card"
+                        onClick={() => {
+                          alert("Card lock feature will be available soon. Please contact customer support to lock your card.");
+                        }}
+                      >
                         Lock Card
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                        data-testid="button-report-lost"
+                        onClick={() => {
+                          alert("To report a lost or stolen card, please call 1-800-TRUIST (1-800-878-4789) immediately.");
+                        }}
+                      >
                         Report Lost
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                        data-testid="button-set-pin"
+                        onClick={() => {
+                          alert("To set or change your PIN, please visit any Truist ATM or call customer service at 1-800-TRUIST.");
+                        }}
+                      >
                         Set PIN
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                        data-testid="button-view-card-transactions"
+                        onClick={() => {
+                          const transactionsTab = document.querySelector('[value="transactions"]') as HTMLElement;
+                          if (transactionsTab) transactionsTab.click();
+                        }}
+                      >
                         View Transactions
                       </Button>
                     </div>

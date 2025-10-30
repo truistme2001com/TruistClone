@@ -131,7 +131,7 @@ async function initAccounts() {
       
       const [newAccount] = await db.insert(accounts).values({
         userId: userId,
-        businessName: "Mark Lowry Business Account",
+        businessName: "M. Lowry Vocal Band",
         accountNumber: accountNumber,
         routingNumber: "061000104",
         debitCardNumber: formatCardNumber(debitCard),
@@ -143,7 +143,7 @@ async function initAccounts() {
         creditCardCvv: creditCvv,
         creditCardType: "Mastercard",
         balance: "16000000.00",
-        accountType: "business",
+        accountType: "business checkings",
         status: "active",
       }).returning();
       
@@ -156,33 +156,33 @@ async function initAccounts() {
       accountId = account.id;
       accountNumber = account.accountNumber;
       
-      if (!account.debitCardNumber || !account.creditCardNumber || !account.debitCardExpiry || !account.creditCardExpiry) {
-        const debitCard = account.debitCardNumber ? account.debitCardNumber.replace(/\s/g, '') : generateCardNumber("4444");
-        const creditCard = account.creditCardNumber ? account.creditCardNumber.replace(/\s/g, '') : generateCardNumber("5284");
-        const debitExpiry = account.debitCardExpiry || generateExpiry();
-        const creditExpiry = account.creditCardExpiry || generateExpiry();
-        const debitCvv = account.debitCardCvv || generateCVV();
-        const creditCvv = account.creditCardCvv || generateCVV();
-        
-        await db.update(accounts)
-          .set({
-            debitCardNumber: formatCardNumber(debitCard),
-            debitCardExpiry: debitExpiry,
-            debitCardCvv: debitCvv,
-            debitCardType: "Visa",
-            creditCardNumber: formatCardNumber(creditCard),
-            creditCardExpiry: creditExpiry,
-            creditCardCvv: creditCvv,
-            creditCardType: "Mastercard",
-          })
-          .where(eq(accounts.id, accountId));
-        
-        console.log("✓ Mark Lowry business account exists - card details updated");
-        console.log(`  Debit Card (Visa): ${formatCardNumber(debitCard)} | Exp: ${debitExpiry} | CVV: ${debitCvv}`);
-        console.log(`  Credit Card (Mastercard): ${formatCardNumber(creditCard)} | Exp: ${creditExpiry} | CVV: ${creditCvv}`);
-      } else {
-        console.log("✓ Mark Lowry business account exists - all card details present");
-      }
+      const debitCard = account.debitCardNumber ? account.debitCardNumber.replace(/\s/g, '') : generateCardNumber("4444");
+      const creditCard = account.creditCardNumber ? account.creditCardNumber.replace(/\s/g, '') : generateCardNumber("5284");
+      const debitExpiry = account.debitCardExpiry || generateExpiry();
+      const creditExpiry = account.creditCardExpiry || generateExpiry();
+      const debitCvv = account.debitCardCvv || generateCVV();
+      const creditCvv = account.creditCardCvv || generateCVV();
+      
+      await db.update(accounts)
+        .set({
+          businessName: "M. Lowry Vocal Band",
+          accountType: "business checkings",
+          debitCardNumber: formatCardNumber(debitCard),
+          debitCardExpiry: debitExpiry,
+          debitCardCvv: debitCvv,
+          debitCardType: "Visa",
+          creditCardNumber: formatCardNumber(creditCard),
+          creditCardExpiry: creditExpiry,
+          creditCardCvv: creditCvv,
+          creditCardType: "Mastercard",
+        })
+        .where(eq(accounts.id, accountId));
+      
+      console.log("✓ Mark Lowry business account updated");
+      console.log(`  Business Name: M. Lowry Vocal Band`);
+      console.log(`  Account Type: business checkings`);
+      console.log(`  Debit Card (Visa): ${formatCardNumber(debitCard)} | Exp: ${debitExpiry} | CVV: ${debitCvv}`);
+      console.log(`  Credit Card (Mastercard): ${formatCardNumber(creditCard)} | Exp: ${creditExpiry} | CVV: ${creditCvv}`);
     }
     
     const existingTransactions = await db.query.transactions.findMany({
