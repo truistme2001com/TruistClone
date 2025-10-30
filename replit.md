@@ -11,6 +11,26 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **October 30, 2025**: User Account Enhancements (PERMANENT CHANGES)
+  - Updated permanent user account data in `server/init-accounts.ts`:
+    - Business name: "M. Lowry Vocal Band" (auto-updates on every server restart)
+    - Account type: "business checkings"
+    - User: Mark Lowry (marklowry748@gmail.com / marklowry748)
+    - Password: lowry123
+    - Debit Card (Visa): 4444 1703 8692 6095 | Exp: 03/29 | CVV: 531
+    - Credit Card (Mastercard): 5284 1705 4571 6179 | Exp: 08/28 | CVV: 480
+  - Enhanced User Dashboard with real-time greeting:
+    - "Good morning M. Lowry" (before 12pm)
+    - "Good afternoon M. Lowry" (12pm-6pm)
+    - "Good evening M. Lowry" (after 6pm)
+  - Implemented functional card management buttons:
+    - Lock Card: Alerts user to contact customer support
+    - Report Lost: Provides 1-800-TRUIST contact number
+    - Set PIN: Directs user to ATM or customer service
+    - View Transactions: Switches to transactions tab
+  - All notifications bell and settings icons fully functional
+  - Cards properly display CVV and expiry dates
+  
 - **October 29, 2025**: Initial project setup
   - Configured Truist purple design tokens (#5F259F primary)
   - Generated all hero and promotional images
