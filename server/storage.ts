@@ -453,6 +453,46 @@ export async function updateCardLimit(
   return { success: true, newLimit };
 }
 
+export async function updateUserAvatar(userId: number, avatar: string) {
+  await db
+    .update(users)
+    .set({ avatar, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+  
+  return { success: true, avatar };
+}
+
+export async function updateUserNickname(userId: number, nickname: string) {
+  await db
+    .update(users)
+    .set({ nickname, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+  
+  return { success: true, nickname };
+}
+
+export async function changeUserPassword(userId: number, currentPassword: string, newPassword: string) {
+  const user = await getUserById(userId);
+  
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  const isValidPassword = await verifyPassword(currentPassword, user.password);
+  if (!isValidPassword) {
+    throw new Error("Current password is incorrect");
+  }
+  
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+  await db
+    .update(users)
+    .set({ password: hashedPassword, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+  
+  return { success: true };
+}
+
 // Helper function to generate account numbers (Truist format: 10 digits)
 function generateAccountNumber(): string {
   const random1 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
