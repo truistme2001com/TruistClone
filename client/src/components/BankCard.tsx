@@ -67,9 +67,23 @@ export function BankCard({
         </div>
 
         <div className="space-y-3">
-          <div>
-            <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Card Number</p>
-            <p className="text-lg font-mono font-semibold tracking-wider" data-testid={`card-number-${type}`}>{cardNumber}</p>
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Card Number</p>
+              <p className="text-lg font-mono font-semibold tracking-wider" data-testid={`card-number-${type}`}>{cardNumber}</p>
+            </div>
+            <div className="flex items-center gap-1">
+              {cardType === "Visa" ? (
+                <div className="flex items-center justify-center w-16 h-10 rounded bg-white/90">
+                  <span className="text-blue-900 font-bold italic text-lg">VISA</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-0">
+                  <div className="w-7 h-7 rounded-full bg-red-500/90 backdrop-blur-sm"></div>
+                  <div className="w-7 h-7 rounded-full bg-yellow-500/90 backdrop-blur-sm -ml-3"></div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-between items-end">
@@ -82,28 +96,17 @@ export function BankCard({
                 {businessName}
               </p>
             </div>
-            <div className="text-right mr-2">
-              <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Expires</p>
-              <p className="text-base font-mono font-bold" data-testid={`expiry-${type}`}>{expiryDate}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-white/60 uppercase tracking-wider mb-1">CVV</p>
-              <p className="text-base font-mono font-bold" data-testid={`cvv-${type}`}>{cvv}</p>
+            <div className="flex items-end gap-6">
+              <div className="text-right">
+                <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Expires</p>
+                <p className="text-base font-mono font-bold" data-testid={`expiry-${type}`}>{expiryDate}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-white/60 uppercase tracking-wider mb-1">CVV</p>
+                <p className="text-base font-mono font-bold" data-testid={`cvv-${type}`}>{cvv}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="absolute bottom-6 right-6 flex items-center gap-1">
-          {cardType === "Visa" ? (
-            <div className="flex items-center justify-center w-16 h-10 rounded bg-white/90">
-              <span className="text-blue-900 font-bold italic text-lg">VISA</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-0">
-              <div className="w-7 h-7 rounded-full bg-red-500/90 backdrop-blur-sm"></div>
-              <div className="w-7 h-7 rounded-full bg-yellow-500/90 backdrop-blur-sm -ml-3"></div>
-            </div>
-          )}
         </div>
       </div>
     </Card>
