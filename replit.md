@@ -11,6 +11,19 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **October 30, 2025**: Profile Avatar System Update
+  - **Cute Avatar Images**: Replaced emoji avatars with 12 adorable kawaii-style profile pictures
+    - Available avatars: Teddy Bear, Cat, Dog, Panda, Bunny, Fox, Unicorn, Robot, Penguin, Koala, Owl, Sloth
+    - All avatars stored in `attached_assets/generated_images/`
+    - Images display in header, avatar selection dialog, and settings panel
+    - Avatar selection updates in real-time and persists to database
+    - Default avatar: Teddy Bear (for new users or legacy emoji IDs)
+  - **Improved Avatar UI**:
+    - Circular profile pictures with proper sizing and overflow handling
+    - Avatar selection dialog shows all 12 options in a 4-column grid
+    - Hover effects and purple border highlights for selected avatar
+    - Smooth transitions and scale animations on selection
+
 - **October 30, 2025**: Card Management & Interactive Features (PERMANENT CHANGES)
   - **Card Lock/Unlock System**:
     - Added database fields: `debitCardLocked` and `creditCardLocked` in `shared/schema.ts`
