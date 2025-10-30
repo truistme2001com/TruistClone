@@ -9,6 +9,7 @@ interface BankCardProps {
   cardType: string;
   expiryDate: string;
   cvv: string;
+  onClick?: () => void;
 }
 
 export function BankCard({ 
@@ -18,17 +19,22 @@ export function BankCard({
   cardNumber,
   cardType,
   expiryDate,
-  cvv
+  cvv,
+  onClick
 }: BankCardProps) {
   return (
-    <Card className={`
-      relative overflow-hidden w-full max-w-md h-56 p-6 
-      ${type === "debit" 
-        ? "bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800" 
-        : "bg-gradient-to-br from-slate-800 via-slate-900 to-black"
-      }
-      text-white shadow-2xl border-0
-    `} data-testid={`card-${type}`}>
+    <Card 
+      className={`
+        relative overflow-hidden w-full max-w-md h-56 p-6 
+        ${type === "debit" 
+          ? "bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800" 
+          : "bg-gradient-to-br from-slate-800 via-slate-900 to-black"
+        }
+        text-white shadow-2xl border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-3xl
+      `} 
+      data-testid={`card-${type}`}
+      onClick={onClick}
+    >
       <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20"></div>
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
       
@@ -76,30 +82,28 @@ export function BankCard({
                 {businessName}
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-right mr-2">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Expires</p>
-              <p className="text-sm font-mono font-semibold" data-testid={`expiry-${type}`}>{expiryDate}</p>
+              <p className="text-base font-mono font-bold" data-testid={`expiry-${type}`}>{expiryDate}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/60 uppercase tracking-wider mb-1">CVV</p>
+              <p className="text-base font-mono font-bold" data-testid={`cvv-${type}`}>{cvv}</p>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-6 right-6 flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-xs text-white/60 uppercase tracking-wider">CVV</p>
-            <p className="text-sm font-mono font-semibold" data-testid={`cvv-${type}`}>{cvv}</p>
-          </div>
-          <div className="flex items-center gap-1">
-            {cardType === "Visa" ? (
-              <div className="flex items-center justify-center w-16 h-10 rounded bg-white/90">
-                <span className="text-blue-900 font-bold italic text-lg">VISA</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-0">
-                <div className="w-7 h-7 rounded-full bg-red-500/90 backdrop-blur-sm"></div>
-                <div className="w-7 h-7 rounded-full bg-yellow-500/90 backdrop-blur-sm -ml-3"></div>
-              </div>
-            )}
-          </div>
+        <div className="absolute bottom-6 right-6 flex items-center gap-1">
+          {cardType === "Visa" ? (
+            <div className="flex items-center justify-center w-16 h-10 rounded bg-white/90">
+              <span className="text-blue-900 font-bold italic text-lg">VISA</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-0">
+              <div className="w-7 h-7 rounded-full bg-red-500/90 backdrop-blur-sm"></div>
+              <div className="w-7 h-7 rounded-full bg-yellow-500/90 backdrop-blur-sm -ml-3"></div>
+            </div>
+          )}
         </div>
       </div>
     </Card>

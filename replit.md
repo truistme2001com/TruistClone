@@ -11,7 +11,24 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
-- **October 30, 2025**: User Account Enhancements (PERMANENT CHANGES)
+- **October 30, 2025**: Card Management & Interactive Features (PERMANENT CHANGES)
+  - **Card Lock/Unlock System**:
+    - Added database fields: `debitCardLocked` and `creditCardLocked` in `shared/schema.ts`
+    - Implemented `/api/cards/toggle-lock` endpoint in `server/routes.ts`
+    - Toggle switches for each card with real-time status updates
+    - Visual feedback: Lock/Unlock icons and dynamic card status badges
+    - Toast notifications for lock/unlock actions
+    - Locked cards show red "Locked" badge, unlocked show green "Active" badge
+  - **Card Enlargement Feature**:
+    - Click any card to view enlarged version in dialog modal
+    - Enlarged view shows full card details with lock/unlock toggle
+    - Scale animation and enhanced visual presentation
+    - Easy access to card limits and status from enlarged view
+  - **Professional Card Management**:
+    - Report Lost button shows toast with 1-800-TRUIST number
+    - Set PIN button shows toast directing to ATM or customer service
+    - View Transactions button navigates to transactions tab
+    - All interactions use toast notifications instead of alerts
   - Updated permanent user account data in `server/init-accounts.ts`:
     - Business name: "M. Lowry Vocal Band" (auto-updates on every server restart)
     - Account type: "business checkings"
@@ -23,11 +40,6 @@ Create an exact replica of the Truist bank website with:
     - "Good morning M. Lowry" (before 12pm)
     - "Good afternoon M. Lowry" (12pm-6pm)
     - "Good evening M. Lowry" (after 6pm)
-  - Implemented functional card management buttons:
-    - Lock Card: Alerts user to contact customer support
-    - Report Lost: Provides 1-800-TRUIST contact number
-    - Set PIN: Directs user to ATM or customer service
-    - View Transactions: Switches to transactions tab
   - All notifications bell and settings icons fully functional
   - Cards properly display CVV and expiry dates
   

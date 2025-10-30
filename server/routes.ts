@@ -16,6 +16,7 @@ import {
   transferFunds,
   domesticWireTransfer,
   internationalWireTransfer,
+  toggleCardLock,
 } from "./storage";
 import { loginSchema, createUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
 
@@ -368,6 +369,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({
         success: false,
         message: error.message || "Wire transfer failed",
+      });
+    }
+  });
+
+  app.post("/api/cards/toggle-lock", isAuthenticated, async (req, res) => {
+    try {
+      const currentUser = req.user as any;
+      const { accountId, cardType, locked } = req.body;
+      
+      if (!accountId || !cardType || typeof locked !== "boolean") {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields" 
+        });
+      }
+      
+      const account = await getAccountById(accountId);
+      if (!account || account.userId !== currentUser.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Unauthorized" 
+        });
+      }
+      
+      const result = await toggleCardLock(accountId, cardType, locked);
+      
+      res.json({
+        success: true,
+        message: locked ? "Card locked successfully" : "Card unlocked successfully",
+        locked: result.locked,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to toggle card lock",
       });
     }
   });

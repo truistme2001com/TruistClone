@@ -422,6 +422,21 @@ export async function internationalWireTransfer(data: {
   };
 }
 
+export async function toggleCardLock(
+  accountId: number,
+  cardType: "debit" | "credit",
+  locked: boolean
+) {
+  const fieldName = cardType === "debit" ? "debitCardLocked" : "creditCardLocked";
+  
+  await db
+    .update(accounts)
+    .set({ [fieldName]: locked, updatedAt: new Date() })
+    .where(eq(accounts.id, accountId));
+  
+  return { success: true, locked };
+}
+
 // Helper function to generate account numbers (Truist format: 10 digits)
 function generateAccountNumber(): string {
   const random1 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");

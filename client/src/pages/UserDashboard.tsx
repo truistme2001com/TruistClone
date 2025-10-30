@@ -11,19 +11,23 @@ import { useLocation, Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send, ChevronDown, Globe, Building2 } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, CreditCard, Download, FileText, LogOut, User, Settings, Bell, Send, ChevronDown, Globe, Building2, Lock, Unlock } from "lucide-react";
 import { BankCard } from "@/components/BankCard";
+import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 export default function UserDashboard() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transferType, setTransferType] = useState<"internal" | "domestic_wire" | "international_wire">("internal");
   const [expandedTransaction, setExpandedTransaction] = useState<number | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [enlargedCard, setEnlargedCard] = useState<"debit" | "credit" | null>(null);
 
   const { data: userData } = useQuery({
     queryKey: ["me"],
@@ -99,6 +103,23 @@ export default function UserDashboard() {
       queryClient.invalidateQueries({ queryKey: ["transactions", selectedAccountId] });
       setIsTransferOpen(false);
       setTransferType("internal");
+    },
+  });
+
+  const cardLockMutation = useMutation({
+    mutationFn: async (data: { accountId: number; cardType: "debit" | "credit"; locked: boolean }) => {
+      return await apiRequest("POST", "/api/cards/toggle-lock", data);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      const cardName = variables.cardType === "debit" ? "Debit Card" : "Credit Card";
+      toast({
+        title: variables.locked ? "🔒 Card Locked" : "🔓 Card Unlocked",
+        description: variables.locked 
+          ? `${cardName} has been locked for purchases` 
+          : `${cardName} has been unlocked for purchases`,
+        duration: 3000,
+      });
     },
   });
 
@@ -526,6 +547,7 @@ export default function UserDashboard() {
                         cardType={account?.debitCardType || "Visa"}
                         expiryDate={account?.debitCardExpiry || "12/28"}
                         cvv={account?.debitCardCvv || "***"}
+                        onClick={() => setEnlargedCard("debit")}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -534,7 +556,9 @@ export default function UserDashboard() {
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                           <p className="text-xs text-gray-600 mb-1">Card Status</p>
-                          <Badge className="bg-green-500 text-white hover:bg-green-600">Active</Badge>
+                          <Badge className={account?.debitCardLocked ? "bg-red-500 text-white" : "bg-green-500 text-white"}>
+                            {account?.debitCardLocked ? "Locked" : "Active"}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -557,6 +581,7 @@ export default function UserDashboard() {
                         cardType={account?.creditCardType || "Mastercard"}
                         expiryDate={account?.creditCardExpiry || "09/27"}
                         cvv={account?.creditCardCvv || "***"}
+                        onClick={() => setEnlargedCard("credit")}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -572,49 +597,87 @@ export default function UserDashboard() {
                   </div>
 
                   <div className="mt-8 pt-6 border-t border-gray-200">
-                    <h4 className="font-bold text-gray-900 mb-4">Card Management</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Button 
-                        variant="outline" 
-                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
-                        data-testid="button-lock-card"
-                        onClick={() => {
-                          alert("Card lock feature will be available soon. Please contact customer support to lock your card.");
-                        }}
-                      >
-                        Lock Card
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
-                        data-testid="button-report-lost"
-                        onClick={() => {
-                          alert("To report a lost or stolen card, please call 1-800-TRUIST (1-800-878-4789) immediately.");
-                        }}
-                      >
-                        Report Lost
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
-                        data-testid="button-set-pin"
-                        onClick={() => {
-                          alert("To set or change your PIN, please visit any Truist ATM or call customer service at 1-800-TRUIST.");
-                        }}
-                      >
-                        Set PIN
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
-                        data-testid="button-view-card-transactions"
-                        onClick={() => {
-                          const transactionsTab = document.querySelector('[value="transactions"]') as HTMLElement;
-                          if (transactionsTab) transactionsTab.click();
-                        }}
-                      >
-                        View Transactions
-                      </Button>
+                    <h4 className="font-bold text-gray-900 mb-6">Card Management</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-3">
+                          {account?.debitCardLocked ? <Lock className="h-5 w-5 text-red-600" /> : <Unlock className="h-5 w-5 text-green-600" />}
+                          <div>
+                            <p className="font-semibold text-gray-900">Debit Card Lock</p>
+                            <p className="text-sm text-gray-600">{account?.debitCardLocked ? "Card is locked" : "Card is unlocked"}</p>
+                          </div>
+                        </div>
+                        <Switch 
+                          checked={account?.debitCardLocked || false}
+                          onCheckedChange={(checked) => {
+                            if (account?.id) {
+                              cardLockMutation.mutate({ accountId: account.id, cardType: "debit", locked: checked });
+                            }
+                          }}
+                          data-testid="switch-lock-debit"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-3">
+                          {account?.creditCardLocked ? <Lock className="h-5 w-5 text-red-600" /> : <Unlock className="h-5 w-5 text-green-600" />}
+                          <div>
+                            <p className="font-semibold text-gray-900">Credit Card Lock</p>
+                            <p className="text-sm text-gray-600">{account?.creditCardLocked ? "Card is locked" : "Card is unlocked"}</p>
+                          </div>
+                        </div>
+                        <Switch 
+                          checked={account?.creditCardLocked || false}
+                          onCheckedChange={(checked) => {
+                            if (account?.id) {
+                              cardLockMutation.mutate({ accountId: account.id, cardType: "credit", locked: checked });
+                            }
+                          }}
+                          data-testid="switch-lock-credit"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <Button 
+                          variant="outline" 
+                          className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                          data-testid="button-report-lost"
+                          onClick={() => {
+                            toast({
+                              title: "📞 Report Lost or Stolen Card",
+                              description: "Please call 1-800-TRUIST (1-800-878-4789) immediately to report your card.",
+                              duration: 5000,
+                            });
+                          }}
+                        >
+                          Report Lost
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                          data-testid="button-set-pin"
+                          onClick={() => {
+                            toast({
+                              title: "🔢 Set PIN",
+                              description: "Visit any Truist ATM or call 1-800-TRUIST to set or change your PIN.",
+                              duration: 4000,
+                            });
+                          }}
+                        >
+                          Set PIN
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                          data-testid="button-view-card-transactions"
+                          onClick={() => {
+                            const transactionsTab = document.querySelector('[value="transactions"]') as HTMLElement;
+                            if (transactionsTab) transactionsTab.click();
+                          }}
+                        >
+                          View Transactions
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -991,6 +1054,71 @@ export default function UserDashboard() {
             </div>
           </div>
           <Button onClick={() => setIsSettingsOpen(false)} className="mt-4">Close</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={enlargedCard !== null} onOpenChange={() => setEnlargedCard(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-purple-600" />
+              {enlargedCard === "debit" ? "Business Debit Card" : "Business Credit Card"}
+            </DialogTitle>
+            <DialogDescription>
+              Card details and limits
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="flex justify-center">
+              <div className="transform scale-110">
+                <BankCard
+                  type={enlargedCard || "debit"}
+                  cardholderName={user?.fullName || ""}
+                  businessName={formatBusinessName(account?.businessName)}
+                  cardNumber={enlargedCard === "debit" ? (account?.debitCardNumber || "") : (account?.creditCardNumber || "")}
+                  cardType={enlargedCard === "debit" ? (account?.debitCardType || "Visa") : (account?.creditCardType || "Mastercard")}
+                  expiryDate={enlargedCard === "debit" ? (account?.debitCardExpiry || "12/28") : (account?.creditCardExpiry || "09/27")}
+                  cvv={enlargedCard === "debit" ? (account?.debitCardCvv || "***") : (account?.creditCardCvv || "***")}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">{enlargedCard === "debit" ? "Daily Limit" : "Credit Limit"}</p>
+                <p className="text-2xl font-bold text-gray-900">{enlargedCard === "debit" ? "$50,000" : "$250,000"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">{enlargedCard === "debit" ? "Card Status" : "Available Credit"}</p>
+                <p className="text-2xl font-bold text-green-600">{enlargedCard === "debit" ? "Active" : "$250,000"}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-center gap-3">
+                {(enlargedCard === "debit" ? account?.debitCardLocked : account?.creditCardLocked) ? (
+                  <Lock className="h-6 w-6 text-red-600" />
+                ) : (
+                  <Unlock className="h-6 w-6 text-green-600" />
+                )}
+                <div>
+                  <p className="font-semibold text-gray-900">Card Lock Status</p>
+                  <p className="text-sm text-gray-600">
+                    {(enlargedCard === "debit" ? account?.debitCardLocked : account?.creditCardLocked) 
+                      ? "Card is currently locked for purchases" 
+                      : "Card is unlocked and ready for purchases"}
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={(enlargedCard === "debit" ? account?.debitCardLocked : account?.creditCardLocked) || false}
+                onCheckedChange={(checked) => {
+                  if (account?.id && enlargedCard) {
+                    cardLockMutation.mutate({ accountId: account.id, cardType: enlargedCard, locked: checked });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <Button onClick={() => setEnlargedCard(null)} className="mt-4">Close</Button>
         </DialogContent>
       </Dialog>
 
