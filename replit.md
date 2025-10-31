@@ -13,7 +13,7 @@ Create an exact replica of the Truist bank website with:
 ## Recent Changes
 - **October 31, 2025**: Permanent Account & Session Fixes
   - **Account Number Update**: Changed from 10 to 13 digits (Truist standard)
-    - Fixed Mark Lowry account number to permanent value: `1234567890123`
+    - Fixed Mark Lowry account number to permanent value: `4729186503421`
     - Updated `generateAccountNumber()` in `server/storage.ts` to generate 13-digit numbers for new accounts
     - All new users will receive random 13-digit account numbers
   - **Admin Avatar Fix**: Set admin avatar to permanent value "admin"

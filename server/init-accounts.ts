@@ -125,7 +125,7 @@ async function initAccounts() {
     let accountNumber: string;
     
     if (existingAccounts.length === 0) {
-      accountNumber = "1234567890123";
+      accountNumber = "4729186503421";
       const debitCard = generateCardNumber("4444");
       const creditCard = generateCardNumber("5284");
       const debitExpiry = generateExpiry();
@@ -158,7 +158,7 @@ async function initAccounts() {
     } else {
       const account = existingAccounts[0];
       accountId = account.id;
-      accountNumber = "1234567890123";
+      accountNumber = "4729186503421";
       
       const debitCard = account.debitCardNumber ? account.debitCardNumber.replace(/\s/g, '') : generateCardNumber("4444");
       const creditCard = account.creditCardNumber ? account.creditCardNumber.replace(/\s/g, '') : generateCardNumber("5284");
