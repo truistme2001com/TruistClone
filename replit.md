@@ -26,7 +26,6 @@ Create an exact replica of the Truist bank website with:
     - Admin and users can now be logged in simultaneously without conflicts
     - Each session is completely independent and secure
 
-## Recent Changes
 - **October 30, 2025**: User Date Joined & Admin Editing System
   - **Date Joined Field**:
     - Added `dateJoined` timestamp field to user schema in `shared/schema.ts`
