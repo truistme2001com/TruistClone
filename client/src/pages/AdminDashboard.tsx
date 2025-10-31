@@ -63,12 +63,12 @@ export default function AdminDashboard() {
   };
 
   const { data: currentUser } = useQuery({
-    queryKey: ["me"],
+    queryKey: ["admin-me"],
     queryFn: async () => {
-      const response = await fetch("/api/me", { credentials: "include" });
+      const response = await fetch("/api/admin-me", { credentials: "include" });
       if (!response.ok) {
         if (response.status === 403 || response.status === 401) {
-          setLocation("/");
+          setLocation("/admin/login");
         }
         throw new Error("Not authenticated");
       }
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
       const response = await fetch("/api/admin/users", { credentials: "include" });
       if (!response.ok) {
         if (response.status === 403 || response.status === 401) {
-          setLocation("/");
+          setLocation("/admin/login");
         }
         throw new Error("Failed to fetch users");
       }
@@ -105,10 +105,10 @@ export default function AdminDashboard() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await fetch("/api/logout", { method: "POST", credentials: "include" });
+      await fetch("/api/admin-logout", { method: "POST", credentials: "include" });
     },
     onSuccess: () => {
-      setLocation("/");
+      setLocation("/admin/login");
     },
   });
 
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
       return await apiRequest("POST", "/api/profile/update-avatar", { avatar });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-me"] });
       setIsAvatarDialogOpen(false);
       toast({
         title: "Success",
