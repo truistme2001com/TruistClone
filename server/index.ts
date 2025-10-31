@@ -45,12 +45,12 @@ adminPassport.use('admin-local',
 );
 
 adminPassport.serializeUser((user: any, done) => {
-  done(null, user.id);
+  done(null, { id: user.id, type: 'admin' });
 });
 
-adminPassport.deserializeUser(async (id: number, done) => {
+adminPassport.deserializeUser(async (data: any, done) => {
   try {
-    const user = await getUserById(id);
+    const user = await getUserById(data.id);
     done(null, user);
   } catch (error) {
     done(error);
@@ -84,12 +84,12 @@ userPassport.use('user-local',
 );
 
 userPassport.serializeUser((user: any, done) => {
-  done(null, user.id);
+  done(null, { id: user.id, type: 'user' });
 });
 
-userPassport.deserializeUser(async (id: number, done) => {
+userPassport.deserializeUser(async (data: any, done) => {
   try {
-    const user = await getUserById(id);
+    const user = await getUserById(data.id);
     done(null, user);
   } catch (error) {
     done(error);
@@ -109,8 +109,6 @@ declare module 'http' {
 declare module 'express-session' {
   interface SessionData {
     passport?: any;
-    adminPassport?: any;
-    userPassport?: any;
   }
 }
 
@@ -130,12 +128,12 @@ const adminSessionMiddleware = session({
     tableName: "admin_sessions",
     createTableIfMissing: true,
   }),
-  name: 'admin.sid', // Different cookie name for admin
+  name: 'admin.sid',
   secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
   },
@@ -150,33 +148,30 @@ const userSessionMiddleware = session({
     tableName: "user_sessions",
     createTableIfMissing: true,
   }),
-  name: 'user.sid', // Different cookie name for users
+  name: 'user.sid',
   secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
   },
 });
 
-// Apply sessions based on route to maintain separation
+// Apply sessions based on route
 app.use((req, res, next) => {
-  // Admin routes use admin session
   if (req.path.startsWith('/api/admin') || 
       req.path === '/api/admin-login' || 
       req.path === '/api/admin-logout' || 
-      req.path === '/api/admin-me' ||
-      req.path.startsWith('/api/admin/')) {
-    adminSessionMiddleware(req, res, () => {
+      req.path === '/api/admin-me') {
+    return adminSessionMiddleware(req, res, () => {
       adminPassport.initialize()(req, res, () => {
         adminPassport.session()(req, res, next);
       });
     });
   } else {
-    // All other routes use user session
-    userSessionMiddleware(req, res, () => {
+    return userSessionMiddleware(req, res, () => {
       userPassport.initialize()(req, res, () => {
         userPassport.session()(req, res, next);
       });
