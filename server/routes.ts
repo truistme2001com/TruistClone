@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import passport from "passport";
+import { adminPassport, userPassport } from "./index";
 import {
   createUser,
   createAccount,
@@ -25,7 +25,7 @@ import {
 } from "./storage";
 import { loginSchema, createUserSchema, updateUserSchema, updateBalanceSchema, transferSchema, domesticWireSchema, internationalWireSchema } from "@shared/schema";
 
-// Middleware to check if user is authenticated
+// Middleware to check if regular user is authenticated
 function isAuthenticated(req: Request, res: Response, next: Function) {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ success: false, message: "Not authenticated" });
@@ -42,7 +42,7 @@ function isAuthenticated(req: Request, res: Response, next: Function) {
   return next();
 }
 
-// Middleware to check if user is admin
+// Middleware to check if admin is authenticated
 function isAdmin(req: Request, res: Response, next: Function) {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ success: false, message: "Not authenticated" });
@@ -64,12 +64,80 @@ function isAdmin(req: Request, res: Response, next: Function) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
+  // Admin authentication routes
+  app.post("/api/admin-login", (req, res, next) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      
+      adminPassport.authenticate("admin-local", (err: any, user: any, info: any) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: "Server error" });
+        }
+        
+        if (!user) {
+          return res.status(401).json({ 
+            success: false, 
+            message: info?.message || "Invalid credentials" 
+          });
+        }
+        
+        req.logIn(user, (err) => {
+          if (err) {
+            return res.status(500).json({ success: false, message: "Login failed" });
+          }
+          
+          return res.json({
+            success: true,
+            message: "Admin login successful",
+            user: {
+              id: user.id,
+              username: user.username,
+              fullName: user.fullName,
+              isAdmin: user.isAdmin,
+            },
+          });
+        });
+      })(req, res, next);
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid login data",
+      });
+    }
+  });
+
+  app.post("/api/admin-logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: "Logout failed" });
+      }
+      res.json({ success: true, message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/admin-me", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userWithAccounts = await getUserWithAccounts(user.id);
+      
+      if (!userWithAccounts) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      // Remove password from response
+      const { password, ...userInfo } = userWithAccounts;
+      res.json({ success: true, user: userInfo });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+
+  // Regular user authentication routes
   app.post("/api/login", (req, res, next) => {
     try {
       const validatedData = loginSchema.parse(req.body);
       
-      passport.authenticate("local", (err: any, user: any, info: any) => {
+      userPassport.authenticate("user-local", (err: any, user: any, info: any) => {
         if (err) {
           return res.status(500).json({ success: false, message: "Server error" });
         }

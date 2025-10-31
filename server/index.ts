@@ -14,8 +14,52 @@ const app = express();
 const PgSession = connectPgSimple(session);
 const pgClient = neon(process.env.DATABASE_URL!);
 
-// Passport configuration
-passport.use(
+// Admin Passport instance with separate serialization
+const adminPassport = new passport.Passport();
+adminPassport.use('admin-local',
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await getUserByUsernameOrEmail(username);
+      if (!user) {
+        return done(null, false, { message: "Incorrect username/email or password" });
+      }
+
+      if (!user.isAdmin) {
+        return done(null, false, { message: "Admin access required" });
+      }
+
+      if (user.isBlocked) {
+        return done(null, false, { message: "Account has been blocked. Please contact support." });
+      }
+
+      const isValid = await verifyPassword(password, user.password);
+      if (!isValid) {
+        return done(null, false, { message: "Incorrect username/email or password" });
+      }
+
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  })
+);
+
+adminPassport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+adminPassport.deserializeUser(async (id: number, done) => {
+  try {
+    const user = await getUserById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+// User Passport instance with separate serialization
+const userPassport = new passport.Passport();
+userPassport.use('user-local',
   new LocalStrategy(async (username, password, done) => {
     try {
       const user = await getUserByUsernameOrEmail(username);
@@ -39,11 +83,11 @@ passport.use(
   })
 );
 
-passport.serializeUser((user: any, done) => {
+userPassport.serializeUser((user: any, done) => {
   done(null, user.id);
 });
 
-passport.deserializeUser(async (id: number, done) => {
+userPassport.deserializeUser(async (id: number, done) => {
   try {
     const user = await getUserById(id);
     done(null, user);
@@ -51,6 +95,9 @@ passport.deserializeUser(async (id: number, done) => {
     done(error);
   }
 });
+
+// Export passport instances for use in routes
+export { adminPassport, userPassport };
 
 // Middleware
 declare module 'http' {
@@ -62,6 +109,8 @@ declare module 'http' {
 declare module 'express-session' {
   interface SessionData {
     passport?: any;
+    adminPassport?: any;
+    userPassport?: any;
   }
 }
 
@@ -72,29 +121,62 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: false }));
 
-// Session middleware
-app.use(
-  session({
-    store: new PgSession({
-      conObject: {
-        connectionString: process.env.DATABASE_URL,
-      },
-      tableName: "sessions",
-      createTableIfMissing: true,
-    }),
-    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+// Admin session middleware with separate cookie
+const adminSessionMiddleware = session({
+  store: new PgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
     },
-  })
-);
+    tableName: "admin_sessions",
+    createTableIfMissing: true,
+  }),
+  name: 'admin.sid', // Different cookie name for admin
+  secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  },
+});
 
-app.use(passport.initialize());
-app.use(passport.session());
+// User session middleware with separate cookie
+const userSessionMiddleware = session({
+  store: new PgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    tableName: "user_sessions",
+    createTableIfMissing: true,
+  }),
+  name: 'user.sid', // Different cookie name for users
+  secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  },
+});
+
+// Apply sessions based on route
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/admin') || req.path === '/api/admin-login' || req.path === '/api/admin-logout' || req.path === '/api/admin-me') {
+    adminSessionMiddleware(req, res, () => {
+      adminPassport.initialize()(req, res, () => {
+        adminPassport.session()(req, res, next);
+      });
+    });
+  } else {
+    userSessionMiddleware(req, res, () => {
+      userPassport.initialize()(req, res, () => {
+        userPassport.session()(req, res, next);
+      });
+    });
+  }
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
