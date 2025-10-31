@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { adminPassport, userPassport } from "./index";
+import passport from "passport";
 import {
   createUser,
   createAccount,
@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = loginSchema.parse(req.body);
       
-      adminPassport.authenticate("admin-local", (err: any, user: any, info: any) => {
+      passport.authenticate("admin-local", (err: any, user: any, info: any) => {
         if (err) {
           return res.status(500).json({ success: false, message: "Server error" });
         }
@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = loginSchema.parse(req.body);
       
-      userPassport.authenticate("user-local", (err: any, user: any, info: any) => {
+      passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
           return res.status(500).json({ success: false, message: "Server error" });
         }
