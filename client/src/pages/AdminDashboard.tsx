@@ -545,9 +545,9 @@ export default function AdminDashboard() {
                 <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl shadow-lg">
                   <DollarSign className="h-7 w-7 text-white" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-600 mb-1">Users Balance</p>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-green-600 truncate">
                     ${formatCurrency(totalBalance)}
                   </p>
                 </div>
@@ -562,9 +562,9 @@ export default function AdminDashboard() {
                   <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl shadow-lg">
                     <Shield className="h-7 w-7 text-white" />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-600 mb-1">Admin Balance</p>
-                    <p className="text-3xl font-bold text-orange-600">
+                    <p className="text-2xl font-bold text-orange-600 truncate">
                       ${formatCurrency(adminBalance)}
                     </p>
                   </div>

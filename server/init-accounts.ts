@@ -77,7 +77,6 @@ async function initAccounts() {
         email: "admin@truist.com",
         isAdmin: true,
         isBlocked: false,
-        avatar: "admin",
       });
       console.log("✓ Admin account created");
     }
