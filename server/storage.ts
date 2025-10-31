@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users, accounts, transactions, sessions } from "@shared/schema";
+import { users, accounts, transactions, sessions, notifications } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -10,7 +10,7 @@ if (!process.env.DATABASE_URL) {
 
 const sql = postgres(process.env.DATABASE_URL);
 export const db = drizzle(sql, {
-  schema: { users, accounts, transactions, sessions },
+  schema: { users, accounts, transactions, sessions, notifications },
   casing: 'snake_case',
 });
 
@@ -525,4 +525,54 @@ function generateAccountNumber(): string {
   const part2 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
   const part3 = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
   return `${part1}${part2}${part3}`;
+}
+
+// Notification operations
+export async function createNotification(data: {
+  type: string;
+  title: string;
+  message: string;
+  userId?: number;
+  relatedEntityId?: number;
+}) {
+  const [notification] = await db.insert(notifications).values({
+    type: data.type,
+    title: data.title,
+    message: data.message,
+    userId: data.userId,
+    relatedEntityId: data.relatedEntityId,
+    isRead: false,
+  }).returning();
+  
+  return notification;
+}
+
+export async function getUnreadNotifications() {
+  return db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.isRead, false))
+    .orderBy(desc(notifications.createdAt));
+}
+
+export async function getAllNotifications(limit: number = 50) {
+  return db
+    .select()
+    .from(notifications)
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+}
+
+export async function markNotificationAsRead(notificationId: number) {
+  await db
+    .update(notifications)
+    .set({ isRead: true })
+    .where(eq(notifications.id, notificationId));
+}
+
+export async function markAllNotificationsAsRead() {
+  await db
+    .update(notifications)
+    .set({ isRead: true })
+    .where(eq(notifications.isRead, false));
 }

@@ -70,6 +70,17 @@ export const sessions = pgTable("sessions", {
   expire: timestamp("expire").notNull(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // user_created, transaction, balance_update
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  userId: integer("user_id").references(() => users.id),
+  relatedEntityId: integer("related_entity_id"),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
@@ -79,6 +90,9 @@ export const selectAccountSchema = createSelectSchema(accounts);
 
 export const insertTransactionSchema = createInsertSchema(transactions);
 export const selectTransactionSchema = createSelectSchema(transactions);
+
+export const insertNotificationSchema = createInsertSchema(notifications);
+export const selectNotificationSchema = createSelectSchema(notifications);
 
 // API schemas
 export const loginSchema = z.object({
