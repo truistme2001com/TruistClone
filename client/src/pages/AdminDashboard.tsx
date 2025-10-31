@@ -547,7 +547,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-600 mb-1">Users Balance</p>
-                  <p className="text-2xl font-bold text-green-600 truncate">
+                  <p className="text-lg font-bold text-green-600 break-all">
                     ${formatCurrency(totalBalance)}
                   </p>
                 </div>
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-600 mb-1">Admin Balance</p>
-                    <p className="text-2xl font-bold text-orange-600 truncate">
+                    <p className="text-lg font-bold text-orange-600 break-all">
                       ${formatCurrency(adminBalance)}
                     </p>
                   </div>
