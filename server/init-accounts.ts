@@ -66,8 +66,7 @@ async function initAccounts() {
           email: "admin@truist.com",
           fullName: "System Administrator",
           isAdmin: true,
-          isBlocked: false,
-          avatar: "admin"
+          isBlocked: false
         })
         .where(eq(users.id, existingAdmin.id));
       console.log("✓ Admin account password updated");

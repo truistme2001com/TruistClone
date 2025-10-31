@@ -40,6 +40,8 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState("");
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -327,10 +329,22 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600" data-testid="button-notifications">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600 hover:text-purple-600" 
+                onClick={() => setIsNotificationsOpen(true)}
+                data-testid="button-notifications"
+              >
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600" data-testid="button-settings">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600 hover:text-purple-600" 
+                onClick={() => setIsSettingsOpen(true)}
+                data-testid="button-settings"
+              >
                 <Settings className="h-5 w-5" />
               </Button>
               <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
@@ -770,6 +784,57 @@ export default function AdminDashboard() {
                   <p className="text-xs text-center mt-2 font-medium">{avatar.label}</p>
                 </button>
               ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Notifications</DialogTitle>
+              <DialogDescription>
+                System notifications and alerts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="text-center text-gray-500 py-8">
+                <Bell className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p className="text-sm">No new notifications</p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Admin Settings</DialogTitle>
+              <DialogDescription>
+                Manage your admin preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Email Notifications</p>
+                  <p className="text-sm text-gray-500">Receive email alerts for important events</p>
+                </div>
+                <Switch defaultChecked data-testid="switch-email-notifications" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Two-Factor Authentication</p>
+                  <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                </div>
+                <Switch data-testid="switch-2fa" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">System Alerts</p>
+                  <p className="text-sm text-gray-500">Show critical system alerts</p>
+                </div>
+                <Switch defaultChecked data-testid="switch-system-alerts" />
+              </div>
             </div>
           </DialogContent>
         </Dialog>
