@@ -333,6 +333,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Create notification for new user creation
+      const { createNotification } = await import("./storage");
+      await createNotification({
+        type: "user_created",
+        title: "New User Created",
+        message: `User ${user.fullName} (@${user.username}) has been created${account ? ` with account ${account.accountNumber}` : ''}`,
+        userId: user.id,
+        relatedEntityId: user.id,
+      });
+      
       res.json({
         success: true,
         message: "User created successfully",
@@ -409,6 +419,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data.type,
         data.description
       );
+      
+      // Create notification for balance update
+      const { createNotification, getAccountById } = await import("./storage");
+      const account = await getAccountById(accountId);
+      const actionType = data.type === "credit" ? "credited" : "debited";
+      const formattedAmount = parseFloat(data.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      
+      await createNotification({
+        type: "balance_update",
+        title: `Account ${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`,
+        message: `Account ${account?.accountNumber} was ${actionType} ${formattedAmount}. New balance: ${parseFloat(newBalance).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`,
+        userId: account?.userId,
+        relatedEntityId: accountId,
+      });
       
       res.json({
         success: true,
@@ -638,6 +662,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({
         success: false,
         message: error.message || "Failed to update card limit",
+      });
+    }
+  });
+
+  // Notification routes
+  app.get("/api/notifications", isAdmin, async (req, res) => {
+    try {
+      const { getUnreadNotifications, getAllNotifications } = await import("./storage");
+      const unreadOnly = req.query.unreadOnly === "true";
+      
+      const notifications = unreadOnly 
+        ? await getUnreadNotifications()
+        : await getAllNotifications();
+      
+      res.json({
+        success: true,
+        notifications,
+        unreadCount: unreadOnly ? notifications.length : notifications.filter((n: any) => !n.isRead).length,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to fetch notifications",
+      });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", isAdmin, async (req, res) => {
+    try {
+      const { markNotificationAsRead } = await import("./storage");
+      const notificationId = parseInt(req.params.id);
+      
+      await markNotificationAsRead(notificationId);
+      
+      res.json({
+        success: true,
+        message: "Notification marked as read",
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to mark notification as read",
+      });
+    }
+  });
+
+  app.post("/api/notifications/read-all", isAdmin, async (req, res) => {
+    try {
+      const { markAllNotificationsAsRead } = await import("./storage");
+      
+      await markAllNotificationsAsRead();
+      
+      res.json({
+        success: true,
+        message: "All notifications marked as read",
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to mark all notifications as read",
+      });
+    }
+  });
+
+  // Admin balance management routes
+  app.get("/api/admin/account", isAdmin, async (req, res) => {
+    try {
+      const { getAccountsByUserId } = await import("./storage");
+      const currentUser = req.user as any;
+      
+      const accounts = await getAccountsByUserId(currentUser.id);
+      const adminAccount = accounts.length > 0 ? accounts[0] : null;
+      
+      res.json({
+        success: true,
+        account: adminAccount,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to fetch admin account",
+      });
+    }
+  });
+
+  app.post("/api/admin/account/add-funds", isAdmin, async (req, res) => {
+    try {
+      const { getAccountsByUserId } = await import("./storage");
+      const { updateAccountBalance } = await import("./storage");
+      const currentUser = req.user as any;
+      const { amount, description } = req.body;
+      
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid amount",
+        });
+      }
+      
+      const accounts = await getAccountsByUserId(currentUser.id);
+      if (accounts.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin account not found",
+        });
+      }
+      
+      const adminAccount = accounts[0];
+      await updateAccountBalance(adminAccount.id, amount, "credit", description || "Admin funds added");
+      
+      res.json({
+        success: true,
+        message: "Funds added successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to add funds",
       });
     }
   });

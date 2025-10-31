@@ -60,16 +60,15 @@ async function initAccounts() {
     });
     
     if (existingAdmin) {
+      // Only update critical security fields and password, preserve all user customizations
       await db.update(users)
         .set({ 
           password: adminPassword,
-          email: "admin@truist.com",
-          fullName: "System Administrator",
           isAdmin: true,
           isBlocked: false
         })
         .where(eq(users.id, existingAdmin.id));
-      console.log("✓ Admin account password updated");
+      console.log("✓ Admin account verified (password reset, customizations preserved)");
     } else {
       await db.insert(users).values({
         username: "admin",
@@ -83,6 +82,33 @@ async function initAccounts() {
       console.log("✓ Admin account created");
     }
     
+    // Create or preserve admin account with balance
+    const adminUser = await db.query.users.findFirst({
+      where: eq(users.username, "admin")
+    });
+    
+    if (adminUser) {
+      const existingAdminAccounts = await db.query.accounts.findMany({
+        where: eq(accounts.userId, adminUser.id)
+      });
+      
+      if (existingAdminAccounts.length === 0) {
+        // Create admin account with initial balance
+        await db.insert(accounts).values({
+          userId: adminUser.id,
+          businessName: "Admin Operations Account",
+          accountNumber: "1000000000001",
+          routingNumber: "061000104",
+          balance: "1000000.00",
+          accountType: "admin operations",
+          status: "active",
+        });
+        console.log("✓ Admin operations account created with $1,000,000.00");
+      } else {
+        console.log("✓ Admin operations account exists (balance preserved)");
+      }
+    }
+    
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, "marklowry748@gmail.com")
     });
@@ -90,18 +116,16 @@ async function initAccounts() {
     let userId: number;
     
     if (existingUser) {
+      // Only update critical security fields and password, preserve all user customizations
       await db.update(users)
         .set({ 
           password: userPassword,
-          username: "marklowry748",
-          fullName: "Mark Lowry",
           isAdmin: false,
-          isBlocked: false,
-          dateJoined: new Date("2019-08-11")
+          isBlocked: false
         })
         .where(eq(users.id, existingUser.id));
       userId = existingUser.id;
-      console.log("✓ Mark Lowry account password updated");
+      console.log("✓ Mark Lowry account verified (password reset, customizations preserved)");
     } else {
       const [newUser] = await db.insert(users).values({
         username: "marklowry748",

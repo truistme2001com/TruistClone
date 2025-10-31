@@ -42,6 +42,8 @@ export default function AdminDashboard() {
   const [selectedAvatar, setSelectedAvatar] = useState("");
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
+  const [fundsAmount, setFundsAmount] = useState("");
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -103,6 +105,26 @@ export default function AdminDashboard() {
       }
       return failureCount < 3;
     },
+  });
+
+  const { data: adminAccountData } = useQuery({
+    queryKey: ["admin-account"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/account", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to fetch admin account");
+      return response.json();
+    },
+    refetchInterval: 3000,
+  });
+
+  const { data: notificationsData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const response = await fetch("/api/notifications", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to fetch notifications");
+      return response.json();
+    },
+    refetchInterval: 3000,
   });
 
   const logoutMutation = useMutation({
@@ -213,7 +235,40 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-account"] });
       setIsUpdateBalanceOpen(false);
+    },
+  });
+
+  const addFundsMutation = useMutation({
+    mutationFn: async (data: { amount: string; description?: string }) => {
+      const response = await fetch("/api/admin/account/add-funds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-account"] });
+      setIsAddFundsOpen(false);
+      setFundsAmount("");
+      toast({
+        title: "Success",
+        description: "Funds added successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add funds",
+        variant: "destructive",
+      });
     },
   });
 
@@ -301,9 +356,13 @@ export default function AdminDashboard() {
   };
 
   const totalBalance = usersData?.users?.reduce((acc: number, u: any) => {
+    // Exclude admin from total users balance
+    if (u.isAdmin) return acc;
     const balance = u.accounts?.[0]?.balance ? parseFloat(u.accounts[0].balance) : 0;
     return acc + balance;
   }, 0) || 0;
+
+  const adminBalance = adminAccountData?.account?.balance ? parseFloat(adminAccountData.account.balance) : 0;
 
   const formatBusinessName = (name: string | undefined) => {
     if (!name) return "";
@@ -332,11 +391,16 @@ export default function AdminDashboard() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-600 hover:text-purple-600" 
+                className="text-gray-600 hover:text-purple-600 relative" 
                 onClick={() => setIsNotificationsOpen(true)}
                 data-testid="button-notifications"
               >
                 <Bell className="h-5 w-5" />
+                {notificationsData?.unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {notificationsData.unreadCount > 9 ? '9+' : notificationsData.unreadCount}
+                  </span>
+                )}
               </Button>
               <Button 
                 variant="ghost" 
@@ -444,7 +508,7 @@ export default function AdminDashboard() {
           </Dialog>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-white">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -482,11 +546,38 @@ export default function AdminDashboard() {
                   <DollarSign className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Balance</p>
+                  <p className="text-sm text-gray-600 mb-1">Users Balance</p>
                   <p className="text-3xl font-bold text-green-600">
                     ${formatCurrency(totalBalance)}
                   </p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-white">
+            <CardContent className="pt-6">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-4">
+                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl shadow-lg">
+                    <Shield className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Admin Balance</p>
+                    <p className="text-3xl font-bold text-orange-600">
+                      ${formatCurrency(adminBalance)}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setIsAddFundsOpen(true)}
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700 text-white mt-2"
+                  data-testid="button-add-funds"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Funds
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -789,18 +880,83 @@ export default function AdminDashboard() {
         </Dialog>
 
         <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle>Notifications</DialogTitle>
-              <DialogDescription>
-                System notifications and alerts
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="text-center text-gray-500 py-8">
-                <Bell className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                <p className="text-sm">No new notifications</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle>Notifications</DialogTitle>
+                  <DialogDescription>
+                    System notifications and alerts
+                  </DialogDescription>
+                </div>
+                {notificationsData?.unreadCount > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const response = await fetch("/api/notifications/read-all", {
+                        method: "POST",
+                        credentials: "include",
+                      });
+                      if (response.ok) {
+                        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+                      }
+                    }}
+                    data-testid="button-mark-all-read"
+                  >
+                    Mark all as read
+                  </Button>
+                )}
               </div>
+            </DialogHeader>
+            <div className="space-y-2 overflow-y-auto flex-1 pr-2">
+              {notificationsData?.notifications && notificationsData.notifications.length > 0 ? (
+                notificationsData.notifications.map((notification: any) => (
+                  <div
+                    key={notification.id}
+                    className={`p-4 rounded-lg border ${
+                      notification.isRead
+                        ? 'bg-gray-50 border-gray-200'
+                        : 'bg-purple-50 border-purple-200'
+                    }`}
+                    data-testid={`notification-${notification.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm mb-1">{notification.title}</p>
+                        <p className="text-sm text-gray-700">{notification.message}</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      {!notification.isRead && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            const response = await fetch(`/api/notifications/${notification.id}/read`, {
+                              method: "POST",
+                              credentials: "include",
+                            });
+                            if (response.ok) {
+                              queryClient.invalidateQueries({ queryKey: ["notifications"] });
+                            }
+                          }}
+                          className="text-purple-600 hover:text-purple-700"
+                          data-testid={`button-mark-read-${notification.id}`}
+                        >
+                          Mark as read
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-sm">No notifications</p>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -836,6 +992,52 @@ export default function AdminDashboard() {
                 <Switch defaultChecked data-testid="switch-system-alerts" />
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAddFundsOpen} onOpenChange={setIsAddFundsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Funds to Admin Account</DialogTitle>
+              <DialogDescription>
+                Add money to your admin operations account
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (fundsAmount && parseFloat(fundsAmount) > 0) {
+                  addFundsMutation.mutate({
+                    amount: fundsAmount,
+                    description: "Admin funds added",
+                  });
+                }
+              }}
+              className="space-y-4 py-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="funds-amount">Amount ($)</Label>
+                <Input
+                  id="funds-amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Enter amount"
+                  value={fundsAmount}
+                  onChange={(e) => setFundsAmount(e.target.value)}
+                  required
+                  data-testid="input-funds-amount"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                disabled={addFundsMutation.isPending || !fundsAmount || parseFloat(fundsAmount) <= 0}
+                data-testid="button-submit-add-funds"
+              >
+                {addFundsMutation.isPending ? "Adding..." : "Add Funds"}
+              </Button>
+            </form>
           </DialogContent>
         </Dialog>
 
