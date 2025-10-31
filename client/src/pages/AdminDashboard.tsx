@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
@@ -44,6 +45,10 @@ export default function AdminDashboard() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   const [fundsAmount, setFundsAmount] = useState("");
+  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<any>(null);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -167,6 +172,19 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+      toast({
+        title: "User Deleted",
+        description: "The user account has been permanently deleted.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
     },
   });
 
@@ -181,6 +199,19 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setIsBlockDialogOpen(false);
+      setUserToBlock(null);
+      toast({
+        title: "User Blocked",
+        description: "The user account has been blocked successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to block user",
+        variant: "destructive",
+      });
     },
   });
 
@@ -195,6 +226,17 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({
+        title: "User Unblocked",
+        description: "The user account has been unblocked successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unblock user",
+        variant: "destructive",
+      });
     },
   });
 
@@ -692,9 +734,8 @@ export default function AdminDashboard() {
                                       variant="outline"
                                       className="gap-1.5 border-orange-300 text-orange-600 hover:bg-orange-50"
                                       onClick={() => {
-                                        if (confirm("Are you sure you want to block this user?")) {
-                                          blockUserMutation.mutate(user.id);
-                                        }
+                                        setUserToBlock(user);
+                                        setIsBlockDialogOpen(true);
                                       }}
                                       data-testid={`button-block-${user.id}`}
                                     >
@@ -706,9 +747,8 @@ export default function AdminDashboard() {
                                     variant="outline"
                                     className="gap-1.5 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
                                     onClick={() => {
-                                      if (confirm("Are you sure you want to delete this user?")) {
-                                        deleteUserMutation.mutate(user.id);
-                                      }
+                                      setUserToDelete(user);
+                                      setIsDeleteDialogOpen(true);
                                     }}
                                     data-testid={`button-delete-${user.id}`}
                                   >
@@ -1040,6 +1080,48 @@ export default function AdminDashboard() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Block User Account</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to block {userToBlock?.fullName}? 
+                They will be able to log in but won't be able to access any features or perform any transactions until unblocked.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => userToBlock && blockUserMutation.mutate(userToBlock.id)}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                Block User
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete User Account</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to permanently delete {userToDelete?.fullName}? 
+                This action cannot be undone. All user data and account information will be permanently removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => userToDelete && deleteUserMutation.mutate(userToDelete.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete User
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <footer className="bg-white border-t border-gray-200 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

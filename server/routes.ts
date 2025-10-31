@@ -33,10 +33,11 @@ function isAuthenticated(req: Request, res: Response, next: Function) {
   
   const user = req.user as any;
   if (user?.isBlocked) {
-    req.logout((err) => {
-      if (err) console.error("Logout error:", err);
+    return res.status(403).json({ 
+      success: false, 
+      message: "Your account access has been blocked by the administrator. Please contact Truist Bank support for assistance.",
+      blocked: true
     });
-    return res.status(403).json({ success: false, message: "Account has been blocked. Please contact support." });
   }
   
   return next();
@@ -50,10 +51,11 @@ function isAdmin(req: Request, res: Response, next: Function) {
   
   const user = req.user as any;
   if (user?.isBlocked) {
-    req.logout((err) => {
-      if (err) console.error("Logout error:", err);
+    return res.status(403).json({ 
+      success: false, 
+      message: "Your account access has been blocked by the administrator. Please contact Truist Bank support for assistance.",
+      blocked: true
     });
-    return res.status(403).json({ success: false, message: "Account has been blocked. Please contact support." });
   }
   
   if (!user?.isAdmin) {

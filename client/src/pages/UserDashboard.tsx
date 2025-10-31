@@ -49,6 +49,7 @@ export default function UserDashboard() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isBlocked, setIsBlocked] = useState(false);
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -70,7 +71,15 @@ export default function UserDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/me", { credentials: "include" });
       if (!response.ok) {
-        if (response.status === 403 || response.status === 401) {
+        if (response.status === 403) {
+          const errorData = await response.json();
+          if (errorData.blocked) {
+            setIsBlocked(true);
+            throw new Error("Account blocked");
+          }
+          setLocation("/");
+        }
+        if (response.status === 401) {
           setLocation("/");
         }
         throw new Error("Not authenticated");
@@ -81,9 +90,9 @@ export default function UserDashboard() {
       }
       return data;
     },
-    refetchInterval: 3000,
+    refetchInterval: isBlocked ? false : 3000,
     retry: (failureCount, error: any) => {
-      if (error.message === "Not authenticated") {
+      if (error.message === "Not authenticated" || error.message === "Account blocked") {
         return false;
       }
       return failureCount < 3;
@@ -100,8 +109,8 @@ export default function UserDashboard() {
       if (!response.ok) throw new Error("Failed to fetch transactions");
       return response.json();
     },
-    enabled: !!selectedAccountId,
-    refetchInterval: 3000,
+    enabled: !!selectedAccountId && !isBlocked,
+    refetchInterval: isBlocked ? false : 3000,
   });
 
   const logoutMutation = useMutation({
@@ -380,6 +389,17 @@ export default function UserDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {isBlocked && (
+          <Alert className="mb-6 bg-red-50 border-red-200" data-testid="alert-blocked">
+            <Lock className="h-5 w-5 text-red-600" />
+            <AlertDescription className="text-red-800 font-medium text-base">
+              <strong className="block mb-1">Account Access Blocked</strong>
+              Your account has been temporarily blocked by the administrator. You cannot perform any transactions or access account features at this time. 
+              Please contact Truist Bank support at <span className="font-semibold">1-800-TRUIST-1</span> for assistance.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {getGreeting()}, {getShortBusinessName(account?.businessName)}
