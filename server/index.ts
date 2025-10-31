@@ -161,15 +161,21 @@ const userSessionMiddleware = session({
   },
 });
 
-// Apply sessions based on route
+// Apply sessions based on route to maintain separation
 app.use((req, res, next) => {
-  if (req.path.startsWith('/api/admin') || req.path === '/api/admin-login' || req.path === '/api/admin-logout' || req.path === '/api/admin-me') {
+  // Admin routes use admin session
+  if (req.path.startsWith('/api/admin') || 
+      req.path === '/api/admin-login' || 
+      req.path === '/api/admin-logout' || 
+      req.path === '/api/admin-me' ||
+      req.path.startsWith('/api/admin/')) {
     adminSessionMiddleware(req, res, () => {
       adminPassport.initialize()(req, res, () => {
         adminPassport.session()(req, res, next);
       });
     });
   } else {
+    // All other routes use user session
     userSessionMiddleware(req, res, () => {
       userPassport.initialize()(req, res, () => {
         userPassport.session()(req, res, next);

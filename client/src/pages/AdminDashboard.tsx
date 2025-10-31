@@ -217,7 +217,7 @@ export default function AdminDashboard() {
 
   const updateAvatarMutation = useMutation({
     mutationFn: async (avatar: string) => {
-      return await apiRequest("POST", "/api/profile/update-avatar", { avatar });
+      return await apiRequest("POST", "/api/admin/profile/update-avatar", { avatar });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-me"] });

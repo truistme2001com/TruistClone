@@ -132,6 +132,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin profile update routes
+  app.post("/api/admin/profile/update-avatar", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { avatar } = req.body;
+      
+      if (!avatar) {
+        return res.status(400).json({ success: false, message: "Avatar is required" });
+      }
+      
+      await updateUserAvatar(user.id, avatar);
+      res.json({ success: true, message: "Avatar updated successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message || "Failed to update avatar" });
+    }
+  });
+
+  app.post("/api/admin/profile/update-nickname", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { nickname } = req.body;
+      
+      await updateUserNickname(user.id, nickname || "");
+      res.json({ success: true, message: "Nickname updated successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message || "Failed to update nickname" });
+    }
+  });
+
+  app.post("/api/admin/profile/change-password", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: "Current and new passwords are required" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+      }
+      
+      await changeUserPassword(user.id, currentPassword, newPassword);
+      res.json({ success: true, message: "Password changed successfully" });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message || "Failed to change password" });
+    }
+  });
+
   // Regular user authentication routes
   app.post("/api/login", (req, res, next) => {
     try {
