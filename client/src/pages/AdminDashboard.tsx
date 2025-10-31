@@ -14,15 +14,53 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
 import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import avatarTeddy from "@assets/generated_images/Cute_teddy_bear_avatar_c7acee2d.png";
+import avatarCat from "@assets/generated_images/Cute_orange_cat_avatar_620953be.png";
+import avatarDog from "@assets/generated_images/Cute_corgi_dog_avatar_c05836b9.png";
+import avatarPanda from "@assets/generated_images/Cute_panda_avatar_446d56e7.png";
+import avatarBunny from "@assets/generated_images/Cute_bunny_rabbit_avatar_1fad4cd8.png";
+import avatarFox from "@assets/generated_images/Cute_fox_avatar_15511073.png";
+import avatarUnicorn from "@assets/generated_images/Cute_unicorn_avatar_a716b055.png";
+import avatarRobot from "@assets/generated_images/Cute_robot_avatar_945782ec.png";
+import avatarPenguin from "@assets/generated_images/Cute_penguin_avatar_8452d04c.png";
+import avatarKoala from "@assets/generated_images/Cute_koala_avatar_90299146.png";
+import avatarOwl from "@assets/generated_images/Cute_owl_avatar_b6ecc7fc.png";
+import avatarSloth from "@assets/generated_images/Cute_sloth_avatar_6f1e1b80.png";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isUpdateBalanceOpen, setIsUpdateBalanceOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<any>(null);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState("");
+  
+  const avatarOptions = [
+    { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
+    { id: "cat", image: avatarCat, label: "Cat" },
+    { id: "dog", image: avatarDog, label: "Dog" },
+    { id: "panda", image: avatarPanda, label: "Panda" },
+    { id: "bunny", image: avatarBunny, label: "Bunny" },
+    { id: "fox", image: avatarFox, label: "Fox" },
+    { id: "unicorn", image: avatarUnicorn, label: "Unicorn" },
+    { id: "robot", image: avatarRobot, label: "Robot" },
+    { id: "penguin", image: avatarPenguin, label: "Penguin" },
+    { id: "koala", image: avatarKoala, label: "Koala" },
+    { id: "owl", image: avatarOwl, label: "Owl" },
+    { id: "sloth", image: avatarSloth, label: "Sloth" },
+  ];
+  
+  const getAvatarImage = (avatarId: string | undefined) => {
+    if (!avatarId || avatarId === "default") return null;
+    const avatar = avatarOptions.find(a => a.id === avatarId);
+    return avatar?.image;
+  };
 
   const { data: currentUser } = useQuery({
     queryKey: ["me"],
@@ -177,6 +215,32 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (avatar: string) => {
+      return await apiRequest("POST", "/api/profile/update-avatar", { avatar });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      setIsAvatarDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update avatar",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAvatarSelect = (avatarId: string) => {
+    setSelectedAvatar(avatarId);
+    updateAvatarMutation.mutate(avatarId);
+  };
+
   const [isAdminUser, setIsAdminUser] = useState(false);
 
   const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
@@ -263,17 +327,29 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600" data-testid="button-notifications">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600">
+              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-purple-600" data-testid="button-settings">
                 <Settings className="h-5 w-5" />
               </Button>
               <div className="hidden sm:flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
                 <div className="flex items-center gap-2">
-                  <div className="bg-purple-100 p-2 rounded-full">
-                    <User className="h-4 w-4 text-purple-600" />
-                  </div>
+                  <button 
+                    onClick={() => setIsAvatarDialogOpen(true)}
+                    className="bg-purple-100 p-2 rounded-full hover:bg-purple-200 transition-colors cursor-pointer"
+                    data-testid="button-admin-avatar"
+                  >
+                    {getAvatarImage(currentUser?.user?.avatar) ? (
+                      <img 
+                        src={getAvatarImage(currentUser?.user?.avatar)!} 
+                        alt="Avatar" 
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-4 w-4 text-purple-600" />
+                    )}
+                  </button>
                   <span className="text-sm font-semibold text-gray-900">{currentUser?.user?.fullName}</span>
                 </div>
               </div>
@@ -282,6 +358,7 @@ export default function AdminDashboard() {
                 size="sm"
                 className="border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700 gap-2"
                 onClick={() => logoutMutation.mutate()}
+                data-testid="button-logout"
               >
                 <LogOut className="h-4 w-4" />
                 Sign Out
@@ -299,7 +376,7 @@ export default function AdminDashboard() {
           </div>
           <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg gap-2">
+              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg gap-2" data-testid="button-create-user">
                 <Plus className="h-5 w-5" />
                 Create New User
               </Button>
@@ -345,7 +422,7 @@ export default function AdminDashboard() {
                     <AlertDescription>{createUserMutation.error.message}</AlertDescription>
                   </Alert>
                 )}
-                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={createUserMutation.isPending}>
+                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={createUserMutation.isPending} data-testid="button-submit-create-user">
                   {createUserMutation.isPending ? "Creating..." : "Create User"}
                 </Button>
               </form>
@@ -481,15 +558,15 @@ export default function AdminDashboard() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="gap-1.5 border-purple-300 text-purple-600 hover:bg-purple-50"
+                                  className="gap-1.5 border-green-300 text-green-600 hover:bg-green-50"
                                   onClick={() => {
                                     setSelectedAccount(user.accounts[0]);
                                     setIsUpdateBalanceOpen(true);
                                   }}
                                   data-testid={`button-update-balance-${user.id}`}
                                 >
-                                  <Edit className="h-3.5 w-3.5" />
-                                  Update
+                                  <DollarSign className="h-3.5 w-3.5" />
+                                  Fund/Debit
                                 </Button>
                               )}
                               {!user.isAdmin && (
@@ -551,7 +628,7 @@ export default function AdminDashboard() {
         <Dialog open={isUpdateBalanceOpen} onOpenChange={setIsUpdateBalanceOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Account Balance</DialogTitle>
+            <DialogTitle>Fund or Debit Account</DialogTitle>
             <DialogDescription>
               {selectedAccount?.businessName} - Account #{selectedAccount?.accountNumber}
             </DialogDescription>
@@ -566,30 +643,30 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <Label htmlFor="type">Transaction Type</Label>
               <Select name="type" value={transactionType} onValueChange={setTransactionType} required>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-transaction-type">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="credit">Credit (Add)</SelectItem>
-                  <SelectItem value="debit">Debit (Subtract)</SelectItem>
+                  <SelectItem value="credit" data-testid="option-credit">Credit (Add Money)</SelectItem>
+                  <SelectItem value="debit" data-testid="option-debit">Debit (Remove Money)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" name="amount" type="number" step="0.01" required />
+              <Input id="amount" name="amount" type="number" step="0.01" required data-testid="input-balance-amount" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description (optional)</Label>
-              <Input id="description" name="description" />
+              <Input id="description" name="description" data-testid="input-balance-description" />
             </div>
             {updateBalanceMutation.error && (
               <Alert variant="destructive">
                 <AlertDescription>{updateBalanceMutation.error.message}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={updateBalanceMutation.isPending}>
-              {updateBalanceMutation.isPending ? "Updating..." : "Update Balance"}
+            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={updateBalanceMutation.isPending} data-testid="button-submit-balance-update">
+              {updateBalanceMutation.isPending ? "Processing..." : "Update Balance"}
             </Button>
           </form>
         </DialogContent>
@@ -661,6 +738,39 @@ export default function AdminDashboard() {
                 {updateUserMutation.isPending ? "Updating..." : "Update User"}
               </Button>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Choose Your Avatar</DialogTitle>
+              <DialogDescription>
+                Select an avatar that represents you
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-4 gap-4 py-4">
+              {avatarOptions.map((avatar) => (
+                <button
+                  key={avatar.id}
+                  onClick={() => handleAvatarSelect(avatar.id)}
+                  className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                    selectedAvatar === avatar.id || currentUser?.user?.avatar === avatar.id
+                      ? "border-purple-600 bg-purple-50"
+                      : "border-gray-200 hover:border-purple-300"
+                  }`}
+                  disabled={updateAvatarMutation.isPending}
+                  data-testid={`button-select-avatar-${avatar.id}`}
+                >
+                  <img
+                    src={avatar.image}
+                    alt={avatar.label}
+                    className="w-full aspect-square object-cover rounded-lg"
+                  />
+                  <p className="text-xs text-center mt-2 font-medium">{avatar.label}</p>
+                </button>
+              ))}
+            </div>
           </DialogContent>
         </Dialog>
 
