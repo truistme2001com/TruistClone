@@ -11,6 +11,35 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **October 31, 2025**: Admin Balance & Real-Time Notification System
+  - **Admin Personal Balance**:
+    - Created separate admin account ("Admin Operations") with $1,000,000 starting balance
+    - Admin balance displayed in dedicated card on Admin Dashboard
+    - "Add Funds" feature allows admin to add money to their account for sending to users
+    - Balance separate from users' total balance - admin has their own personal funds
+    - All balance updates persist across imports and restarts
+  - **Real-Time Notifications**:
+    - Added notifications table in database schema (`shared/schema.ts`)
+    - Notifications automatically created when:
+      - New user is created
+      - Admin credits/debits user balance
+    - Bell icon in admin header shows unread count badge (red circle)
+    - Full notification dialog with:
+      - List of all notifications (unread highlighted in purple)
+      - Mark individual notifications as read
+      - "Mark all as read" button
+      - Timestamps in local format
+    - Polling-based updates every 3 seconds for "real-time" feel
+  - **Immediate Balance Updates**:
+    - Implemented TanStack Query cache invalidation
+    - When admin credits/debits user, both admin and user balances update immediately
+    - No page refresh needed - all updates happen in real-time
+  - **Data Persistence Improvements**:
+    - Enhanced `server/init-accounts.ts` to only update security fields
+    - All user customizations preserved: avatar, nickname, email, balance, etc.
+    - Only password, isAdmin, and isBlocked fields reset on restart for security
+    - Admin operations account created once and preserved forever
+
 - **October 31, 2025**: Permanent Account & Session Fixes
   - **Account Number Update**: Changed from 10 to 13 digits (Truist standard)
     - Fixed Mark Lowry account number to permanent value: `4729186503421`
