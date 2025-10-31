@@ -519,9 +519,10 @@ export async function changeUserPassword(userId: number, currentPassword: string
   return { success: true };
 }
 
-// Helper function to generate account numbers (Truist format: 10 digits)
+// Helper function to generate account numbers (Truist format: 13 digits)
 function generateAccountNumber(): string {
-  const random1 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
-  const random2 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
-  return `${random1}${random2}`;
+  const part1 = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  const part2 = Math.floor(Math.random() * 100000).toString().padStart(5, "0");
+  const part3 = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  return `${part1}${part2}${part3}`;
 }

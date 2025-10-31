@@ -66,7 +66,8 @@ async function initAccounts() {
           email: "admin@truist.com",
           fullName: "System Administrator",
           isAdmin: true,
-          isBlocked: false
+          isBlocked: false,
+          avatar: "admin"
         })
         .where(eq(users.id, existingAdmin.id));
       console.log("✓ Admin account password updated");
@@ -78,6 +79,7 @@ async function initAccounts() {
         email: "admin@truist.com",
         isAdmin: true,
         isBlocked: false,
+        avatar: "admin",
       });
       console.log("✓ Admin account created");
     }
@@ -123,7 +125,7 @@ async function initAccounts() {
     let accountNumber: string;
     
     if (existingAccounts.length === 0) {
-      accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+      accountNumber = "1234567890123";
       const debitCard = generateCardNumber("4444");
       const creditCard = generateCardNumber("5284");
       const debitExpiry = generateExpiry();

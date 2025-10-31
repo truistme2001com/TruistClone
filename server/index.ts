@@ -101,8 +101,8 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: false }));
 
-// Single unified session for both admin and users
-app.use(session({
+// Create separate session middleware for admin and users
+const adminSessionMiddleware = session({
   store: new PgSession({
     conObject: {
       connectionString: process.env.DATABASE_URL,
@@ -110,7 +110,27 @@ app.use(session({
     tableName: "sessions",
     createTableIfMissing: true,
   }),
-  name: 'connect.sid',
+  name: 'admin.sid',
+  secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: '/api/admin',
+  },
+});
+
+const userSessionMiddleware = session({
+  store: new PgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    tableName: "sessions",
+    createTableIfMissing: true,
+  }),
+  name: 'user.sid',
   secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
   resave: false,
   saveUninitialized: false,
@@ -119,7 +139,16 @@ app.use(session({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
   },
-}));
+});
+
+// Apply sessions based on route path
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/admin')) {
+    adminSessionMiddleware(req, res, next);
+  } else {
+    userSessionMiddleware(req, res, next);
+  }
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
