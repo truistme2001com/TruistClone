@@ -11,6 +11,22 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **October 31, 2025**: Permanent Account & Session Fixes
+  - **Account Number Update**: Changed from 10 to 13 digits (Truist standard)
+    - Fixed Mark Lowry account number to permanent value: `1234567890123`
+    - Updated `generateAccountNumber()` in `server/storage.ts` to generate 13-digit numbers for new accounts
+    - All new users will receive random 13-digit account numbers
+  - **Admin Avatar Fix**: Set admin avatar to permanent value "admin"
+    - Avatar field now persists across imports and restarts
+    - Admin avatar will not change when importing to new agent
+  - **Separate Admin & User Sessions**: 
+    - Implemented dual session system in `server/index.ts`
+    - Admin sessions use cookie: `admin.sid` (path: `/api/admin`)
+    - User sessions use cookie: `user.sid` (global path)
+    - Admin and users can now be logged in simultaneously without conflicts
+    - Each session is completely independent and secure
+
+## Recent Changes
 - **October 30, 2025**: User Date Joined & Admin Editing System
   - **Date Joined Field**:
     - Added `dateJoined` timestamp field to user schema in `shared/schema.ts`

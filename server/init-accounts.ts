@@ -158,7 +158,7 @@ async function initAccounts() {
     } else {
       const account = existingAccounts[0];
       accountId = account.id;
-      accountNumber = account.accountNumber;
+      accountNumber = "1234567890123";
       
       const debitCard = account.debitCardNumber ? account.debitCardNumber.replace(/\s/g, '') : generateCardNumber("4444");
       const creditCard = account.creditCardNumber ? account.creditCardNumber.replace(/\s/g, '') : generateCardNumber("5284");
@@ -170,6 +170,7 @@ async function initAccounts() {
       await db.update(accounts)
         .set({
           businessName: "M. Lowry Vocal Band",
+          accountNumber: accountNumber,
           accountType: "business checkings",
           debitCardNumber: formatCardNumber(debitCard),
           debitCardExpiry: debitExpiry,
