@@ -81,6 +81,40 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const accountApplications = pgTable("account_applications", {
+  id: serial("id").primaryKey(),
+  fullName: text("full_name").notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  username: varchar("username", { length: 100 }).notNull(),
+  password: text("password").notNull(),
+  businessName: text("business_name"),
+  accountType: varchar("account_type", { length: 50 }).notNull().default("business checkings"),
+  initialDeposit: decimal("initial_deposit", { precision: 20, scale: 2 }).default("0"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, declined
+  declineReason: text("decline_reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+  processedBy: integer("processed_by").references(() => users.id),
+});
+
+export const pendingTransfers = pgTable("pending_transfers", {
+  id: serial("id").primaryKey(),
+  fromAccountId: integer("from_account_id").notNull().references(() => accounts.id),
+  amount: decimal("amount", { precision: 20, scale: 2 }).notNull(),
+  transferMethod: varchar("transfer_method", { length: 50 }).notNull(),
+  beneficiaryName: text("beneficiary_name"),
+  beneficiaryAccount: varchar("beneficiary_account", { length: 50 }),
+  beneficiaryBank: text("beneficiary_bank"),
+  routingNumber: varchar("routing_number", { length: 20 }),
+  swiftCode: varchar("swift_code", { length: 20 }),
+  beneficiaryAddress: text("beneficiary_address"),
+  description: text("description"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, approved, rejected, completed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+  processedBy: integer("processed_by").references(() => users.id),
+});
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
@@ -93,6 +127,12 @@ export const selectTransactionSchema = createSelectSchema(transactions);
 
 export const insertNotificationSchema = createInsertSchema(notifications);
 export const selectNotificationSchema = createSelectSchema(notifications);
+
+export const insertAccountApplicationSchema = createInsertSchema(accountApplications);
+export const selectAccountApplicationSchema = createSelectSchema(accountApplications);
+
+export const insertPendingTransferSchema = createInsertSchema(pendingTransfers);
+export const selectPendingTransferSchema = createSelectSchema(pendingTransfers);
 
 // API schemas
 export const loginSchema = z.object({
@@ -108,6 +148,16 @@ export const createUserSchema = z.object({
   isAdmin: z.boolean().default(false),
   businessName: z.string().optional(),
   initialBalance: z.string().optional(),
+});
+
+export const openAccountSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  businessName: z.string().optional(),
+  accountType: z.string().default("business checkings"),
+  initialDeposit: z.string().optional(),
 });
 
 export const updateUserSchema = z.object({
@@ -162,6 +212,7 @@ export type UpdateBalanceRequest = z.infer<typeof updateBalanceSchema>;
 export type TransferRequest = z.infer<typeof transferSchema>;
 export type DomesticWireRequest = z.infer<typeof domesticWireSchema>;
 export type InternationalWireRequest = z.infer<typeof internationalWireSchema>;
+export type OpenAccountRequest = z.infer<typeof openAccountSchema>;
 
 export interface LoginResponse {
   success: boolean;
