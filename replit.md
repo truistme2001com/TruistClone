@@ -65,9 +65,10 @@ Create an exact replica of the Truist bank website with:
     - Fixed Mark Lowry account number to permanent value: `4729186503421`
     - Updated `generateAccountNumber()` in `server/storage.ts` to generate 13-digit numbers for new accounts
     - All new users will receive random 13-digit account numbers
-  - **Admin Avatar Fix**: Set admin avatar to permanent value "admin"
+  - **Admin Avatar Fix**: Set admin avatar to permanent value "owl"
     - Avatar field now persists across imports and restarts
     - Admin avatar will not change when importing to new agent
+    - Admin account created with owl avatar by default
   - **Separate Admin & User Sessions**: 
     - Implemented dual session system in `server/index.ts`
     - Admin sessions use cookie: `admin.sid` (path: `/api/admin`)

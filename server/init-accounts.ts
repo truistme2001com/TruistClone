@@ -75,10 +75,11 @@ async function initAccounts() {
         password: adminPassword,
         fullName: "System Administrator",
         email: "admin@truist.com",
+        avatar: "owl",
         isAdmin: true,
         isBlocked: false,
       });
-      console.log("✓ Admin account created");
+      console.log("✓ Admin account created with owl avatar");
     }
     
     // Create or preserve admin account with balance
