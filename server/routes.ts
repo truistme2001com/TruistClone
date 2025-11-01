@@ -786,6 +786,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Account application routes
+  app.post("/api/open-account", async (req, res) => {
+    try {
+      const { openAccountSchema } = await import("@shared/schema");
+      const { submitAccountApplication } = await import("./storage");
+      
+      const validatedData = openAccountSchema.parse(req.body);
+      
+      // Check if username or email already exists
+      const { checkUsernameExists, checkEmailExists } = await import("./storage");
+      const usernameExists = await checkUsernameExists(validatedData.username);
+      const emailExists = await checkEmailExists(validatedData.email);
+      
+      if (usernameExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists",
+        });
+      }
+      
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already registered",
+        });
+      }
+      
+      await submitAccountApplication(validatedData);
+      
+      res.json({
+        success: true,
+        message: "Account application submitted successfully",
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to submit application",
+      });
+    }
+  });
+
+  // Admin account application management routes
+  app.get("/api/admin/account-applications", isAdmin, async (req, res) => {
+    try {
+      const { getAllAccountApplications } = await import("./storage");
+      const applications = await getAllAccountApplications();
+      
+      res.json({
+        success: true,
+        applications,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to fetch applications",
+      });
+    }
+  });
+
+  app.post("/api/admin/account-applications/:id/approve", isAdmin, async (req, res) => {
+    try {
+      const { approveAccountApplication } = await import("./storage");
+      const applicationId = parseInt(req.params.id);
+      const adminUser = req.user as any;
+      
+      const result = await approveAccountApplication(applicationId, adminUser.id);
+      
+      res.json({
+        success: true,
+        message: "Account application approved successfully",
+        ...result,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to approve application",
+      });
+    }
+  });
+
+  app.post("/api/admin/account-applications/:id/decline", isAdmin, async (req, res) => {
+    try {
+      const { declineAccountApplication } = await import("./storage");
+      const applicationId = parseInt(req.params.id);
+      const adminUser = req.user as any;
+      const { reason } = req.body;
+      
+      await declineAccountApplication(applicationId, adminUser.id, reason);
+      
+      res.json({
+        success: true,
+        message: "Account application declined",
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to decline application",
+      });
+    }
+  });
+
+  // Get all transactions for admin overview
+  app.get("/api/admin/transactions", isAdmin, async (req, res) => {
+    try {
+      const { getAllTransactions } = await import("./storage");
+      const transactions = await getAllTransactions();
+      
+      res.json({
+        success: true,
+        transactions,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to fetch transactions",
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

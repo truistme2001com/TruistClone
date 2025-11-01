@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users, accounts, transactions, sessions, notifications } from "@shared/schema";
+import { users, accounts, transactions, sessions, notifications, accountApplications, pendingTransfers } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -10,7 +10,7 @@ if (!process.env.DATABASE_URL) {
 
 const sql = postgres(process.env.DATABASE_URL);
 export const db = drizzle(sql, {
-  schema: { users, accounts, transactions, sessions, notifications },
+  schema: { users, accounts, transactions, sessions, notifications, accountApplications, pendingTransfers },
   casing: 'snake_case',
 });
 
@@ -575,4 +575,155 @@ export async function markAllNotificationsAsRead() {
     .update(notifications)
     .set({ isRead: true })
     .where(eq(notifications.isRead, false));
+}
+
+// Account application operations
+export async function checkUsernameExists(username: string): Promise<boolean> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.username, username)
+  });
+  return !!user;
+}
+
+export async function checkEmailExists(email: string): Promise<boolean> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email)
+  });
+  return !!user;
+}
+
+export async function submitAccountApplication(data: {
+  fullName: string;
+  email: string;
+  username: string;
+  password: string;
+  businessName?: string;
+  accountType: string;
+  initialDeposit?: string;
+}) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  
+  const [application] = await db.insert(accountApplications).values({
+    fullName: data.fullName,
+    email: data.email,
+    username: data.username,
+    password: hashedPassword,
+    businessName: data.businessName || data.fullName,
+    accountType: data.accountType,
+    initialDeposit: data.initialDeposit || "0",
+    status: "pending",
+  }).returning();
+  
+  return application;
+}
+
+export async function getAllAccountApplications() {
+  return db
+    .select()
+    .from(accountApplications)
+    .orderBy(desc(accountApplications.createdAt));
+}
+
+export async function approveAccountApplication(applicationId: number, adminId: number) {
+  const application = await db.query.accountApplications.findFirst({
+    where: eq(accountApplications.id, applicationId)
+  });
+  
+  if (!application) {
+    throw new Error("Application not found");
+  }
+  
+  if (application.status !== "pending") {
+    throw new Error("Application has already been processed");
+  }
+  
+  // Create user and account
+  const [newUser] = await db.insert(users).values({
+    username: application.username,
+    password: application.password, // Already hashed
+    fullName: application.fullName,
+    email: application.email,
+    isAdmin: false,
+    isBlocked: false,
+  }).returning();
+  
+  const accountNumber = generateAccountNumber();
+  const [newAccount] = await db.insert(accounts).values({
+    userId: newUser.id,
+    businessName: application.businessName || application.fullName,
+    accountNumber: accountNumber,
+    routingNumber: "061000104", // Truist routing number
+    balance: application.initialDeposit || "0",
+    accountType: application.accountType,
+    status: "active",
+  }).returning();
+  
+  // Update application status
+  await db
+    .update(accountApplications)
+    .set({
+      status: "approved",
+      processedAt: new Date(),
+      processedBy: adminId,
+    })
+    .where(eq(accountApplications.id, applicationId));
+  
+  // Create notification
+  await createNotification({
+    type: "account_approved",
+    title: "Account Approved",
+    message: `New account created for ${application.fullName}. Account #${accountNumber}`,
+    relatedEntityId: newUser.id,
+  });
+  
+  return {
+    user: newUser,
+    account: newAccount,
+    accountNumber,
+  };
+}
+
+export async function declineAccountApplication(applicationId: number, adminId: number, reason?: string) {
+  const application = await db.query.accountApplications.findFirst({
+    where: eq(accountApplications.id, applicationId)
+  });
+  
+  if (!application) {
+    throw new Error("Application not found");
+  }
+  
+  if (application.status !== "pending") {
+    throw new Error("Application has already been processed");
+  }
+  
+  await db
+    .update(accountApplications)
+    .set({
+      status: "declined",
+      declineReason: reason || "Application did not meet requirements",
+      processedAt: new Date(),
+      processedBy: adminId,
+    })
+    .where(eq(accountApplications.id, applicationId));
+}
+
+export async function getAllTransactions(limit: number = 100) {
+  return db
+    .select({
+      id: transactions.id,
+      accountId: transactions.accountId,
+      type: transactions.type,
+      amount: transactions.amount,
+      description: transactions.description,
+      balanceAfter: transactions.balanceAfter,
+      transferMethod: transactions.transferMethod,
+      beneficiaryName: transactions.beneficiaryName,
+      createdAt: transactions.createdAt,
+      accountNumber: accounts.accountNumber,
+      businessName: accounts.businessName,
+    })
+    .from(transactions)
+    .leftJoin(accounts, eq(transactions.accountId, accounts.id))
+    .orderBy(desc(transactions.createdAt))
+    .limit(limit);
 }
