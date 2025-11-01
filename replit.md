@@ -11,6 +11,26 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **November 1, 2025**: Footer Links & Avatar Persistence Enhancement
+  - **Privacy Policy, Terms of Service, and Contact Us Pages**:
+    - Created three new professional pages: Privacy Policy, Terms of Service, and Contact Us
+    - Each page features consistent layout with purple branding (#5F259F)
+    - Professional content sections with clear hierarchy and organization
+    - Dark mode support throughout all pages
+    - "Back to Home" navigation button on each page
+    - Contact Us page includes phone support, email, headquarters info, and emergency contacts
+  - **Footer Link Updates**:
+    - Updated footer to link to new internal pages (was linking to external Truist URLs)
+    - Links now properly route within the application using wouter routing
+    - Three main footer links: Privacy Policy, Terms of Service, Contact Us
+    - All links functional and tested
+  - **Avatar Persistence Verification**:
+    - Confirmed and enhanced admin avatar persistence in `server/init-accounts.ts`
+    - Code explicitly preserves avatar field during account initialization
+    - Only password, isAdmin, and isBlocked fields are reset on restart for security
+    - Avatar and all other customizations remain intact across imports and restarts
+    - Updated console logging to clarify avatar preservation
+
 - **October 31, 2025**: Admin Balance & Real-Time Notification System
   - **Admin Personal Balance**:
     - Created separate admin account ("Admin Operations") with $1,000,000 starting balance
