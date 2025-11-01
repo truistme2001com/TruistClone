@@ -11,6 +11,36 @@ Create an exact replica of the Truist bank website with:
 - Responsive design matching the original
 
 ## Recent Changes
+- **November 1, 2025**: Account Application Approval System
+  - **Admin Application Approval Tab**:
+    - Added "Application Approval" tab to Admin Dashboard
+    - Displays all pending account applications in a detailed table
+    - Shows applicant name, email, username, business name, account type, initial deposit, and application date
+    - Real-time updates with 3-second polling
+    - Badge indicator shows number of pending applications
+    - "All Caught Up" message when no pending applications
+  - **Approve/Decline Workflow**:
+    - Professional confirmation dialogs for both approve and decline actions
+    - Approve dialog shows what will happen: account creation, banking details generation, initial balance setup
+    - Decline dialog requires admin to provide a reason for rejection
+    - Both actions invalidate caches for immediate UI updates
+    - Toast notifications confirm successful approval/decline
+  - **Processed Applications History**:
+    - Separate section showing previously approved or declined applications
+    - Displays status, processed date, and decline reason if applicable
+    - Color-coded badges (green for approved, red for declined)
+  - **Enhanced User Application Experience**:
+    - OpenAccount page shows clear "Pending Administrative Approval" message after submission
+    - Orange alert box clearly states user cannot log in until approved
+    - Detailed "What happens next?" section explaining the approval process
+    - Information about account details they'll receive upon approval
+    - Blue info box reminds users to check email for notifications
+  - **Database & API**:
+    - Leverages existing `accountApplications` table with pending/approved/declined status
+    - Uses existing API endpoints: `/api/admin/account-applications` (GET), `/api/admin/account-applications/:id/approve` (POST), `/api/admin/account-applications/:id/decline` (POST)
+    - Proper data validation and error handling throughout
+    - All operations properly authenticated with admin middleware
+
 - **November 1, 2025**: Footer Links & Avatar Persistence Enhancement
   - **Privacy Policy, Terms of Service, and Contact Us Pages**:
     - Created three new professional pages: Privacy Policy, Terms of Service, and Contact Us
