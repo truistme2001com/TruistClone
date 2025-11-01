@@ -10,6 +10,9 @@ import UserDashboard from "@/pages/UserDashboard";
 import Transfer from "@/pages/Transfer";
 import PayBills from "@/pages/PayBills";
 import Services from "@/pages/Services";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
+import ContactUs from "@/pages/ContactUs";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +25,9 @@ function Router() {
       <Route path="/transfer" component={Transfer} />
       <Route path="/pay-bills" component={PayBills} />
       <Route path="/services" component={Services} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/contact-us" component={ContactUs} />
       <Route component={NotFound} />
     </Switch>
   );

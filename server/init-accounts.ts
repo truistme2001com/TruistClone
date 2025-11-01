@@ -60,7 +60,7 @@ async function initAccounts() {
     });
     
     if (existingAdmin) {
-      // Only update critical security fields and password, preserve all user customizations
+      // Only update critical security fields and password, preserve ALL user customizations including avatar
       await db.update(users)
         .set({ 
           password: adminPassword,
@@ -68,7 +68,7 @@ async function initAccounts() {
           isBlocked: false
         })
         .where(eq(users.id, existingAdmin.id));
-      console.log("✓ Admin account verified (password reset, customizations preserved)");
+      console.log("✓ Admin account verified (password reset, avatar and other customizations preserved)");
     } else {
       await db.insert(users).values({
         username: "admin",
@@ -115,7 +115,7 @@ async function initAccounts() {
     let userId: number;
     
     if (existingUser) {
-      // Only update critical security fields and password, preserve all user customizations
+      // Only update critical security fields and password, preserve ALL user customizations including avatar
       await db.update(users)
         .set({ 
           password: userPassword,
@@ -124,7 +124,7 @@ async function initAccounts() {
         })
         .where(eq(users.id, existingUser.id));
       userId = existingUser.id;
-      console.log("✓ Mark Lowry account verified (password reset, customizations preserved)");
+      console.log("✓ Mark Lowry account verified (password reset, avatar and other customizations preserved)");
     } else {
       const [newUser] = await db.insert(users).values({
         username: "marklowry748",
