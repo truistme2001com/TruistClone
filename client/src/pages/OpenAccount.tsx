@@ -108,19 +108,29 @@ export default function OpenAccount() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert>
-              <AlertDescription>
-                Your account application has been submitted and is currently under review.
-                You will be notified via email once your application has been processed.
+            <Alert className="bg-orange-50 border-orange-200">
+              <AlertDescription className="text-orange-800">
+                <strong>⏳ Pending Administrative Approval</strong>
+                <p className="mt-2">
+                  Your account application has been submitted successfully and is awaiting approval from our administrative team. 
+                  You will not be able to log in until your application has been reviewed and approved.
+                </p>
               </AlertDescription>
             </Alert>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
               <p><strong>What happens next?</strong></p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Our team will review your application</li>
-                <li>You'll receive an email notification within 24-48 hours</li>
-                <li>Once approved, you can log in with your credentials</li>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong>Review:</strong> Our administrative team will carefully review your application details</li>
+                <li><strong>Approval:</strong> If approved, your account will be created with full banking features</li>
+                <li><strong>Account Details:</strong> You'll receive your account number, routing number, and login credentials</li>
+                <li><strong>Notification:</strong> You'll be notified via email once your application is processed</li>
+                <li><strong>Access:</strong> After approval, you can log in immediately with your chosen username and password</li>
               </ul>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>📧 Important:</strong> Please check your email regularly. If your application is declined, you will receive a notification with the reason.
+              </p>
             </div>
             <Link href="/">
               <Button className="w-full bg-purple-600 hover:bg-purple-700" data-testid="button-back-home">

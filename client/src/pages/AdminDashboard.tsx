@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell } from "lucide-react";
+import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell, FileCheck, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import avatarTeddy from "@assets/generated_images/Cute_teddy_bear_avatar_c7acee2d.png";
 import avatarCat from "@assets/generated_images/Cute_orange_cat_avatar_620953be.png";
@@ -49,6 +49,10 @@ export default function AdminDashboard() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToBlock, setUserToBlock] = useState<any>(null);
   const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+  const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [declineReason, setDeclineReason] = useState("");
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -127,6 +131,16 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/notifications", { credentials: "include" });
       if (!response.ok) throw new Error("Failed to fetch notifications");
+      return response.json();
+    },
+    refetchInterval: 3000,
+  });
+
+  const { data: applicationsData } = useQuery({
+    queryKey: ["account-applications"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/account-applications", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to fetch applications");
       return response.json();
     },
     refetchInterval: 3000,
@@ -309,6 +323,70 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to add funds",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const approveApplicationMutation = useMutation({
+    mutationFn: async (applicationId: number) => {
+      const response = await fetch(`/api/admin/account-applications/${applicationId}/approve`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["account-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setIsApproveDialogOpen(false);
+      setSelectedApplication(null);
+      toast({
+        title: "Application Approved",
+        description: "The account has been created and the user can now log in.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to approve application",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const declineApplicationMutation = useMutation({
+    mutationFn: async ({ applicationId, reason }: { applicationId: number; reason: string }) => {
+      const response = await fetch(`/api/admin/account-applications/${applicationId}/decline`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["account-applications"] });
+      setIsDeclineDialogOpen(false);
+      setSelectedApplication(null);
+      setDeclineReason("");
+      toast({
+        title: "Application Declined",
+        description: "The application has been rejected.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline application",
         variant: "destructive",
       });
     },
@@ -637,6 +715,19 @@ export default function AdminDashboard() {
             >
               User Management
             </TabsTrigger>
+            <TabsTrigger 
+              value="applications" 
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white font-semibold gap-2"
+              data-testid="tab-applications"
+            >
+              <FileCheck className="h-4 w-4" />
+              Application Approval
+              {applicationsData?.applications?.filter((app: any) => app.status === "pending").length > 0 && (
+                <Badge className="ml-2 bg-orange-500 text-white">
+                  {applicationsData.applications.filter((app: any) => app.status === "pending").length}
+                </Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
@@ -770,6 +861,159 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="applications" className="space-y-4">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <FileCheck className="h-6 w-6 text-blue-600" />
+                  Account Applications
+                </CardTitle>
+                <CardDescription>Review and approve new account applications</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                {applicationsData?.applications?.filter((app: any) => app.status === "pending").length === 0 ? (
+                  <div className="p-12 text-center">
+                    <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">All Caught Up!</h3>
+                    <p className="text-gray-600">No pending applications at the moment.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-50/80">
+                          <TableHead className="font-bold">Applicant Name</TableHead>
+                          <TableHead className="font-bold">Email</TableHead>
+                          <TableHead className="font-bold">Username</TableHead>
+                          <TableHead className="font-bold">Business Name</TableHead>
+                          <TableHead className="font-bold">Account Type</TableHead>
+                          <TableHead className="font-bold">Initial Deposit</TableHead>
+                          <TableHead className="font-bold">Applied Date</TableHead>
+                          <TableHead className="font-bold">Status</TableHead>
+                          <TableHead className="font-bold">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {applicationsData?.applications
+                          ?.filter((app: any) => app.status === "pending")
+                          .map((app: any) => (
+                          <TableRow key={app.id} className="hover:bg-blue-50/50 transition-colors">
+                            <TableCell className="font-semibold text-gray-900" data-testid={`application-name-${app.id}`}>{app.fullName}</TableCell>
+                            <TableCell className="text-gray-700">{app.email}</TableCell>
+                            <TableCell className="text-gray-700 font-mono text-sm">{app.username}</TableCell>
+                            <TableCell className="text-gray-700">{app.businessName || <span className="text-gray-400 italic">N/A</span>}</TableCell>
+                            <TableCell className="text-gray-700">{app.accountType}</TableCell>
+                            <TableCell className="font-bold text-green-600">
+                              ${parseFloat(app.initialDeposit || "0").toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </TableCell>
+                            <TableCell className="text-gray-600 text-sm">
+                              {new Date(app.createdAt).toLocaleDateString("en-US", { 
+                                year: "numeric", 
+                                month: "short", 
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className="bg-orange-100 text-orange-700 font-semibold gap-1">
+                                <Clock className="h-3 w-3" />
+                                Pending
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white gap-1"
+                                  onClick={() => {
+                                    setSelectedApplication(app);
+                                    setIsApproveDialogOpen(true);
+                                  }}
+                                  data-testid={`button-approve-${app.id}`}
+                                >
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-300 text-red-600 hover:bg-red-50 gap-1"
+                                  onClick={() => {
+                                    setSelectedApplication(app);
+                                    setIsDeclineDialogOpen(true);
+                                  }}
+                                  data-testid={`button-decline-${app.id}`}
+                                >
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  Decline
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {applicationsData?.applications?.filter((app: any) => app.status !== "pending").length > 0 && (
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-lg">Processed Applications</CardTitle>
+                  <CardDescription>Previously approved or declined applications</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-50/50">
+                          <TableHead>Applicant</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Business Name</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Processed Date</TableHead>
+                          <TableHead>Decline Reason</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {applicationsData?.applications
+                          ?.filter((app: any) => app.status !== "pending")
+                          .map((app: any) => (
+                          <TableRow key={app.id} className="hover:bg-gray-50/50">
+                            <TableCell className="font-medium">{app.fullName}</TableCell>
+                            <TableCell className="text-sm text-gray-600">{app.email}</TableCell>
+                            <TableCell className="text-sm text-gray-600">{app.businessName || <span className="italic text-gray-400">N/A</span>}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={app.status === "approved" ? "default" : "destructive"}
+                                className={app.status === "approved" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
+                              >
+                                {app.status === "approved" ? "Approved" : "Declined"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-600">
+                              {app.processedAt ? new Date(app.processedAt).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                              }) : "N/A"}
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-600">
+                              {app.declineReason || <span className="text-gray-400 italic">N/A</span>}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
         </main>
@@ -1122,6 +1366,84 @@ export default function AdminDashboard() {
                 className="bg-red-600 hover:bg-red-700"
               >
                 Delete User
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Approve Account Application</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>
+                  You are about to approve the account application for <span className="font-semibold">{selectedApplication?.fullName}</span>.
+                </p>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                  <p className="text-sm text-green-800 font-medium">This will:</p>
+                  <ul className="text-sm text-green-700 mt-1 ml-4 list-disc space-y-1">
+                    <li>Create a new user account with username: {selectedApplication?.username}</li>
+                    <li>Generate banking account details (account number, routing number)</li>
+                    <li>Set initial balance to: ${parseFloat(selectedApplication?.initialDeposit || "0").toFixed(2)}</li>
+                    <li>Allow the user to log in immediately</li>
+                  </ul>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="button-cancel-approve">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => selectedApplication && approveApplicationMutation.mutate(selectedApplication.id)}
+                className="bg-green-600 hover:bg-green-700"
+                data-testid="button-confirm-approve"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Approve Application
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={isDeclineDialogOpen} onOpenChange={setIsDeclineDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Decline Account Application</AlertDialogTitle>
+              <AlertDialogDescription>
+                You are about to decline the account application for <span className="font-semibold">{selectedApplication?.fullName}</span>.
+                Please provide a reason for declining this application.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <Label htmlFor="decline-reason" className="text-sm font-medium">
+                Decline Reason
+              </Label>
+              <textarea
+                id="decline-reason"
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                rows={4}
+                placeholder="e.g., Incomplete information, Failed verification, etc."
+                data-testid="textarea-decline-reason"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="button-cancel-decline">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (selectedApplication && declineReason.trim()) {
+                    declineApplicationMutation.mutate({
+                      applicationId: selectedApplication.id,
+                      reason: declineReason
+                    });
+                  }
+                }}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={!declineReason.trim()}
+                data-testid="button-confirm-decline"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Decline Application
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
