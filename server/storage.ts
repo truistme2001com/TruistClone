@@ -778,6 +778,49 @@ export async function declineAccountApplication(applicationId: number, adminId: 
     .where(eq(accountApplications.id, applicationId));
 }
 
+export async function updateAccountsWithMissingCardDetails() {
+  // Get all accounts
+  const allAccounts = await db.select().from(accounts);
+  let updatedCount = 0;
+  
+  for (const account of allAccounts) {
+    const updates: any = {};
+    
+    // Add debit card details if missing
+    if (!account.debitCardCvv || !account.debitCardNumber) {
+      updates.debitCardNumber = generateCardNumber();
+      updates.debitCardExpiry = generateExpiry();
+      updates.debitCardCvv = generateCVV();
+      updates.debitCardType = "Visa";
+      if (!account.debitCardLimit) {
+        updates.debitCardLimit = "5000";
+      }
+    }
+    
+    // Add credit card details if missing
+    if (!account.creditCardCvv || !account.creditCardNumber) {
+      updates.creditCardNumber = generateCardNumber();
+      updates.creditCardExpiry = generateExpiry();
+      updates.creditCardCvv = generateCVV();
+      updates.creditCardType = "Mastercard";
+      if (!account.creditCardLimit) {
+        updates.creditCardLimit = "10000";
+      }
+    }
+    
+    // Update the account if there are missing fields
+    if (Object.keys(updates).length > 0) {
+      await db
+        .update(accounts)
+        .set(updates)
+        .where(eq(accounts.id, account.id));
+      updatedCount++;
+    }
+  }
+  
+  return updatedCount;
+}
+
 export async function getAllTransactions(limit: number = 100) {
   return db
     .select({

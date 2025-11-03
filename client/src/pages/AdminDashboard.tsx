@@ -885,15 +885,15 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-gray-50/80">
-                          <TableHead className="font-bold">Applicant Name</TableHead>
-                          <TableHead className="font-bold">Email</TableHead>
-                          <TableHead className="font-bold">Username</TableHead>
-                          <TableHead className="font-bold">Business Name</TableHead>
-                          <TableHead className="font-bold">Account Type</TableHead>
-                          <TableHead className="font-bold">Initial Deposit</TableHead>
-                          <TableHead className="font-bold">Applied Date</TableHead>
-                          <TableHead className="font-bold">Status</TableHead>
-                          <TableHead className="font-bold">Actions</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Applicant Name</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Email</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Username</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Business Name</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Account Type</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Initial Deposit</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Applied Date</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Status</TableHead>
+                          <TableHead className="font-bold whitespace-nowrap">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -901,15 +901,15 @@ export default function AdminDashboard() {
                           ?.filter((app: any) => app.status === "pending")
                           .map((app: any) => (
                           <TableRow key={app.id} className="hover:bg-blue-50/50 transition-colors">
-                            <TableCell className="font-semibold text-gray-900" data-testid={`application-name-${app.id}`}>{app.fullName}</TableCell>
-                            <TableCell className="text-gray-700">{app.email}</TableCell>
-                            <TableCell className="text-gray-700 font-mono text-sm">{app.username}</TableCell>
-                            <TableCell className="text-gray-700">{app.businessName || <span className="text-gray-400 italic">N/A</span>}</TableCell>
-                            <TableCell className="text-gray-700">{app.accountType}</TableCell>
-                            <TableCell className="font-bold text-green-600">
+                            <TableCell className="font-semibold text-gray-900 whitespace-nowrap" data-testid={`application-name-${app.id}`}>{app.fullName}</TableCell>
+                            <TableCell className="text-gray-700 whitespace-nowrap">{app.email}</TableCell>
+                            <TableCell className="text-gray-700 font-mono text-sm whitespace-nowrap">{app.username}</TableCell>
+                            <TableCell className="text-gray-700 whitespace-nowrap">{app.businessName || <span className="text-gray-400 italic">N/A</span>}</TableCell>
+                            <TableCell className="text-gray-700 whitespace-nowrap">{app.accountType}</TableCell>
+                            <TableCell className="font-bold text-green-600 whitespace-nowrap">
                               ${parseFloat(app.initialDeposit || "0").toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </TableCell>
-                            <TableCell className="text-gray-600 text-sm">
+                            <TableCell className="text-gray-600 text-sm whitespace-nowrap">
                               {new Date(app.createdAt).toLocaleDateString("en-US", { 
                                 year: "numeric", 
                                 month: "short", 

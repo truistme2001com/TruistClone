@@ -308,6 +308,13 @@ async function initAccounts() {
       console.log("✓ Transaction history already exists - preserving existing data");
     }
     
+    // Update any accounts that don't have card details
+    const { updateAccountsWithMissingCardDetails } = await import("./storage");
+    const updatedCount = await updateAccountsWithMissingCardDetails();
+    if (updatedCount > 0) {
+      console.log(`✓ Updated ${updatedCount} account(s) with missing card details`);
+    }
+    
     console.log("\n=== Permanent Login Credentials ===");
     console.log("Admin Account:");
     console.log("  Username: admin");
