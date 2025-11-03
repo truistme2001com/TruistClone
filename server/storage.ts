@@ -652,6 +652,27 @@ export async function getAllAccountApplications() {
     .orderBy(desc(accountApplications.createdAt));
 }
 
+// Helper functions for generating card details
+function generateCardNumber(): string {
+  // Generate a random 16-digit card number
+  const prefix = Math.random() > 0.5 ? "4444" : "5284"; // Visa starts with 4, Mastercard with 5
+  const middle = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  const next = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  const last = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  return `${prefix} ${middle} ${next} ${last}`;
+}
+
+function generateExpiry(): string {
+  const currentYear = new Date().getFullYear();
+  const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+  const year = String((currentYear + Math.floor(Math.random() * 5) + 1) % 100).padStart(2, '0');
+  return `${month}/${year}`;
+}
+
+function generateCVV(): string {
+  return String(Math.floor(Math.random() * 900) + 100);
+}
+
 export async function approveAccountApplication(applicationId: number, adminId: number) {
   const application = await db.query.accountApplications.findFirst({
     where: eq(accountApplications.id, applicationId)
@@ -675,7 +696,15 @@ export async function approveAccountApplication(applicationId: number, adminId: 
     isBlocked: false,
   }).returning();
   
+  // Generate card details
   const accountNumber = generateAccountNumber();
+  const debitCardNumber = generateCardNumber();
+  const debitCardExpiry = generateExpiry();
+  const debitCardCvv = generateCVV();
+  const creditCardNumber = generateCardNumber();
+  const creditCardExpiry = generateExpiry();
+  const creditCardCvv = generateCVV();
+  
   const [newAccount] = await db.insert(accounts).values({
     userId: newUser.id,
     businessName: application.businessName || application.fullName,
@@ -684,6 +713,20 @@ export async function approveAccountApplication(applicationId: number, adminId: 
     balance: application.initialDeposit || "0",
     accountType: application.accountType,
     status: "active",
+    // Debit card details
+    debitCardNumber: debitCardNumber,
+    debitCardExpiry: debitCardExpiry,
+    debitCardCvv: debitCardCvv,
+    debitCardType: "Visa",
+    debitCardLocked: false,
+    debitCardLimit: "5000",
+    // Credit card details
+    creditCardNumber: creditCardNumber,
+    creditCardExpiry: creditCardExpiry,
+    creditCardCvv: creditCardCvv,
+    creditCardType: "Mastercard",
+    creditCardLocked: false,
+    creditCardLimit: "10000",
   }).returning();
   
   // Update application status

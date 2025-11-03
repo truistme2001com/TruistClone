@@ -719,7 +719,7 @@ export default function UserDashboard() {
                         cardNumber={account?.debitCardNumber || ""}
                         cardType={account?.debitCardType || "Visa"}
                         expiryDate={account?.debitCardExpiry || "12/28"}
-                        cvv={account?.debitCardCvv || "***"}
+                        cvv={account?.debitCardCvv || "000"}
                         onClick={() => setEnlargedCard("debit")}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -755,7 +755,7 @@ export default function UserDashboard() {
                         cardNumber={account?.creditCardNumber || ""}
                         cardType={account?.creditCardType || "Mastercard"}
                         expiryDate={account?.creditCardExpiry || "09/27"}
-                        cvv={account?.creditCardCvv || "***"}
+                        cvv={account?.creditCardCvv || "000"}
                         onClick={() => setEnlargedCard("credit")}
                       />
                       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1403,7 +1403,7 @@ export default function UserDashboard() {
                   cardNumber={enlargedCard === "debit" ? (account?.debitCardNumber || "") : (account?.creditCardNumber || "")}
                   cardType={enlargedCard === "debit" ? (account?.debitCardType || "Visa") : (account?.creditCardType || "Mastercard")}
                   expiryDate={enlargedCard === "debit" ? (account?.debitCardExpiry || "12/28") : (account?.creditCardExpiry || "09/27")}
-                  cvv={enlargedCard === "debit" ? (account?.debitCardCvv || "***") : (account?.creditCardCvv || "***")}
+                  cvv={enlargedCard === "debit" ? (account?.debitCardCvv || "000") : (account?.creditCardCvv || "000")}
                 />
               </div>
             </div>
