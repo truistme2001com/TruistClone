@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pur_b67575c5.jpg";
-import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell, FileCheck, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Users, DollarSign, Building2, Plus, Trash2, Edit, LogOut, Shield, User, Settings, Bell, FileCheck, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import avatarTeddy from "@assets/generated_images/Cute_teddy_bear_avatar_c7acee2d.png";
 import avatarCat from "@assets/generated_images/Cute_orange_cat_avatar_620953be.png";
@@ -53,6 +53,7 @@ export default function AdminDashboard() {
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [declineReason, setDeclineReason] = useState("");
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   
   const avatarOptions = [
     { id: "teddy", image: avatarTeddy, label: "Teddy Bear" },
@@ -927,6 +928,19 @@ export default function AdminDashboard() {
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"
+                                  variant="outline"
+                                  className="gap-1"
+                                  onClick={() => {
+                                    setSelectedApplication(app);
+                                    setIsViewDetailsOpen(true);
+                                  }}
+                                  data-testid={`button-view-${app.id}`}
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
                                   className="bg-green-600 hover:bg-green-700 text-white gap-1"
                                   onClick={() => {
                                     setSelectedApplication(app);
@@ -1449,14 +1463,166 @@ export default function AdminDashboard() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Application Details Dialog */}
+        <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCheck className="h-5 w-5 text-purple-600" />
+                Application Details
+              </DialogTitle>
+              <DialogDescription>
+                Complete information for {selectedApplication?.fullName}'s account application
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 mt-4">
+              {/* Personal Information */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Personal Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-gray-500">Full Name</Label>
+                    <p className="font-medium">{selectedApplication?.fullName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Email</Label>
+                    <p className="font-medium">{selectedApplication?.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Phone Number</Label>
+                    <p className="font-medium">{selectedApplication?.phoneNumber || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Date of Birth</Label>
+                    <p className="font-medium">{selectedApplication?.dateOfBirth || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">SSN (Last 4)</Label>
+                    <p className="font-medium font-mono">{selectedApplication?.ssnLast4 ? `****${selectedApplication.ssnLast4}` : 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Address Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <Label className="text-xs text-gray-500">Street Address</Label>
+                    <p className="font-medium">{selectedApplication?.streetAddress || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">City</Label>
+                    <p className="font-medium">{selectedApplication?.city || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">State</Label>
+                    <p className="font-medium">{selectedApplication?.state || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Zip Code</Label>
+                    <p className="font-medium">{selectedApplication?.zipCode || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Information */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Account Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-gray-500">Username</Label>
+                    <p className="font-medium font-mono">{selectedApplication?.username || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Account Type</Label>
+                    <p className="font-medium">{selectedApplication?.accountType || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Business Name</Label>
+                    <p className="font-medium">{selectedApplication?.businessName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Initial Deposit</Label>
+                    <p className="font-medium text-green-600">${parseFloat(selectedApplication?.initialDeposit || "0").toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Application Status */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Application Status</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-gray-500">Status</Label>
+                    <div className="mt-1">
+                      <Badge className={
+                        selectedApplication?.status === 'approved' ? "bg-green-100 text-green-700" :
+                        selectedApplication?.status === 'declined' ? "bg-red-100 text-red-700" :
+                        "bg-orange-100 text-orange-700"
+                      }>
+                        {selectedApplication?.status || 'pending'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Application Date</Label>
+                    <p className="font-medium">
+                      {selectedApplication?.createdAt ? new Date(selectedApplication.createdAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      }) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>
+                Close
+              </Button>
+              {selectedApplication?.status === 'pending' && (
+                <>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      setIsViewDetailsOpen(false);
+                      setIsApproveDialogOpen(true);
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={() => {
+                      setIsViewDetailsOpen(false);
+                      setIsDeclineDialogOpen(true);
+                    }}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Decline
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <footer className="bg-white border-t border-gray-200 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
               <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
               <div className="flex gap-6">
-                <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
-                <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
-                <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
+                <a href="/privacy-policy" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
+                <a href="/terms-of-service" className="hover:text-purple-600 transition-colors">Terms of Service</a>
+                <a href="/contact-us" className="hover:text-purple-600 transition-colors">Contact Us</a>
               </div>
             </div>
           </div>

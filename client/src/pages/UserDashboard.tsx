@@ -1601,9 +1601,9 @@ export default function UserDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <p>© 2025 Truist Financial Corporation. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-purple-600 transition-colors">Contact Us</a>
+              <a href="/privacy-policy" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
+              <a href="/terms-of-service" className="hover:text-purple-600 transition-colors">Terms of Service</a>
+              <a href="/contact-us" className="hover:text-purple-600 transition-colors">Contact Us</a>
             </div>
           </div>
         </div>

@@ -16,6 +16,13 @@ import truistLogo from "@/../../attached_assets/stock_images/truist_bank_logo_pu
 const openAccountSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  ssnLast4: z.string().length(4, "SSN must be exactly 4 digits").regex(/^\d{4}$/, "SSN must contain only numbers"),
+  streetAddress: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(2, "State is required"),
+  zipCode: z.string().min(5, "Zip code must be at least 5 digits"),
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(6, "Please confirm your password"),
@@ -40,6 +47,13 @@ export default function OpenAccount() {
     defaultValues: {
       fullName: "",
       email: "",
+      phoneNumber: "",
+      dateOfBirth: "",
+      ssnLast4: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
       username: "",
       password: "",
       confirmPassword: "",
@@ -58,6 +72,13 @@ export default function OpenAccount() {
         body: JSON.stringify({
           fullName: data.fullName,
           email: data.email,
+          phoneNumber: data.phoneNumber,
+          dateOfBirth: data.dateOfBirth,
+          ssnLast4: data.ssnLast4,
+          streetAddress: data.streetAddress,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode,
           username: data.username,
           password: data.password,
           businessName: data.businessName || data.fullName,
@@ -204,6 +225,108 @@ export default function OpenAccount() {
 
                 <FormField
                   control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number *</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="tel" placeholder="(555) 123-4567" data-testid="input-phone" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of Birth *</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="date" data-testid="input-dob" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ssnLast4"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SSN (Last 4 digits) *</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="text" maxLength={4} placeholder="1234" data-testid="input-ssn" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="streetAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street Address *</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="123 Main Street" data-testid="input-street" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="New York" data-testid="input-city" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State *</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="NY" data-testid="input-state" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="zipCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Zip Code *</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="10001" data-testid="input-zip" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
@@ -223,7 +346,7 @@ export default function OpenAccount() {
                     <FormItem>
                       <FormLabel>Password *</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" placeholder="••••••••" data-testid="input-password" />
+                        <Input {...field} type="password" autoComplete="new-password" placeholder="••••••••" data-testid="input-password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -237,7 +360,7 @@ export default function OpenAccount() {
                     <FormItem>
                       <FormLabel>Confirm Password *</FormLabel>
                       <FormControl>
-                        <Input {...field} type="password" placeholder="••••••••" data-testid="input-confirm-password" />
+                        <Input {...field} type="password" autoComplete="new-password" placeholder="••••••••" data-testid="input-confirm-password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

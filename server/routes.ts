@@ -813,7 +813,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      await submitAccountApplication(validatedData);
+      const application = await submitAccountApplication(validatedData);
+      
+      // Create notification for all admins
+      const { createNotification } = await import("./storage");
+      const { db } = await import("./storage");
+      const { users } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const adminUsers = await db.query.users.findMany({
+        where: eq(users.isAdmin, true)
+      });
+      
+      // Send notification to each admin
+      for (const admin of adminUsers) {
+        await createNotification({
+          type: "application_submitted",
+          title: "New Account Application",
+          message: `${validatedData.fullName} has submitted a new account application for ${validatedData.accountType}`,
+          userId: admin.id,
+          relatedEntityId: application.id,
+        });
+      }
       
       res.json({
         success: true,

@@ -597,6 +597,13 @@ export async function submitAccountApplication(data: {
   email: string;
   username: string;
   password: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  ssnLast4?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   businessName?: string;
   accountType: string;
   initialDeposit?: string;
@@ -608,6 +615,13 @@ export async function submitAccountApplication(data: {
     email: data.email,
     username: data.username,
     password: hashedPassword,
+    phoneNumber: data.phoneNumber,
+    dateOfBirth: data.dateOfBirth,
+    ssnLast4: data.ssnLast4,
+    streetAddress: data.streetAddress,
+    city: data.city,
+    state: data.state,
+    zipCode: data.zipCode,
     businessName: data.businessName || data.fullName,
     accountType: data.accountType,
     initialDeposit: data.initialDeposit || "0",
