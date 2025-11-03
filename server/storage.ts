@@ -585,6 +585,20 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
   return !!user;
 }
 
+export async function getPendingApplicationByUsername(username: string) {
+  const application = await db.query.accountApplications.findFirst({
+    where: eq(accountApplications.username, username)
+  });
+  return application;
+}
+
+export async function getPendingApplicationByEmail(email: string) {
+  const application = await db.query.accountApplications.findFirst({
+    where: eq(accountApplications.email, email)
+  });
+  return application;
+}
+
 export async function checkEmailExists(email: string): Promise<boolean> {
   const user = await db.query.users.findFirst({
     where: eq(users.email, email)

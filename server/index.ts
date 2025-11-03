@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { getUserByUsernameOrEmail, getUserById, verifyPassword } from "./storage";
+import { getUserByUsernameOrEmail, getUserById, verifyPassword, getPendingApplicationByUsername, getPendingApplicationByEmail } from "./storage";
 import connectPgSimple from "connect-pg-simple";
 import { neon } from "@neondatabase/serverless";
 
@@ -20,6 +20,24 @@ passport.use('local',
     try {
       const user = await getUserByUsernameOrEmail(username);
       if (!user) {
+        // Check if there's a pending application with this username or email
+        let pendingApp = await getPendingApplicationByUsername(username);
+        if (!pendingApp && username.includes('@')) {
+          // If input looks like an email, also check by email
+          pendingApp = await getPendingApplicationByEmail(username);
+        }
+        
+        if (pendingApp) {
+          if (pendingApp.status === "pending") {
+            return done(null, false, { 
+              message: "Your account application is pending administrative approval. You will be able to log in once your application has been reviewed and approved." 
+            });
+          } else if (pendingApp.status === "declined") {
+            return done(null, false, { 
+              message: `Your account application was declined. Reason: ${pendingApp.declineReason || "Application did not meet requirements"}` 
+            });
+          }
+        }
         return done(null, false, { message: "Incorrect username/email or password" });
       }
 
