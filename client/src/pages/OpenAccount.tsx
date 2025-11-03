@@ -41,6 +41,7 @@ export default function OpenAccount() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
+  const [applicationData, setApplicationData] = useState<any>(null);
 
   const form = useForm<OpenAccountForm>({
     resolver: zodResolver(openAccountSchema),
@@ -91,6 +92,11 @@ export default function OpenAccount() {
 
       if (response.ok) {
         setApplicationSubmitted(true);
+        setApplicationData({
+          ...data,
+          submittedAt: new Date().toISOString(),
+          applicationId: result.application?.id,
+        });
         toast({
           title: "Application Submitted!",
           description: "Your account application has been submitted and is pending admin approval.",
@@ -113,54 +119,144 @@ export default function OpenAccount() {
     }
   };
 
-  if (applicationSubmitted) {
+  if (applicationSubmitted && applicationData) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <CheckCircle2 className="h-16 w-16 text-green-500" />
-            </div>
-            <CardTitle className="text-2xl text-purple-900 dark:text-purple-400">
-              Application Submitted Successfully!
-            </CardTitle>
-            <CardDescription>
-              Thank you for choosing Truist Bank
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert className="bg-orange-50 border-orange-200">
-              <AlertDescription className="text-orange-800">
-                <strong>⏳ Pending Administrative Approval</strong>
-                <p className="mt-2">
-                  Your account application has been submitted successfully and is awaiting approval from our administrative team. 
-                  You will not be able to log in until your application has been reviewed and approved.
+        <div className="w-full max-w-3xl space-y-6">
+          <Card>
+            <CardHeader className="text-center bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+              <div className="flex justify-center mb-4">
+                <CheckCircle2 className="h-16 w-16" />
+              </div>
+              <CardTitle className="text-2xl">
+                Application Submitted Successfully!
+              </CardTitle>
+              <CardDescription className="text-purple-100">
+                Thank you for choosing Truist Bank
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <Alert className="bg-orange-50 border-orange-200">
+                <AlertDescription className="text-orange-800">
+                  <strong className="flex items-center gap-2">
+                    <span className="text-2xl">⏳</span>
+                    Pending Administrative Approval
+                  </strong>
+                  <p className="mt-2">
+                    Your account application is awaiting approval from our administrative team. 
+                    You will not be able to log in until your application has been reviewed and approved.
+                  </p>
+                </AlertDescription>
+              </Alert>
+
+              <div className="bg-gradient-to-br from-purple-700 to-purple-900 text-white rounded-xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold mb-4 border-b border-purple-400 pb-2">
+                  Application Details Summary
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-purple-200 text-sm">Applicant Name</p>
+                      <p className="font-semibold text-lg" data-testid="text-applicant-name">{applicationData.fullName}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Username</p>
+                      <p className="font-semibold" data-testid="text-username">{applicationData.username}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Email Address</p>
+                      <p className="font-semibold" data-testid="text-email">{applicationData.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Phone Number</p>
+                      <p className="font-semibold" data-testid="text-phone">{applicationData.phoneNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Date of Birth</p>
+                      <p className="font-semibold" data-testid="text-dob">{applicationData.dateOfBirth}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-purple-200 text-sm">Account Type</p>
+                      <p className="font-semibold capitalize" data-testid="text-account-type">{applicationData.accountType}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Business Name</p>
+                      <p className="font-semibold" data-testid="text-business-name">{applicationData.businessName || applicationData.fullName}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Street Address</p>
+                      <p className="font-semibold" data-testid="text-address">{applicationData.streetAddress}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">City, State, ZIP</p>
+                      <p className="font-semibold" data-testid="text-city-state-zip">
+                        {applicationData.city}, {applicationData.state} {applicationData.zipCode}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm">Initial Deposit</p>
+                      <p className="font-semibold" data-testid="text-initial-deposit">
+                        ${parseFloat(applicationData.initialDeposit || "0").toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-purple-400">
+                  <div className="bg-purple-800/50 rounded-lg p-4">
+                    <p className="text-purple-200 text-sm mb-2">Routing Number (Upon Approval)</p>
+                    <p className="font-mono text-xl font-bold" data-testid="text-routing-number">061000104</p>
+                    <p className="text-purple-200 text-xs mt-1">Truist Bank Routing Number</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 text-xs text-purple-200 text-center">
+                  <p>Your account number will be generated upon approval</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <p className="font-semibold text-gray-900 dark:text-gray-100">What happens next?</p>
+                <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 font-bold">1.</span>
+                    <span><strong>Review:</strong> Our administrative team will carefully review your application details</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 font-bold">2.</span>
+                    <span><strong>Approval:</strong> If approved, your account will be created with full banking features including a unique account number</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 font-bold">3.</span>
+                    <span><strong>Notification:</strong> You'll be notified via email once your application is processed</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 font-bold">4.</span>
+                    <span><strong>Access:</strong> After approval, you can log in immediately with your username: <strong className="text-purple-600">{applicationData.username}</strong></span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>📧 Important:</strong> Please save or screenshot this information for your records. 
+                  Check your email regularly for updates on your application status.
                 </p>
-              </AlertDescription>
-            </Alert>
-            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-              <p><strong>What happens next?</strong></p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li><strong>Review:</strong> Our administrative team will carefully review your application details</li>
-                <li><strong>Approval:</strong> If approved, your account will be created with full banking features</li>
-                <li><strong>Account Details:</strong> You'll receive your account number, routing number, and login credentials</li>
-                <li><strong>Notification:</strong> You'll be notified via email once your application is processed</li>
-                <li><strong>Access:</strong> After approval, you can log in immediately with your chosen username and password</li>
-              </ul>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>📧 Important:</strong> Please check your email regularly. If your application is declined, you will receive a notification with the reason.
-              </p>
-            </div>
-            <Link href="/">
-              <Button className="w-full bg-purple-600 hover:bg-purple-700" data-testid="button-back-home">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Home
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+              </div>
+
+              <Link href="/">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700" data-testid="button-back-home">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }

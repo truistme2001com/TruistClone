@@ -260,10 +260,12 @@ export function Header() {
                       <span className="font-medium">Featured accounts</span>
                       <ChevronDown className="w-4 h-4 -rotate-90" />
                     </a>
-                    <a href="https://www.truist.com/checking" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
-                      <span className="font-medium">Banking accounts</span>
-                      <ChevronDown className="w-4 h-4 -rotate-90" />
-                    </a>
+                    <Link href="/open-account">
+                      <a className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors w-full" data-testid="link-banking-accounts">
+                        <span className="font-medium">Banking accounts</span>
+                        <ChevronDown className="w-4 h-4 -rotate-90" />
+                      </a>
+                    </Link>
                     <a href="https://www.truist.com/savings" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 text-sm text-[#5D2A8F] hover:bg-purple-50 transition-colors">
                       <span className="font-medium">Savings accounts</span>
                       <ChevronDown className="w-4 h-4 -rotate-90" />
