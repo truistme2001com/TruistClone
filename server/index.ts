@@ -10,9 +10,29 @@ import { neon } from "@neondatabase/serverless";
 
 const app = express();
 
-// Session store setup
-const PgSession = connectPgSimple(session);
-const pgClient = neon(process.env.DATABASE_URL!);
+// Check if database is available
+const hasDatabase = !!process.env.DATABASE_URL;
+
+// Session store setup - use PostgreSQL or in-memory based on DATABASE_URL
+let sessionStore: any;
+let pgClient: any;
+
+if (hasDatabase) {
+  const PgSession = connectPgSimple(session);
+  pgClient = neon(process.env.DATABASE_URL!);
+  sessionStore = new PgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    tableName: "sessions",
+    createTableIfMissing: true,
+  });
+  console.log("✓ Using PostgreSQL session store");
+} else {
+  // Use in-memory session store
+  sessionStore = new session.MemoryStore();
+  console.log("✓ Using in-memory session store");
+}
 
 // Unified Passport strategy for both admin and regular users
 passport.use('local',
@@ -121,13 +141,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Create separate session middleware for admin and users
 const adminSessionMiddleware = session({
-  store: new PgSession({
-    conObject: {
-      connectionString: process.env.DATABASE_URL,
-    },
-    tableName: "sessions",
-    createTableIfMissing: true,
-  }),
+  store: sessionStore,
   name: 'admin.sid',
   secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
   resave: false,
@@ -140,13 +154,7 @@ const adminSessionMiddleware = session({
 });
 
 const userSessionMiddleware = session({
-  store: new PgSession({
-    conObject: {
-      connectionString: process.env.DATABASE_URL,
-    },
-    tableName: "sessions",
-    createTableIfMissing: true,
-  }),
+  store: sessionStore,
   name: 'user.sid',
   secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
   resave: false,

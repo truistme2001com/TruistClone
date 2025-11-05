@@ -1,203 +1,18 @@
 # Truist Bank Website Replica
 
 ## Overview
-This is a pixel-perfect replica of the Truist bank website (https://www.truist.com/), featuring their signature purple branding (#5F259F), comprehensive banking product showcase, and modern financial services interface.
+This project is a pixel-perfect replica of the Truist bank website (https://www.truist.com/). Its purpose is to showcase banking products and modern financial services with an identical Truist purple branding (#5F259F) and comprehensive layout, including all major sections like Hero, Login, Products, Promotions, Mobile App, Video, NFL Partnership, and Money & Mindset. The replica aims for a professional banking aesthetic and responsive design.
 
-## Project Purpose
-Create an exact replica of the Truist bank website with:
-- Identical Truist purple color scheme and branding
-- All major sections: Hero, Login, Products, Promotions, Mobile App, Video, NFL Partnership, Money & Mindset
-- Professional banking imagery and layout
-- Responsive design matching the original
+## User Preferences
+- Exact replica of Truist.com required
+- All colors must match (#5F259F purple theme)
+- Same layout and sections as original
+- Professional banking aesthetic
 
-## Recent Changes
-- **November 1, 2025**: Account Application Approval System
-  - **Admin Application Approval Tab**:
-    - Added "Application Approval" tab to Admin Dashboard
-    - Displays all pending account applications in a detailed table
-    - Shows applicant name, email, username, business name, account type, initial deposit, and application date
-    - Real-time updates with 3-second polling
-    - Badge indicator shows number of pending applications
-    - "All Caught Up" message when no pending applications
-  - **Approve/Decline Workflow**:
-    - Professional confirmation dialogs for both approve and decline actions
-    - Approve dialog shows what will happen: account creation, banking details generation, initial balance setup
-    - Decline dialog requires admin to provide a reason for rejection
-    - Both actions invalidate caches for immediate UI updates
-    - Toast notifications confirm successful approval/decline
-  - **Processed Applications History**:
-    - Separate section showing previously approved or declined applications
-    - Displays status, processed date, and decline reason if applicable
-    - Color-coded badges (green for approved, red for declined)
-  - **Enhanced User Application Experience**:
-    - OpenAccount page shows clear "Pending Administrative Approval" message after submission
-    - Orange alert box clearly states user cannot log in until approved
-    - Detailed "What happens next?" section explaining the approval process
-    - Information about account details they'll receive upon approval
-    - Blue info box reminds users to check email for notifications
-  - **Database & API**:
-    - Leverages existing `accountApplications` table with pending/approved/declined status
-    - Uses existing API endpoints: `/api/admin/account-applications` (GET), `/api/admin/account-applications/:id/approve` (POST), `/api/admin/account-applications/:id/decline` (POST)
-    - Proper data validation and error handling throughout
-    - All operations properly authenticated with admin middleware
-
-- **November 1, 2025**: Footer Links & Avatar Persistence Enhancement
-  - **Privacy Policy, Terms of Service, and Contact Us Pages**:
-    - Created three new professional pages: Privacy Policy, Terms of Service, and Contact Us
-    - Each page features consistent layout with purple branding (#5F259F)
-    - Professional content sections with clear hierarchy and organization
-    - Dark mode support throughout all pages
-    - "Back to Home" navigation button on each page
-    - Contact Us page includes phone support, email, headquarters info, and emergency contacts
-  - **Footer Link Updates**:
-    - Updated footer to link to new internal pages (was linking to external Truist URLs)
-    - Links now properly route within the application using wouter routing
-    - Three main footer links: Privacy Policy, Terms of Service, Contact Us
-    - All links functional and tested
-  - **Avatar Persistence Verification**:
-    - Confirmed and enhanced admin avatar persistence in `server/init-accounts.ts`
-    - Code explicitly preserves avatar field during account initialization
-    - Only password, isAdmin, and isBlocked fields are reset on restart for security
-    - Avatar and all other customizations remain intact across imports and restarts
-    - Updated console logging to clarify avatar preservation
-
-- **October 31, 2025**: Admin Balance & Real-Time Notification System
-  - **Admin Personal Balance**:
-    - Created separate admin account ("Admin Operations") with $1,000,000 starting balance
-    - Admin balance displayed in dedicated card on Admin Dashboard
-    - "Add Funds" feature allows admin to add money to their account for sending to users
-    - Balance separate from users' total balance - admin has their own personal funds
-    - All balance updates persist across imports and restarts
-  - **Real-Time Notifications**:
-    - Added notifications table in database schema (`shared/schema.ts`)
-    - Notifications automatically created when:
-      - New user is created
-      - Admin credits/debits user balance
-    - Bell icon in admin header shows unread count badge (red circle)
-    - Full notification dialog with:
-      - List of all notifications (unread highlighted in purple)
-      - Mark individual notifications as read
-      - "Mark all as read" button
-      - Timestamps in local format
-    - Polling-based updates every 3 seconds for "real-time" feel
-  - **Immediate Balance Updates**:
-    - Implemented TanStack Query cache invalidation
-    - When admin credits/debits user, both admin and user balances update immediately
-    - No page refresh needed - all updates happen in real-time
-  - **Data Persistence Improvements**:
-    - Enhanced `server/init-accounts.ts` to only update security fields
-    - All user customizations preserved: avatar, nickname, email, balance, etc.
-    - Only password, isAdmin, and isBlocked fields reset on restart for security
-    - Admin operations account created once and preserved forever
-
-- **October 31, 2025**: Permanent Account & Session Fixes
-  - **Account Number Update**: Changed from 10 to 13 digits (Truist standard)
-    - Fixed Mark Lowry account number to permanent value: `4729186503421`
-    - Updated `generateAccountNumber()` in `server/storage.ts` to generate 13-digit numbers for new accounts
-    - All new users will receive random 13-digit account numbers
-  - **Admin Avatar Fix**: Set admin avatar to permanent value "owl"
-    - Avatar field now persists across imports and restarts
-    - Admin avatar will not change when importing to new agent
-    - Admin account created with owl avatar by default
-  - **Separate Admin & User Sessions**: 
-    - Implemented dual session system in `server/index.ts`
-    - Admin sessions use cookie: `admin.sid` (path: `/api/admin`)
-    - User sessions use cookie: `user.sid` (global path)
-    - Admin and users can now be logged in simultaneously without conflicts
-    - Each session is completely independent and secure
-
-- **October 30, 2025**: User Date Joined & Admin Editing System
-  - **Date Joined Field**:
-    - Added `dateJoined` timestamp field to user schema in `shared/schema.ts`
-    - Mark Lowry's account shows join date: **August 11, 2019**
-    - Date displayed in USA format (MMMM d, yyyy) on Account Holder page
-    - Automatically set for new user accounts upon creation
-    - Database schema updated with proper timestamp handling
-  - **Admin User Editing**:
-    - Full admin interface for editing user details in Admin Dashboard
-    - Edit dialog allows updating: Full Name, Email, Username, Password, Date Joined
-    - New API endpoint: `/api/admin/users/:userId/update` with validation
-    - `updateUser` function in storage layer with secure password hashing
-    - Only changed fields are submitted to reduce overhead
-    - Real-time cache invalidation after updates
-    - Comprehensive validation using Zod schemas
-  - **Account Holder Display**:
-    - Date Joined shows below Username in Account Holder section
-    - Formatted as "August 11, 2019" (USA format)
-    - Accessible via user dashboard details tab
-    - Uses date-fns for consistent formatting
-
-- **October 30, 2025**: Profile Avatar System Update
-  - **Cute Avatar Images**: Replaced emoji avatars with 12 adorable kawaii-style profile pictures
-    - Available avatars: Teddy Bear, Cat, Dog, Panda, Bunny, Fox, Unicorn, Robot, Penguin, Koala, Owl, Sloth
-    - All avatars stored in `attached_assets/generated_images/`
-    - Images display in header, avatar selection dialog, and settings panel
-    - Avatar selection updates in real-time and persists to database
-    - Default avatar: Teddy Bear (for new users or legacy emoji IDs)
-  - **Improved Avatar UI**:
-    - Circular profile pictures with proper sizing and overflow handling
-    - Avatar selection dialog shows all 12 options in a 4-column grid
-    - Hover effects and purple border highlights for selected avatar
-    - Smooth transitions and scale animations on selection
-
-- **October 30, 2025**: Card Management & Interactive Features (PERMANENT CHANGES)
-  - **Card Lock/Unlock System**:
-    - Added database fields: `debitCardLocked` and `creditCardLocked` in `shared/schema.ts`
-    - Implemented `/api/cards/toggle-lock` endpoint in `server/routes.ts`
-    - Toggle switches for each card with real-time status updates
-    - Visual feedback: Lock/Unlock icons and dynamic card status badges
-    - Toast notifications for lock/unlock actions
-    - Locked cards show red "Locked" badge, unlocked show green "Active" badge
-  - **Card Enlargement Feature**:
-    - Click any card to view enlarged version in dialog modal
-    - Enlarged view shows full card details with lock/unlock toggle
-    - Scale animation and enhanced visual presentation
-    - Easy access to card limits and status from enlarged view
-  - **Professional Card Management**:
-    - Report Lost button shows toast with 1-800-TRUIST number
-    - Set PIN button shows toast directing to ATM or customer service
-    - View Transactions button navigates to transactions tab
-    - All interactions use toast notifications instead of alerts
-  - Updated permanent user account data in `server/init-accounts.ts`:
-    - Business name: "M. Lowry Vocal Band" (auto-updates on every server restart)
-    - Account type: "business checkings"
-    - User: Mark Lowry (marklowry748@gmail.com / marklowry748)
-    - Password: lowry123
-    - Debit Card (Visa): 4444 1703 8692 6095 | Exp: 03/29 | CVV: 531
-    - Credit Card (Mastercard): 5284 1705 4571 6179 | Exp: 08/28 | CVV: 480
-  - Enhanced User Dashboard with real-time greeting:
-    - "Good morning M. Lowry" (before 12pm)
-    - "Good afternoon M. Lowry" (12pm-6pm)
-    - "Good evening M. Lowry" (after 6pm)
-  - All notifications bell and settings icons fully functional
-  - Cards properly display CVV and expiry dates
-  
-- **October 29, 2025**: Initial project setup
-  - Configured Truist purple design tokens (#5F259F primary)
-  - Generated all hero and promotional images
-  - Built complete frontend: Header, Hero with Login, Product Carousel, Promotional Cards, Mobile App Section, Video Player, NFL Partnership, Money & Mindset Blog, Footer
-  - Implemented responsive design with mobile/desktop layouts
-  - Added fixed login form on desktop (right side)
-
-## Project Architecture
+## System Architecture
 
 ### Frontend Structure
-- **Header**: Navigation with Personal, Small Business, Commercial, Wealth, About Truist
-- **Hero Section**: Full-width image with Truist One Checking promotion and overlay
-- **Login Form**: Fixed position (desktop) with User ID, Password, security links
-- **Product Carousel**: 8 products with purple icons (Checking, Savings, Credit Card, etc.)
-- **Promotional Sections**: 
-  - Money Market Account
-  - LightStream unsecured loans
-  - Truist One Checking (with image)
-  - Home Equity Lending (with image)
-  - Credit card offers
-  - Fraud and Security
-- **Mobile App Section**: App mockup, QR code, store badges
-- **Video Section**: "Let your light shine" promotional content with play button
-- **NFL Partnership**: Bradley Chubb and Bijan Robinson community spotlight
-- **Money & Mindset**: Blog cards for savings tips and side hustles
-- **Footer**: Comprehensive links, disclaimers, FDIC info
+The frontend includes a Header, Hero Section with a fixed Login Form (desktop), Product Carousel, various Promotional Sections (Money Market, LightStream, Truist One Checking, Home Equity, Credit Cards, Fraud/Security), Mobile App Section, Video Section, NFL Partnership, Money & Mindset Blog, and a comprehensive Footer.
 
 ### Technology Stack
 - **Frontend**: React, TypeScript, Tailwind CSS, Shadcn UI
@@ -207,39 +22,43 @@ Create an exact replica of the Truist bank website with:
 - **Icons**: Lucide React
 
 ### Design System
-- **Primary Color**: #5F259F (Truist signature purple) - HSL: 273 61% 38%
-- **Typography**: System fonts (-apple-system, BlinkMacSystemFont, Segoe UI, Roboto)
-- **Spacing**: Consistent padding/margins (p-4, py-12, py-16, py-20)
+- **Primary Color**: #5F259F (Truist signature purple)
+- **Typography**: System fonts
+- **Spacing**: Consistent padding/margins (e.g., p-4, py-12)
 - **Components**: Shadcn UI (Card, Button, Input, Label, Checkbox)
 - **Layout**: Max-width 7xl containers, responsive grid layouts
-- **Shadows**: Subtle elevation for cards and interactive elements
+- **Shadows**: Subtle elevation for interactive elements
 
 ### Key Features
-- Responsive design (mobile-first approach)
-- Fixed login form on desktop (slides to inline on mobile)
-- Interactive product carousel
-- Video player with play button
-- App download section with QR code
-- Professional imagery throughout
-- Comprehensive footer with disclaimers
+- Responsive design with a mobile-first approach.
+- Fixed login form on desktop, becoming inline on mobile.
+- Interactive product carousel and video player.
+- App download section with QR code.
+- Admin Dashboard with account application approval workflow, real-time notifications, and user editing capabilities.
+- Dual-storage architecture supporting PostgreSQL and in-memory storage based on environment variables.
+- Persistent user data and settings, including avatars and card lock/unlock statuses.
+- Separate admin and user session management.
+- Dynamic greeting based on time of day.
 
-## User Preferences
-- Exact replica of Truist.com required
-- All colors must match (#5F259F purple theme)
-- Same layout and sections as original
-- Professional banking aesthetic
+### Technical Implementations
+- **Dual-Storage System**: Automatic detection of storage mode (PostgreSQL via `DATABASE_URL` or in-memory).
+  - **With DATABASE_URL**: Uses PostgreSQL database + PostgreSQL session store
+  - **Without DATABASE_URL**: Uses in-memory storage + MemoryStore for sessions
+  - Seamless fallback - no code changes needed between deployment environments
+  - **In-Memory Mode Limitations**:
+    - **Non-Persistent**: All data lost on server restart
+    - **Single-Instance Only**: Cannot scale horizontally
+    - **Session Loss**: Sessions reset on restart
+    - **Best For**: Development, testing, demos, temporary deployments
+    - **Not For**: Production banking applications requiring data persistence
+- **Account Application Approval**: Admin dashboard tab for approving/declining applications with detailed views, status updates, and historical records.
+- **Real-Time Notifications**: Database-backed notification system with unread counts, status indicators, and immediate updates.
+- **Permanent Account & Session Management**: 13-digit account numbers, persistent admin avatar ("owl"), and independent admin/user sessions using distinct cookies.
+- **User Editing & Date Joined**: Admin interface for updating user details and a `dateJoined` field displayed on the account holder page.
+- **Profile Avatar System**: 12 kawaii-style avatars replacing emojis, with real-time selection and persistence.
+- **Card Management**: Lock/unlock debit and credit cards with real-time status, visual feedback, and an enlarged card view with full details.
+- **Permanent User Data**: Pre-configured permanent user data for Mark Lowry, including business name, account type, and card details.
 
-## Images
-All images generated and stored in `attached_assets/generated_images/`:
-- Kids jumping in lake (hero)
-- Kids trick-or-treating (Truist One Checking promo)
-- Banking mobile app mockup
-- NFL players (Bradley Chubb, Bijan Robinson)
-- Woman with savings jars (Money & Mindset)
-- Side hustle workspace (Money & Mindset)
-- Modern family home (Home Equity promo)
-
-## Environment
-- Node.js 20
-- Vite dev server
-- Express backend (minimal, for future login functionality)
+## External Dependencies
+- **Database**: PostgreSQL (optional, for production environments)
+- **Environment**: Node.js 20, Vite dev server, Express backend
