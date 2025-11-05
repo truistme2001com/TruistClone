@@ -4,15 +4,28 @@ import { users, accounts, transactions, sessions, notifications, accountApplicat
 import { eq, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set");
+// Check if DATABASE_URL is available
+const hasDatabase = !!process.env.DATABASE_URL;
+
+// Import in-memory storage as fallback
+import * as memStorage from './storage-memory';
+
+// Use PostgreSQL if DATABASE_URL is set, otherwise use in-memory storage
+let sql: any = null;
+let db: any = null;
+
+if (hasDatabase) {
+  sql = postgres(process.env.DATABASE_URL!);
+  db = drizzle(sql, {
+    schema: { users, accounts, transactions, sessions, notifications, accountApplications, pendingTransfers },
+    casing: 'snake_case',
+  });
+  console.log('✓ Using PostgreSQL database');
+} else {
+  console.log('⚠️  DATABASE_URL not set - using in-memory storage (data will be lost on restart)');
 }
 
-const sql = postgres(process.env.DATABASE_URL);
-export const db = drizzle(sql, {
-  schema: { users, accounts, transactions, sessions, notifications, accountApplications, pendingTransfers },
-  casing: 'snake_case',
-});
+export { db };
 
 // User operations
 export async function createUser(data: {
@@ -22,6 +35,8 @@ export async function createUser(data: {
   email?: string;
   isAdmin?: boolean;
 }) {
+  if (!hasDatabase) return memStorage.createUser(data);
+  
   const hashedPassword = await bcrypt.hash(data.password, 10);
   
   const [user] = await db.insert(users).values({
@@ -36,6 +51,8 @@ export async function createUser(data: {
 }
 
 export async function getUserByUsername(username: string) {
+  if (!hasDatabase) return memStorage.getUserByUsername(username);
+  
   const [user] = await db
     .select()
     .from(users)
@@ -46,6 +63,8 @@ export async function getUserByUsername(username: string) {
 }
 
 export async function getUserByEmail(email: string) {
+  if (!hasDatabase) return memStorage.getUserByEmail(email);
+  
   const [user] = await db
     .select()
     .from(users)
@@ -56,6 +75,8 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function getUserByUsernameOrEmail(usernameOrEmail: string) {
+  if (!hasDatabase) return memStorage.getUserByUsernameOrEmail(usernameOrEmail);
+  
   // First try to find by username
   let user = await getUserByUsername(usernameOrEmail);
   
@@ -68,6 +89,8 @@ export async function getUserByUsernameOrEmail(usernameOrEmail: string) {
 }
 
 export async function getUserById(id: number) {
+  if (!hasDatabase) return memStorage.getUserById(id);
+  
   const [user] = await db
     .select()
     .from(users)
@@ -78,18 +101,26 @@ export async function getUserById(id: number) {
 }
 
 export async function getAllUsers() {
+  if (!hasDatabase) return memStorage.getAllUsers();
+  
   return await db.select().from(users);
 }
 
 export async function verifyPassword(plainPassword: string, hashedPassword: string) {
+  if (!hasDatabase) return memStorage.verifyPassword(plainPassword, hashedPassword);
+  
   return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
 export async function deleteUser(userId: number) {
+  if (!hasDatabase) return memStorage.deleteUser(userId);
+  
   await db.delete(users).where(eq(users.id, userId));
 }
 
 export async function blockUser(userId: number) {
+  if (!hasDatabase) return memStorage.blockUser(userId);
+  
   await db
     .update(users)
     .set({ isBlocked: true, updatedAt: new Date() })
@@ -97,6 +128,8 @@ export async function blockUser(userId: number) {
 }
 
 export async function unblockUser(userId: number) {
+  if (!hasDatabase) return memStorage.unblockUser(userId);
+  
   await db
     .update(users)
     .set({ isBlocked: false, updatedAt: new Date() })
@@ -110,6 +143,8 @@ export async function updateUser(userId: number, data: {
   password?: string;
   dateJoined?: Date;
 }) {
+  if (!hasDatabase) return memStorage.updateUser(userId, data);
+  
   const updateData: any = { updatedAt: new Date() };
   
   if (data.fullName) updateData.fullName = data.fullName;
@@ -135,6 +170,8 @@ export async function createAccount(data: {
   businessName: string;
   initialBalance?: string;
 }) {
+  if (!hasDatabase) return memStorage.createAccount(data);
+  
   const accountNumber = generateAccountNumber();
   
   const [account] = await db.insert(accounts).values({
@@ -161,6 +198,8 @@ export async function createAccount(data: {
 }
 
 export async function getAccountsByUserId(userId: number) {
+  if (!hasDatabase) return memStorage.getAccountsByUserId(userId);
+  
   return await db
     .select()
     .from(accounts)
@@ -168,6 +207,8 @@ export async function getAccountsByUserId(userId: number) {
 }
 
 export async function getAccountById(accountId: number) {
+  if (!hasDatabase) return memStorage.getAccountById(accountId);
+  
   const [account] = await db
     .select()
     .from(accounts)
@@ -178,6 +219,8 @@ export async function getAccountById(accountId: number) {
 }
 
 export async function getAccountByAccountNumber(accountNumber: string) {
+  if (!hasDatabase) return memStorage.getAccountByAccountNumber(accountNumber);
+  
   const [account] = await db
     .select()
     .from(accounts)
@@ -188,6 +231,8 @@ export async function getAccountByAccountNumber(accountNumber: string) {
 }
 
 export async function getAllAccounts() {
+  if (!hasDatabase) return memStorage.getAllAccounts();
+  
   return await db.select().from(accounts);
 }
 
@@ -197,6 +242,8 @@ export async function updateAccountBalance(
   type: "credit" | "debit",
   description?: string
 ) {
+  if (!hasDatabase) return memStorage.updateAccountBalance(accountId, amount, type, description);
+  
   const account = await getAccountById(accountId);
   if (!account) {
     throw new Error("Account not found");
@@ -232,11 +279,15 @@ export async function updateAccountBalance(
 }
 
 export async function deleteAccount(accountId: number) {
+  if (!hasDatabase) return memStorage.deleteAccount(accountId);
+  
   await db.delete(transactions).where(eq(transactions.accountId, accountId));
   await db.delete(accounts).where(eq(accounts.id, accountId));
 }
 
 export async function getTransactionsByAccountId(accountId: number, limit: number = 50) {
+  if (!hasDatabase) return memStorage.getTransactionsByAccountId(accountId, limit);
+  
   return await db
     .select()
     .from(transactions)
@@ -246,6 +297,8 @@ export async function getTransactionsByAccountId(accountId: number, limit: numbe
 }
 
 export async function getUserWithAccounts(userId: number) {
+  if (!hasDatabase) return memStorage.getUserWithAccounts(userId);
+  
   const user = await getUserById(userId);
   if (!user) return null;
   
@@ -258,10 +311,12 @@ export async function getUserWithAccounts(userId: number) {
 }
 
 export async function getAllUsersWithAccounts() {
+  if (!hasDatabase) return memStorage.getAllUsersWithAccounts();
+  
   const allUsers = await getAllUsers();
   
   const usersWithAccounts = await Promise.all(
-    allUsers.map(async (user) => {
+    allUsers.map(async (user: any) => {
       const userAccounts = await getAccountsByUserId(user.id);
       return {
         ...user,
@@ -279,6 +334,8 @@ export async function transferFunds(
   amount: string,
   description?: string
 ) {
+  if (!hasDatabase) return memStorage.transferFunds(fromAccountId, toAccountNumber, amount, description);
+  
   const fromAccount = await getAccountById(fromAccountId);
   if (!fromAccount) {
     throw new Error("Source account not found");
@@ -349,6 +406,8 @@ export async function domesticWireTransfer(data: {
   beneficiaryAddress: string;
   description?: string;
 }) {
+  if (!hasDatabase) return memStorage.domesticWireTransfer(data);
+  
   const fromAccount = await getAccountById(data.fromAccountId);
   if (!fromAccount) {
     throw new Error("Source account not found");
@@ -404,6 +463,8 @@ export async function internationalWireTransfer(data: {
   beneficiaryAddress: string;
   description?: string;
 }) {
+  if (!hasDatabase) return memStorage.internationalWireTransfer(data);
+  
   const fromAccount = await getAccountById(data.fromAccountId);
   if (!fromAccount) {
     throw new Error("Source account not found");
@@ -454,6 +515,8 @@ export async function toggleCardLock(
   cardType: "debit" | "credit",
   locked: boolean
 ) {
+  if (!hasDatabase) return memStorage.toggleCardLock(accountId, cardType, locked);
+  
   const fieldName = cardType === "debit" ? "debitCardLocked" : "creditCardLocked";
   
   await db
@@ -469,6 +532,8 @@ export async function updateCardLimit(
   cardType: "debit" | "credit",
   newLimit: string
 ) {
+  if (!hasDatabase) return memStorage.updateCardLimit(accountId, cardType, newLimit);
+  
   const fieldName = cardType === "debit" ? "debitCardLimit" : "creditCardLimit";
   
   await db
@@ -480,6 +545,8 @@ export async function updateCardLimit(
 }
 
 export async function updateUserAvatar(userId: number, avatar: string) {
+  if (!hasDatabase) return memStorage.updateUserAvatar(userId, avatar);
+  
   await db
     .update(users)
     .set({ avatar, updatedAt: new Date() })
@@ -489,6 +556,8 @@ export async function updateUserAvatar(userId: number, avatar: string) {
 }
 
 export async function updateUserNickname(userId: number, nickname: string) {
+  if (!hasDatabase) return memStorage.updateUserNickname(userId, nickname);
+  
   await db
     .update(users)
     .set({ nickname, updatedAt: new Date() })
@@ -498,6 +567,8 @@ export async function updateUserNickname(userId: number, nickname: string) {
 }
 
 export async function changeUserPassword(userId: number, currentPassword: string, newPassword: string) {
+  if (!hasDatabase) return memStorage.changeUserPassword(userId, currentPassword, newPassword);
+  
   const user = await getUserById(userId);
   
   if (!user) {
@@ -535,6 +606,8 @@ export async function createNotification(data: {
   userId?: number;
   relatedEntityId?: number;
 }) {
+  if (!hasDatabase) return memStorage.createNotification(data);
+  
   const [notification] = await db.insert(notifications).values({
     type: data.type,
     title: data.title,
@@ -548,6 +621,8 @@ export async function createNotification(data: {
 }
 
 export async function getUnreadNotifications() {
+  if (!hasDatabase) return memStorage.getUnreadNotifications();
+  
   return db
     .select()
     .from(notifications)
@@ -556,6 +631,8 @@ export async function getUnreadNotifications() {
 }
 
 export async function getAllNotifications(limit: number = 50) {
+  if (!hasDatabase) return memStorage.getAllNotifications(limit);
+  
   return db
     .select()
     .from(notifications)
@@ -564,6 +641,8 @@ export async function getAllNotifications(limit: number = 50) {
 }
 
 export async function markNotificationAsRead(notificationId: number) {
+  if (!hasDatabase) return memStorage.markNotificationAsRead(notificationId);
+  
   await db
     .update(notifications)
     .set({ isRead: true })
@@ -571,6 +650,8 @@ export async function markNotificationAsRead(notificationId: number) {
 }
 
 export async function markAllNotificationsAsRead() {
+  if (!hasDatabase) return memStorage.markAllNotificationsAsRead();
+  
   await db
     .update(notifications)
     .set({ isRead: true })
@@ -579,6 +660,8 @@ export async function markAllNotificationsAsRead() {
 
 // Account application operations
 export async function checkUsernameExists(username: string): Promise<boolean> {
+  if (!hasDatabase) return memStorage.checkUsernameExists(username);
+  
   const user = await db.query.users.findFirst({
     where: eq(users.username, username)
   });
@@ -586,6 +669,8 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
 }
 
 export async function getPendingApplicationByUsername(username: string) {
+  if (!hasDatabase) return memStorage.getPendingApplicationByUsername(username);
+  
   const application = await db.query.accountApplications.findFirst({
     where: eq(accountApplications.username, username)
   });
@@ -593,6 +678,8 @@ export async function getPendingApplicationByUsername(username: string) {
 }
 
 export async function getPendingApplicationByEmail(email: string) {
+  if (!hasDatabase) return memStorage.getPendingApplicationByEmail(email);
+  
   const application = await db.query.accountApplications.findFirst({
     where: eq(accountApplications.email, email)
   });
@@ -600,6 +687,8 @@ export async function getPendingApplicationByEmail(email: string) {
 }
 
 export async function checkEmailExists(email: string): Promise<boolean> {
+  if (!hasDatabase) return memStorage.checkEmailExists(email);
+  
   const user = await db.query.users.findFirst({
     where: eq(users.email, email)
   });
@@ -622,6 +711,8 @@ export async function submitAccountApplication(data: {
   accountType: string;
   initialDeposit?: string;
 }) {
+  if (!hasDatabase) return memStorage.submitAccountApplication(data);
+  
   const hashedPassword = await bcrypt.hash(data.password, 10);
   
   const [application] = await db.insert(accountApplications).values({
@@ -646,6 +737,8 @@ export async function submitAccountApplication(data: {
 }
 
 export async function getAllAccountApplications() {
+  if (!hasDatabase) return memStorage.getAllAccountApplications();
+  
   return db
     .select()
     .from(accountApplications)
@@ -674,6 +767,8 @@ function generateCVV(): string {
 }
 
 export async function approveAccountApplication(applicationId: number, adminId: number) {
+  if (!hasDatabase) return memStorage.approveAccountApplication(applicationId, adminId);
+  
   const application = await db.query.accountApplications.findFirst({
     where: eq(accountApplications.id, applicationId)
   });
@@ -755,6 +850,8 @@ export async function approveAccountApplication(applicationId: number, adminId: 
 }
 
 export async function declineAccountApplication(applicationId: number, adminId: number, reason?: string) {
+  if (!hasDatabase) return memStorage.declineAccountApplication(applicationId, adminId, reason);
+  
   const application = await db.query.accountApplications.findFirst({
     where: eq(accountApplications.id, applicationId)
   });
@@ -779,6 +876,8 @@ export async function declineAccountApplication(applicationId: number, adminId: 
 }
 
 export async function updateAccountsWithMissingCardDetails() {
+  if (!hasDatabase) return memStorage.updateAccountsWithMissingCardDetails();
+  
   // Get all accounts
   const allAccounts = await db.select().from(accounts);
   let updatedCount = 0;
@@ -822,6 +921,8 @@ export async function updateAccountsWithMissingCardDetails() {
 }
 
 export async function getAllTransactions(limit: number = 100) {
+  if (!hasDatabase) return memStorage.getAllTransactions(limit);
+  
   return db
     .select({
       id: transactions.id,

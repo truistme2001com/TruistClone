@@ -1,0 +1,50 @@
+2025-11-05T16:43:47.761595996Z ../dist/public/assets/Cute_panda_avatar_446d56e7-DIIplIEW.png                   697.35 kB
+2025-11-05T16:43:47.761598066Z ../dist/public/assets/Cute_sloth_avatar_6f1e1b80-xFAOJXUl.png                   761.59 kB
+2025-11-05T16:43:47.761600537Z ../dist/public/assets/Banking_mobile_app_mockup_64163d74-byJxi_yi.png           781.10 kB
+2025-11-05T16:43:47.761602686Z ../dist/public/assets/Cute_unicorn_avatar_a716b055-DiP-xJTR.png                 793.31 kB
+2025-11-05T16:43:47.761604817Z ../dist/public/assets/Cute_fox_avatar_15511073-BFuEu4Yd.png                     802.93 kB
+2025-11-05T16:43:47.761606887Z ../dist/public/assets/Cute_teddy_bear_avatar_c7acee2d-DUVbc6_X.png              803.71 kB
+2025-11-05T16:43:47.761608967Z ../dist/public/assets/Cute_corgi_dog_avatar_c05836b9-BD3avobx.png               878.42 kB
+2025-11-05T16:43:47.761611067Z ../dist/public/assets/Cute_koala_avatar_90299146-B0IAampp.png                   925.98 kB
+2025-11-05T16:43:47.761613157Z ../dist/public/assets/Cute_owl_avatar_b6ecc7fc-JCVhhDtu.png                     996.35 kB
+2025-11-05T16:43:47.761615247Z ../dist/public/assets/Woman_savings_goals_jars_86c92ee3-CPB-92rY.png          1,482.62 kB
+2025-11-05T16:43:47.761617317Z ../dist/public/assets/Modern_family_home_exterior_c68486de-Bb0c6jWj.png       1,810.43 kB
+2025-11-05T16:43:47.761619427Z ../dist/public/assets/Kids_trick-or-treating_Halloween_33a4af10-D9-5elg6.png  2,098.72 kB
+2025-11-05T16:43:47.761621837Z ../dist/public/assets/index-BmA_hYox.css                                        113.12 kB │ gzip:  17.77 kB
+2025-11-05T16:43:47.761624307Z ../dist/public/assets/index-DeqCwRPR.js                                         743.29 kB │ gzip: 202.37 kB
+2025-11-05T16:43:47.761627087Z ✓ built in 4.48s
+2025-11-05T16:43:47.782863132Z 
+2025-11-05T16:43:47.782876592Z   dist/index.js  81.4kb
+2025-11-05T16:43:47.782878743Z 
+2025-11-05T16:43:47.782880663Z ⚡ Done in 6ms
+2025-11-05T16:43:53.853565193Z ==> Uploading build...
+2025-11-05T16:44:12.933798262Z ==> Uploaded in 8.3s. Compression took 10.6s
+2025-11-05T16:44:13.002042806Z ==> Build successful 🎉
+2025-11-05T16:46:06.431349663Z ==> Deploying...
+2025-11-05T16:46:41.103300929Z     at __init (file:///opt/render/project/src/dist/index.js:4:56)
+2025-11-05T16:46:41.103306679Z     at file:///opt/render/project/src/dist/index.js:1073:1
+2025-11-05T16:46:41.103312139Z     at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+2025-11-05T16:46:41.103317939Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+2025-11-05T16:46:41.103323439Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+2025-11-05T16:46:41.103328139Z 
+2025-11-05T16:46:41.103333019Z Node.js v22.16.0
+2025-11-05T16:46:42.26499294Z ==> Exited with status 1
+2025-11-05T16:46:42.282368969Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-11-05T16:46:47.09125956Z ==> Running 'npm run start'
+2025-11-05T16:46:47.99215319Z 
+2025-11-05T16:46:47.99217842Z > rest-express@1.0.0 start
+2025-11-05T16:46:47.992183791Z > NODE_ENV=production node dist/index.js
+2025-11-05T16:46:47.992186571Z 
+2025-11-05T16:46:55.087497422Z file:///opt/render/project/src/dist/index.js:784
+2025-11-05T16:46:55.087528633Z       throw new Error("DATABASE_URL must be set");
+2025-11-05T16:46:55.087533283Z             ^
+2025-11-05T16:46:55.087537513Z 
+2025-11-05T16:46:55.087542563Z Error: DATABASE_URL must be set
+2025-11-05T16:46:55.087547803Z     at server/storage.ts (file:///opt/render/project/src/dist/index.js:784:13)
+2025-11-05T16:46:55.087551883Z     at __init (file:///opt/render/project/src/dist/index.js:4:56)
+2025-11-05T16:46:55.087556084Z     at file:///opt/render/project/src/dist/index.js:1073:1
+2025-11-05T16:46:55.087560413Z     at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+2025-11-05T16:46:55.087565584Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+2025-11-05T16:46:55.087569794Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+2025-11-05T16:46:55.087573704Z 
+2025-11-05T16:46:55.087577704Z Node.js v22.16.0
